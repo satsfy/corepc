@@ -28,7 +28,7 @@ for VER in "${VERSIONS[@]}"; do
     fi
 
     GEN="$DIR/output/v${VER}_generated.rs"
-    FLAT="$DIR/output/v${VER}_flattened.rs"
+    INLINED="$DIR/output/v${VER}_inlined.rs"
     RPT="$DIR/output/v${VER}_compare.txt"
 
     echo "--- v${VER} ---"
@@ -36,13 +36,13 @@ for VER in "${VERSIONS[@]}"; do
     python3 "$DIR/codegen.py" -i "$SPEC" -o "$DIR/output" -c "$VER" --single-file
     mv "$DIR/output/generated.rs" "$GEN"
 
-    python3 "$DIR/flatten_mods.py" --all-versions --types-dir "$ROOT/types/src" \
-        --up-to-version "$VER" -o "$FLAT" 2>/dev/null
+    python3 "$DIR/inline_corepc_version.py" --all-versions --types-dir "$ROOT/types/src" \
+        --up-to-version "$VER" -o "$INLINED" 2>/dev/null
 
     python3 "$DIR/compare_types.py" --all --version "$VER" \
-        --repo "$FLAT" --spec "$GEN" > "$RPT" 2>&1
+        --repo "$INLINED" --spec "$GEN" > "$RPT" 2>&1
 
-    REPO_N=$(grep -c '^pub struct' "$FLAT")
+    REPO_N=$(grep -c '^pub struct' "$INLINED")
     SPEC_N=$(grep -c '^pub struct' "$GEN")
     echo "  ${SPEC_N} spec, ${REPO_N} repo structs"
 done

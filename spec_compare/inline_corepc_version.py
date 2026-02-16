@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Flatten Rust module tree and extract struct definitions from corepc-types."""
+"""Inline Rust module tree and extract struct definitions from corepc-types."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ def _find_mod(base: Path, name: str) -> Path:
     raise FileNotFoundError(f"Cannot find module `{name}` under {base}")
 
 
-def _flatten(path: Path, seen: set[Path]) -> str:
+def _inline_mod(path: Path, seen: set[Path]) -> str:
     path = path.resolve()
     if path in seen:
         return ""
@@ -42,7 +42,7 @@ def _flatten(path: Path, seen: set[Path]) -> str:
         mod_path = _find_mod(path.parent, m.group("name"))
         out.append(attrs)
         out.append(f"{vis}mod {m.group('name')} {{\n")
-        body = _flatten(mod_path, seen)
+        body = _inline_mod(mod_path, seen)
         out.append("".join("    " + l if l.strip() else l for l in body.splitlines(True)))
         out.append("}\n")
     return "".join(out)
@@ -144,7 +144,7 @@ def _collect_all_versions(types_src: Path, up_to: int | None = None) -> str:
         if not mod_file.exists():
             continue
 
-        text = _extract_structs(_flatten(mod_file, set()))
+        text = _extract_structs(_inline_mod(mod_file, set()))
 
         name, body = None, []
         for line in text.splitlines(keepends=True):
@@ -172,9 +172,9 @@ def _collect_all_versions(types_src: Path, up_to: int | None = None) -> str:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Flatten Rust modules and extract structs")
+    ap = argparse.ArgumentParser(description="Inline Rust modules and extract structs")
     ap.add_argument("entry", nargs='?', help="Entry .rs file")
-    ap.add_argument("-o", "--out", default="flattened.rs")
+    ap.add_argument("-o", "--out", default="inlined.rs")
     ap.add_argument("--extract-structs", action="store_true")
     ap.add_argument("--all-versions", action="store_true")
     ap.add_argument("--types-dir", default=None)
@@ -191,7 +191,7 @@ def main() -> int:
         if not args.entry:
             print("Error: entry file required unless --all-versions", file=sys.stderr)
             return 1
-        text = _flatten(Path(args.entry), set())
+        text = _inline_mod(Path(args.entry), set())
         if args.extract_structs:
             text = _extract_structs(text)
 

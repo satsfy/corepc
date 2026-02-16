@@ -21,8 +21,8 @@ For each version **N** the tool performs three steps:
    producing a single `output/vN_generated.rs` containing every struct the
    spec implies.
 
-2. **Flatten** — walks `types/src/v17..vN`, inlines all `mod` declarations,
-   and extracts every `pub struct` into `output/vN_flattened.rs`.
+2. **Inline** — walks `types/src/v17..vN`, inlines all `mod` declarations,
+   and extracts every `pub struct` into `output/vN_inlined.rs`.
 
 3. **Compare** — diffs the two files and writes a human-readable report to
    `output/vN_compare.txt`, which is also printed to the terminal.
@@ -34,14 +34,14 @@ spec_compare/
 ├── README.md             ← you are here
 ├── run.sh                ← main entry point (called by `just spec-compare`)
 ├── compare_types.py      ← struct comparison logic
-├── flatten_mods.py       ← Rust module flattener / struct extractor
+  ├── inline_corepc_version.py ← Rust module inliner / struct extractor
 ├── specs/                ← OpenRPC JSON files (one per Bitcoin Core release)
 │   ├── v24_2_0_openrpc.json
 │   ├── …
 │   └── v30_2_0_openrpc.json
 └── output/               ← generated artefacts (git-ignored)
     ├── vN_generated.rs
-    ├── vN_flattened.rs
+    ├── vN_inlined.rs
     └── vN_compare.txt
 ```
 

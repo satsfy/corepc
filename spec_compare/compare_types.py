@@ -737,7 +737,7 @@ def _print_ignored_breakdown(ignored: set[str], repo: dict[str, StructDef],
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Compare spec vs repo structs")
-    ap.add_argument("--repo", default="flattened.rs")
+    ap.add_argument("--repo", default="inlined.rs")
     ap.add_argument("--spec", default="generated.rs")
     ap.add_argument("--all", action="store_true", help="Show all diffs")
     ap.add_argument("--version", type=int, default=None)
