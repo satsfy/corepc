@@ -2,7 +2,7 @@
   "openrpc": "1.2.6",
   "info": {
     "title": "Bitcoin Core RPC",
-    "version": "v30.2.0"
+    "version": "v30.99.0-b65ff0e5a1fd-dirty"
   },
   "methods": [
     {
@@ -117,10 +117,10 @@
           "name": "node",
           "schema": {
             "type": "string",
-            "description": "The address of the peer to connect to"
+            "description": "The IP address/hostname optionally followed by :port of the peer to connect to"
           },
           "required": true,
-          "description": "The address of the peer to connect to"
+          "description": "The IP address/hostname optionally followed by :port of the peer to connect to"
         },
         {
           "name": "command",
@@ -335,25 +335,6 @@
       },
       "x-bitcoin-category": "rawtransactions",
       "x-bitcoin-examples": "> bitcoin-cli analyzepsbt \"psbt\"\n"
-    },
-    {
-      "name": "api",
-      "summary": "Return an OpenRPC document describing the RPC API.",
-      "description": "Return an OpenRPC document describing the RPC API.",
-      "paramStructure": "by-position",
-      "params": [
-      ],
-      "result": {
-        "name": "result",
-        "schema": {
-          "type": "object",
-          "properties": {
-          },
-          "additionalProperties": false,
-          "description": "OpenRPC document"
-        }
-      },
-      "x-bitcoin-category": "control"
     },
     {
       "name": "backupwallet",
@@ -1176,8 +1157,8 @@
           "properties": {
             "tx": {
               "type": "object",
+              "x-documentation-commentary": "The layout is the same as the output of decoderawtransaction.",
               "properties": {
-                "x-documentation-commentary": "The layout is the same as the output of decoderawtransaction."
               },
               "additionalProperties": true,
               "description": "The decoded network-serialized unsigned transaction."
@@ -1271,7 +1252,6 @@
                   "non_witness_utxo": {
                     "type": "object",
                     "properties": {
-                      "x-documentation-commentary": ""
                     },
                     "additionalProperties": true,
                     "description": "Decoded network transaction for non-witness UTXOs",
@@ -3047,7 +3027,6 @@
                 "fail": {
                   "type": "object",
                   "properties": {
-                    "x-documentation-commentary": ""
                   },
                   "additionalProperties": true,
                   "description": "information about the highest range of feerates to fail to meet the threshold",
@@ -3073,7 +3052,6 @@
             "medium": {
               "type": "object",
               "properties": {
-                "x-documentation-commentary": ""
               },
               "additionalProperties": true,
               "description": "estimate for medium time horizon",
@@ -3082,7 +3060,6 @@
             "long": {
               "type": "object",
               "properties": {
-                "x-documentation-commentary": ""
               },
               "additionalProperties": true,
               "description": "estimate for long time horizon",
@@ -3861,8 +3838,8 @@
             },
             "embedded": {
               "type": "object",
+              "x-documentation-commentary": "Includes all getaddressinfo output fields for the embedded address, excluding metadata (timestamp, hdkeypath, hdseedid)\nand relation to the wallet (ismine).",
               "properties": {
-                "x-documentation-commentary": "Includes all getaddressinfo output fields for the embedded address, excluding metadata (timestamp, hdkeypath, hdseedid)\nand relation to the wallet (ismine)."
               },
               "additionalProperties": true,
               "description": "Information about the address embedded in P2SH or P2WSH, if relevant and known.",
@@ -4296,14 +4273,14 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 1",
               "properties": {
-                "x-documentation-commentary": "Same output as verbosity = 1",
                 "tx": {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "x-documentation-commentary": "The transactions in the format of the getrawtransaction RPC. Different from verbosity = 1 \"tx\" result",
                     "properties": {
-                      "x-documentation-commentary": "The transactions in the format of the getrawtransaction RPC. Different from verbosity = 1 \"tx\" result",
                       "fee": {
                         "type": "number",
                         "description": "The transaction fee in BTC, omitted if block undo data is not available"
@@ -4324,8 +4301,8 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 2",
               "properties": {
-                "x-documentation-commentary": "Same output as verbosity = 2",
                 "tx": {
                   "type": "array",
                   "items": {
@@ -4335,8 +4312,8 @@
                         "type": "array",
                         "items": {
                           "type": "object",
+                          "x-documentation-commentary": "The same output as verbosity = 2",
                           "properties": {
-                            "x-documentation-commentary": "The same output as verbosity = 2",
                             "prevout": {
                               "type": "object",
                               "properties": {
@@ -5642,6 +5619,14 @@
               "type": "number",
               "description": "requested block height (or tip)"
             },
+            "script_flags": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "description": "a script verify flag"
+              },
+              "description": "script verify flags for the block"
+            },
             "deployments": {
               "type": "object",
               "additionalProperties": {
@@ -5761,6 +5746,7 @@
           "required": [
             "hash",
             "height",
+            "script_flags",
             "deployments"
           ],
           "additionalProperties": false
@@ -6412,6 +6398,10 @@
                     "type": "number",
                     "description": "virtual transaction size of in-mempool ancestors (including this one)"
                   },
+                  "chunkweight": {
+                    "type": "number",
+                    "description": "sigops-adjusted weight (as defined in BIP 141 and modified by '-bytespersigop') of this transaction's chunk"
+                  },
                   "wtxid": {
                     "type": "string",
                     "pattern": "^[0-9a-fA-F]*$",
@@ -6440,13 +6430,19 @@
                         "type": "string",
                         "x-bitcoin-type": "amount",
                         "description": "transaction fees of in-mempool descendants (including this one) with fee deltas used for mining priority, denominated in BTC"
+                      },
+                      "chunk": {
+                        "type": "string",
+                        "x-bitcoin-type": "amount",
+                        "description": "transaction fees of chunk, denominated in BTC"
                       }
                     },
                     "required": [
                       "base",
                       "modified",
                       "ancestor",
-                      "descendant"
+                      "descendant",
+                      "chunk"
                     ],
                     "additionalProperties": false
                   },
@@ -6488,6 +6484,7 @@
                   "descendantsize",
                   "ancestorcount",
                   "ancestorsize",
+                  "chunkweight",
                   "wtxid",
                   "fees",
                   "depends",
@@ -6505,6 +6502,82 @@
       },
       "x-bitcoin-category": "blockchain",
       "x-bitcoin-examples": "> bitcoin-cli getmempoolancestors \"mytxid\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getmempoolancestors\", \"params\": [\"mytxid\"]}' -H 'content-type: application/json' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "getmempoolcluster",
+      "summary": "Returns mempool data for given cluster",
+      "description": "Returns mempool data for given cluster",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "txid",
+          "schema": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]*$",
+            "x-bitcoin-type": "hex",
+            "description": "The txid of a transaction in the cluster"
+          },
+          "required": true,
+          "description": "The txid of a transaction in the cluster"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "clusterweight": {
+              "type": "number",
+              "description": "total sigops-adjusted weight (as defined in BIP 141 and modified by '-bytespersigop')"
+            },
+            "txcount": {
+              "type": "number",
+              "description": "number of transactions"
+            },
+            "chunks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "chunkfee": {
+                    "type": "number",
+                    "description": "fees of the transactions in this chunk"
+                  },
+                  "chunkweight": {
+                    "type": "number",
+                    "description": "sigops-adjusted weight of all transactions in this chunk"
+                  },
+                  "txs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[0-9a-fA-F]*$",
+                      "x-bitcoin-type": "hex",
+                      "description": "transaction id"
+                    },
+                    "description": "transactions in this chunk in mining order"
+                  }
+                },
+                "required": [
+                  "chunkfee",
+                  "chunkweight",
+                  "txs"
+                ],
+                "additionalProperties": false
+              },
+              "description": "chunks in this cluster (in mining order)"
+            }
+          },
+          "required": [
+            "clusterweight",
+            "txcount",
+            "chunks"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "x-bitcoin-category": "blockchain",
+      "x-bitcoin-examples": "> bitcoin-cli getmempoolcluster txid\n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getmempoolcluster\", \"params\": [txid]}' -H 'content-type: application/json' http://127.0.0.1:8332/\n"
     },
     {
       "name": "getmempooldescendants",
@@ -6586,6 +6659,10 @@
                     "type": "number",
                     "description": "virtual transaction size of in-mempool ancestors (including this one)"
                   },
+                  "chunkweight": {
+                    "type": "number",
+                    "description": "sigops-adjusted weight (as defined in BIP 141 and modified by '-bytespersigop') of this transaction's chunk"
+                  },
                   "wtxid": {
                     "type": "string",
                     "pattern": "^[0-9a-fA-F]*$",
@@ -6614,13 +6691,19 @@
                         "type": "string",
                         "x-bitcoin-type": "amount",
                         "description": "transaction fees of in-mempool descendants (including this one) with fee deltas used for mining priority, denominated in BTC"
+                      },
+                      "chunk": {
+                        "type": "string",
+                        "x-bitcoin-type": "amount",
+                        "description": "transaction fees of chunk, denominated in BTC"
                       }
                     },
                     "required": [
                       "base",
                       "modified",
                       "ancestor",
-                      "descendant"
+                      "descendant",
+                      "chunk"
                     ],
                     "additionalProperties": false
                   },
@@ -6662,6 +6745,7 @@
                   "descendantsize",
                   "ancestorcount",
                   "ancestorsize",
+                  "chunkweight",
                   "wtxid",
                   "fees",
                   "depends",
@@ -6736,6 +6820,10 @@
               "type": "number",
               "description": "virtual transaction size of in-mempool ancestors (including this one)"
             },
+            "chunkweight": {
+              "type": "number",
+              "description": "sigops-adjusted weight (as defined in BIP 141 and modified by '-bytespersigop') of this transaction's chunk"
+            },
             "wtxid": {
               "type": "string",
               "pattern": "^[0-9a-fA-F]*$",
@@ -6764,13 +6852,19 @@
                   "type": "string",
                   "x-bitcoin-type": "amount",
                   "description": "transaction fees of in-mempool descendants (including this one) with fee deltas used for mining priority, denominated in BTC"
+                },
+                "chunk": {
+                  "type": "string",
+                  "x-bitcoin-type": "amount",
+                  "description": "transaction fees of chunk, denominated in BTC"
                 }
               },
               "required": [
                 "base",
                 "modified",
                 "ancestor",
-                "descendant"
+                "descendant",
+                "chunk"
               ],
               "additionalProperties": false
             },
@@ -6812,6 +6906,7 @@
             "descendantsize",
             "ancestorcount",
             "ancestorsize",
+            "chunkweight",
             "wtxid",
             "fees",
             "depends",
@@ -6824,6 +6919,41 @@
       },
       "x-bitcoin-category": "blockchain",
       "x-bitcoin-examples": "> bitcoin-cli getmempoolentry \"mytxid\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getmempoolentry\", \"params\": [\"mytxid\"]}' -H 'content-type: application/json' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "getmempoolfeeratediagram",
+      "summary": "Returns the feerate diagram for the whole mempool.",
+      "description": "Returns the feerate diagram for the whole mempool.",
+      "paramStructure": "by-position",
+      "params": [
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weight": {
+                "type": "number",
+                "description": "cumulative sigops-adjusted weight"
+              },
+              "fee": {
+                "type": "number",
+                "description": "cumulative fee"
+              }
+            },
+            "required": [
+              "weight",
+              "fee"
+            ],
+            "additionalProperties": false
+          },
+          "x-bitcoin-condition": "mempool chunks"
+        }
+      },
+      "x-bitcoin-category": "hidden",
+      "x-bitcoin-examples": "> bitcoin-cli getmempoolfeeratediagram \n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getmempoolfeeratediagram\", \"params\": []}' -H 'content-type: application/json' http://127.0.0.1:8332/\n"
     },
     {
       "name": "getmempoolinfo",
@@ -6891,6 +7021,14 @@
             "maxdatacarriersize": {
               "type": "number",
               "description": "Maximum number of bytes that can be used by OP_RETURN outputs in the mempool"
+            },
+            "limitclustercount": {
+              "type": "number",
+              "description": "Maximum number of transactions that can be in a cluster (configured by -limitclustercount)"
+            },
+            "limitclustersize": {
+              "type": "number",
+              "description": "Maximum size of a cluster in virtual bytes (configured by -limitclustersize)"
             }
           },
           "required": [
@@ -6906,7 +7044,9 @@
             "unbroadcastcount",
             "fullrbf",
             "permitbaremultisig",
-            "maxdatacarriersize"
+            "maxdatacarriersize",
+            "limitclustercount",
+            "limitclustersize"
           ],
           "additionalProperties": false
         }
@@ -7428,6 +7568,25 @@
       "x-bitcoin-examples": "> bitcoin-cli getnodeaddresses 8\n> bitcoin-cli getnodeaddresses 4 \"i2p\"\n> bitcoin-cli -named getnodeaddresses network=onion count=12\n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getnodeaddresses\", \"params\": [8]}' -H 'content-type: application/json' http://127.0.0.1:8332/\n> curl --user myusername --data-binary '{\"jsonrpc\": \"2.0\", \"id\": \"curltest\", \"method\": \"getnodeaddresses\", \"params\": [4, \"i2p\"]}' -H 'content-type: application/json' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "getopenrpc",
+      "summary": "Return an OpenRPC document describing the RPC API.",
+      "description": "Return an OpenRPC document describing the RPC API.",
+      "paramStructure": "by-position",
+      "params": [
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+          },
+          "additionalProperties": false,
+          "description": "OpenRPC document"
+        }
+      },
+      "x-bitcoin-category": "control"
+    },
+    {
       "name": "getorphantxs",
       "summary": "Shows transactions in the tx orphanage.",
       "description": "Shows transactions in the tx orphanage.\n\nEXPERIMENTAL warning: this call may be changed in future releases.",
@@ -7590,7 +7749,7 @@
               },
               "addr": {
                 "type": "string",
-                "description": "(host:port) The IP address and port of the peer"
+                "description": "(host:port) The IP address/hostname optionally followed by :port of the peer"
               },
               "addrbind": {
                 "type": "string",
@@ -7628,6 +7787,14 @@
               "relaytxes": {
                 "type": "boolean",
                 "description": "Whether we relay transactions to this peer"
+              },
+              "last_inv_sequence": {
+                "type": "number",
+                "description": "Mempool sequence number of this peer's last INV"
+              },
+              "inv_to_send": {
+                "type": "number",
+                "description": "How many txs we have queued to announce to this peer"
               },
               "lastsend": {
                 "type": "number",
@@ -7703,7 +7870,8 @@
               },
               "startingheight": {
                 "type": "number",
-                "description": "The starting height (block) of the peer"
+                "description": "(DEPRECATED, returned only if config option -deprecatedrpc=startingheight is passed) The starting height (block) of the peer",
+                "x-bitcoin-optional": true
               },
               "presynced_headers": {
                 "type": "number",
@@ -7766,7 +7934,7 @@
               },
               "connection_type": {
                 "type": "string",
-                "description": "Type of connection: \noutbound-full-relay (default automatic connections),\nblock-relay-only (does not relay transactions or addresses),\ninbound (initiated by the peer),\nmanual (added via addnode RPC or -addnode/-connect configuration options),\naddr-fetch (short-lived automatic connection for soliciting addresses),\nfeeler (short-lived automatic connection for testing addresses).\nPlease note this output is unlikely to be stable in upcoming releases as we iterate to\nbest capture connection behaviors."
+                "description": "Type of connection: \noutbound-full-relay (default automatic connections),\nblock-relay-only (does not relay transactions or addresses),\ninbound (initiated by the peer),\nmanual (added via addnode RPC or -addnode/-connect configuration options),\naddr-fetch (short-lived automatic connection for soliciting addresses),\nfeeler (short-lived automatic connection for testing addresses),\nprivate-broadcast (short-lived automatic connection for broadcasting privacy-sensitive transactions).\nPlease note this output is unlikely to be stable in upcoming releases as we iterate to\nbest capture connection behaviors."
               },
               "transport_protocol_type": {
                 "type": "string",
@@ -7784,6 +7952,8 @@
               "services",
               "servicesnames",
               "relaytxes",
+              "last_inv_sequence",
+              "inv_to_send",
               "lastsend",
               "lastrecv",
               "last_transaction",
@@ -7797,7 +7967,6 @@
               "inbound",
               "bip152_hb_to",
               "bip152_hb_from",
-              "startingheight",
               "presynced_headers",
               "synced_headers",
               "synced_blocks",
@@ -8044,6 +8213,10 @@
                     "type": "number",
                     "description": "virtual transaction size of in-mempool ancestors (including this one)"
                   },
+                  "chunkweight": {
+                    "type": "number",
+                    "description": "sigops-adjusted weight (as defined in BIP 141 and modified by '-bytespersigop') of this transaction's chunk"
+                  },
                   "wtxid": {
                     "type": "string",
                     "pattern": "^[0-9a-fA-F]*$",
@@ -8072,13 +8245,19 @@
                         "type": "string",
                         "x-bitcoin-type": "amount",
                         "description": "transaction fees of in-mempool descendants (including this one) with fee deltas used for mining priority, denominated in BTC"
+                      },
+                      "chunk": {
+                        "type": "string",
+                        "x-bitcoin-type": "amount",
+                        "description": "transaction fees of chunk, denominated in BTC"
                       }
                     },
                     "required": [
                       "base",
                       "modified",
                       "ancestor",
-                      "descendant"
+                      "descendant",
+                      "chunk"
                     ],
                     "additionalProperties": false
                   },
@@ -8120,6 +8299,7 @@
                   "descendantsize",
                   "ancestorcount",
                   "ancestorsize",
+                  "chunkweight",
                   "wtxid",
                   "fees",
                   "depends",
@@ -8427,8 +8607,8 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 1",
               "properties": {
-                "x-documentation-commentary": "Same output as verbosity = 1",
                 "fee": {
                   "type": "number",
                   "description": "transaction fee in BTC, omitted if block undo data is not available",
@@ -8438,8 +8618,8 @@
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "x-documentation-commentary": "Same output as verbosity = 1",
                     "properties": {
-                      "x-documentation-commentary": "Same output as verbosity = 1",
                       "prevout": {
                         "type": "object",
                         "properties": {
@@ -8898,9 +9078,182 @@
             "decoded": {
               "type": "object",
               "properties": {
-                "x-documentation-commentary": "Equivalent to the RPC decoderawtransaction method, or the RPC getrawtransaction method when `verbose` is passed."
+                "txid": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]*$",
+                  "x-bitcoin-type": "hex",
+                  "description": "The transaction id"
+                },
+                "hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-fA-F]*$",
+                  "x-bitcoin-type": "hex",
+                  "description": "The transaction hash (differs from txid for witness transactions)"
+                },
+                "size": {
+                  "type": "number",
+                  "description": "The serialized transaction size"
+                },
+                "vsize": {
+                  "type": "number",
+                  "description": "The virtual transaction size (differs from size for witness transactions)"
+                },
+                "weight": {
+                  "type": "number",
+                  "description": "The transaction's weight (between vsize*4-3 and vsize*4)"
+                },
+                "version": {
+                  "type": "number",
+                  "description": "The version"
+                },
+                "locktime": {
+                  "type": "number",
+                  "x-bitcoin-format": "unix-time",
+                  "description": "The lock time"
+                },
+                "vin": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "coinbase": {
+                        "type": "string",
+                        "pattern": "^[0-9a-fA-F]*$",
+                        "x-bitcoin-type": "hex",
+                        "description": "The coinbase value (only if coinbase transaction)",
+                        "x-bitcoin-optional": true
+                      },
+                      "txid": {
+                        "type": "string",
+                        "pattern": "^[0-9a-fA-F]*$",
+                        "x-bitcoin-type": "hex",
+                        "description": "The transaction id (if not coinbase transaction)",
+                        "x-bitcoin-optional": true
+                      },
+                      "vout": {
+                        "type": "number",
+                        "description": "The output number (if not coinbase transaction)",
+                        "x-bitcoin-optional": true
+                      },
+                      "scriptSig": {
+                        "type": "object",
+                        "properties": {
+                          "asm": {
+                            "type": "string",
+                            "description": "Disassembly of the signature script"
+                          },
+                          "hex": {
+                            "type": "string",
+                            "pattern": "^[0-9a-fA-F]*$",
+                            "x-bitcoin-type": "hex",
+                            "description": "The raw signature script bytes, hex-encoded"
+                          }
+                        },
+                        "required": [
+                          "asm",
+                          "hex"
+                        ],
+                        "additionalProperties": false,
+                        "description": "The script (if not coinbase transaction)",
+                        "x-bitcoin-optional": true
+                      },
+                      "txinwitness": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "pattern": "^[0-9a-fA-F]*$",
+                          "x-bitcoin-type": "hex",
+                          "description": "hex-encoded witness data (if any)"
+                        },
+                        "x-bitcoin-optional": true
+                      },
+                      "sequence": {
+                        "type": "number",
+                        "description": "The script sequence number"
+                      }
+                    },
+                    "required": [
+                      "sequence"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "vout": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {
+                        "type": "string",
+                        "x-bitcoin-type": "amount",
+                        "description": "The value in BTC"
+                      },
+                      "n": {
+                        "type": "number",
+                        "description": "index"
+                      },
+                      "scriptPubKey": {
+                        "type": "object",
+                        "properties": {
+                          "asm": {
+                            "type": "string",
+                            "description": "Disassembly of the output script"
+                          },
+                          "desc": {
+                            "type": "string",
+                            "description": "Inferred descriptor for the output"
+                          },
+                          "hex": {
+                            "type": "string",
+                            "pattern": "^[0-9a-fA-F]*$",
+                            "x-bitcoin-type": "hex",
+                            "description": "The raw output script bytes, hex-encoded"
+                          },
+                          "address": {
+                            "type": "string",
+                            "description": "The Bitcoin address (only if a well-defined address exists)",
+                            "x-bitcoin-optional": true
+                          },
+                          "type": {
+                            "type": "string",
+                            "description": "The type (one of: nonstandard, anchor, pubkey, pubkeyhash, scripthash, multisig, nulldata, witness_v0_scripthash, witness_v0_keyhash, witness_v1_taproot, witness_unknown)"
+                          }
+                        },
+                        "required": [
+                          "asm",
+                          "desc",
+                          "hex",
+                          "type"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "ischange": {
+                        "type": "boolean",
+                        "description": "Output script is change (only present if true)",
+                        "x-bitcoin-optional": true
+                      }
+                    },
+                    "required": [
+                      "value",
+                      "n",
+                      "scriptPubKey"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
               },
-              "additionalProperties": true,
+              "required": [
+                "txid",
+                "hash",
+                "size",
+                "vsize",
+                "weight",
+                "version",
+                "locktime",
+                "vin",
+                "vout"
+              ],
+              "additionalProperties": false,
               "description": "The decoded transaction (only present when `verbose` is passed)",
               "x-bitcoin-optional": true
             },
@@ -9625,8 +9978,8 @@
               },
               "error": {
                 "type": "object",
+                "x-documentation-commentary": "JSONRPC error",
                 "properties": {
-                  "x-documentation-commentary": "JSONRPC error"
                 },
                 "additionalProperties": true,
                 "x-bitcoin-optional": true
@@ -10526,7 +10879,7 @@
     {
       "name": "listtransactions",
       "summary": "If a label name is provided, this will return only incoming transactions paying to addresses with the specified label.",
-      "description": "If a label name is provided, this will return only incoming transactions paying to addresses with the specified label.\n\nReturns up to 'count' most recent transactions skipping the first 'from' transactions.",
+      "description": "If a label name is provided, this will return only incoming transactions paying to addresses with the specified label.\nReturns up to 'count' most recent transactions ordered from oldest to newest while skipping the first number of \ntransactions specified in the 'skip' argument. A transaction can have multiple entries in this RPC response. \nFor instance, a wallet transaction that pays three addresses — one wallet-owned and two external — will produce \nfour entries. The payment to the wallet-owned address appears both as a send entry and as a receive entry. \nAs a result, the RPC response will contain one entry in the receive category and three entries in the send category.",
       "paramStructure": "by-position",
       "params": [
         {
@@ -11217,7 +11570,7 @@
     {
       "name": "logging",
       "summary": "Gets and sets the logging configuration.",
-      "description": "Gets and sets the logging configuration.\nWhen called without an argument, returns the list of categories with status that are currently being debug logged or not.\nWhen called with arguments, adds or removes categories from debug logging and return the lists above.\nThe arguments are evaluated in order \"include\", \"exclude\".\nIf an item is both included and excluded, it will thus end up being excluded.\nThe valid logging categories are: addrman, bench, blockstorage, cmpctblock, coindb, estimatefee, http, i2p, ipc, leveldb, libevent, mempool, mempoolrej, net, proxy, prune, qt, rand, reindex, rpc, scan, selectcoins, tor, txpackages, txreconciliation, validation, walletdb, zmq\nIn addition, the following are available as category names with special meanings:\n  - \"all\",  \"1\" : represent all logging categories.",
+      "description": "Gets and sets the logging configuration.\nWhen called without an argument, returns the list of categories with status that are currently being debug logged or not.\nWhen called with arguments, adds or removes categories from debug logging and return the lists above.\nThe arguments are evaluated in order \"include\", \"exclude\".\nIf an item is both included and excluded, it will thus end up being excluded.\nThe valid logging categories are: addrman, bench, blockstorage, cmpctblock, coindb, estimatefee, http, i2p, ipc, kernel, leveldb, libevent, mempool, mempoolrej, net, privatebroadcast, proxy, prune, qt, rand, reindex, rpc, scan, selectcoins, tor, txpackages, txreconciliation, validation, walletdb, zmq\nIn addition, the following are available as category names with special meanings:\n  - \"all\",  \"1\" : represent all logging categories.",
       "paramStructure": "by-position",
       "params": [
         {
@@ -13001,8 +13354,8 @@
     },
     {
       "name": "sendrawtransaction",
-      "summary": "Submit a raw transaction (serialized, hex-encoded) to local node and network.",
-      "description": "Submit a raw transaction (serialized, hex-encoded) to local node and network.\n\nThe transaction will be sent unconditionally to all peers, so using sendrawtransaction\nfor manual rebroadcast may degrade privacy by leaking the transaction's origin, as\nnodes will normally not rebroadcast non-wallet transactions already in their mempool.\n\nA specific exception, RPC_TRANSACTION_ALREADY_IN_UTXO_SET, may throw if the transaction cannot be added to the mempool.\n\nRelated RPCs: createrawtransaction, signrawtransactionwithkey",
+      "summary": "Submit a raw transaction (serialized, hex-encoded) to the network.",
+      "description": "Submit a raw transaction (serialized, hex-encoded) to the network.\n\nIf -privatebroadcast is disabled, then the transaction will be put into the\nlocal mempool of the node and will be sent unconditionally to all currently\nconnected peers, so using sendrawtransaction for manual rebroadcast will degrade\nprivacy by leaking the transaction's origin, as nodes will normally not\nrebroadcast non-wallet transactions already in their mempool.\n\nIf -privatebroadcast is enabled, then the transaction will be sent only via\ndedicated, short-lived connections to Tor or I2P peers or IPv4/IPv6 peers\nvia the Tor network. This conceals the transaction's origin. The transaction\nwill only enter the local mempool when it is received back from the network.\n\nA specific exception, RPC_TRANSACTION_ALREADY_IN_UTXO_SET, may throw if the transaction cannot be added to the mempool.\n\nRelated RPCs: createrawtransaction, signrawtransactionwithkey",
       "paramStructure": "by-position",
       "params": [
         {
@@ -14151,7 +14504,7 @@
                   },
                   "error": {
                     "type": "string",
-                    "description": "The transaction error string, if it was rejected by the mempool",
+                    "description": "Error string if rejected from mempool, or \"package-not-validated\" when the package aborts before any per-tx processing.",
                     "x-bitcoin-optional": true
                   }
                 },
@@ -14162,7 +14515,7 @@
                 "description": "transaction wtxid"
               },
               "x-bitcoin-object-dynamic": true,
-              "description": "transaction results keyed by wtxid"
+              "description": "The transaction results keyed by wtxid. An entry is returned for every submitted wtxid."
             },
             "replaced-transactions": {
               "type": "array",
