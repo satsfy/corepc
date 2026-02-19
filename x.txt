@@ -1,0 +1,23 @@
+
+
+
+
+or(
+    and(pk(A), pk(B)),
+    and(after(100), pk(A))
+)
+
+
+IF
+    <A> CHECKSIGVERIFY
+    <B> CHECKSIG
+ELSE
+    <100> CHECKLOCKTIMEVERIFY
+    DROP
+    <A> CHECKSIG
+ENDIF
+
+a branch de timeout pode deixa um valor no stack sem querer
+a falha na satisfação em alguma branch não aborta corretamente
+
+é muito
