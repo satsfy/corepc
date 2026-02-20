@@ -400,25 +400,6 @@
       "x-bitcoin-examples": "> bitcoin-cli analyzepsbt \"psbt\"\n"
     },
     {
-      "name": "api",
-      "summary": "Return an OpenRPC document describing the RPC API.",
-      "description": "Return an OpenRPC document describing the RPC API.",
-      "paramStructure": "by-position",
-      "params": [
-      ],
-      "result": {
-        "name": "result",
-        "schema": {
-          "type": "object",
-          "properties": {
-          },
-          "additionalProperties": false,
-          "description": "OpenRPC document"
-        }
-      },
-      "x-bitcoin-category": "control"
-    },
-    {
       "name": "backupwallet",
       "summary": "Safely copies current wallet file to destination, which can be a directory or a path with filename.",
       "description": "Safely copies current wallet file to destination, which can be a directory or a path with filename.",
@@ -1159,6 +1140,7 @@
           "properties": {
             "tx": {
               "type": "object",
+              "x-documentation-commentary": "The layout is the same as the output of decoderawtransaction.",
               "properties": {
               },
               "additionalProperties": true,
@@ -3582,6 +3564,7 @@
             },
             "embedded": {
               "type": "object",
+              "x-documentation-commentary": "Includes all getaddressinfo output fields for the embedded address, excluding metadata (timestamp, hdkeypath, hdseedid)\nand relation to the wallet (ismine, iswatchonly).",
               "properties": {
               },
               "additionalProperties": true,
@@ -3974,11 +3957,13 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 1",
               "properties": {
                 "tx": {
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "x-documentation-commentary": "The transactions in the format of the getrawtransaction RPC. Different from verbosity = 1 \"tx\" result",
                     "properties": {
                       "fee": {
                         "type": "number",
@@ -4000,6 +3985,7 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 2",
               "properties": {
                 "tx": {
                   "type": "array",
@@ -4010,6 +3996,7 @@
                         "type": "array",
                         "items": {
                           "type": "object",
+                          "x-documentation-commentary": "The same output as verbosity = 2",
                           "properties": {
                             "prevout": {
                               "type": "object",
@@ -6522,6 +6509,25 @@
       "x-bitcoin-examples": "> bitcoin-cli getnodeaddresses 8\n> bitcoin-cli getnodeaddresses 4 \"i2p\"\n> bitcoin-cli -named getnodeaddresses network=onion count=12\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"getnodeaddresses\", \"params\": [8]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"getnodeaddresses\", \"params\": [4, \"i2p\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "getopenrpc",
+      "summary": "Return an OpenRPC document describing the RPC API.",
+      "description": "Return an OpenRPC document describing the RPC API.",
+      "paramStructure": "by-position",
+      "params": [
+      ],
+      "result": {
+        "name": "result",
+        "schema": {
+          "type": "object",
+          "properties": {
+          },
+          "additionalProperties": false,
+          "description": "OpenRPC document"
+        }
+      },
+      "x-bitcoin-category": "control"
+    },
+    {
       "name": "getpeerinfo",
       "summary": "Returns data about each connected network peer as a json array of objects.",
       "description": "Returns data about each connected network peer as a json array of objects.",
@@ -7250,6 +7256,7 @@
             },
             {
               "type": "object",
+              "x-documentation-commentary": "Same output as verbosity = 1",
               "properties": {
                 "fee": {
                   "type": "number",
@@ -7260,6 +7267,7 @@
                   "type": "array",
                   "items": {
                     "type": "object",
+                    "x-documentation-commentary": "Same output as verbosity = 1",
                     "properties": {
                       "prevout": {
                         "type": "object",
@@ -7713,6 +7721,7 @@
             },
             "decoded": {
               "type": "object",
+              "x-documentation-commentary": "Equivalent to the RPC decoderawtransaction method, or the RPC getrawtransaction method when `verbose` is passed.",
               "properties": {
               },
               "additionalProperties": true,
@@ -8516,6 +8525,7 @@
               },
               "error": {
                 "type": "object",
+                "x-documentation-commentary": "JSONRPC error",
                 "properties": {
                 },
                 "additionalProperties": true,
@@ -8678,6 +8688,7 @@
               },
               "error": {
                 "type": "object",
+                "x-documentation-commentary": "JSONRPC error",
                 "properties": {
                 },
                 "additionalProperties": true,
