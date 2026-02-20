@@ -60,3 +60,8 @@ docsrs *flags:
 # Update the recent and minimal lock files.
 update-lock-files:
   contrib/update-lock-files.sh
+
+# Compare corepc-types structs against the OpenRPC spec. Usage: just spec-compare <version|all>
+spec-compare version:
+  $REPO_DIR/spec_compare/run.sh {{version}}
+
