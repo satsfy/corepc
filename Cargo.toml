@@ -3,6 +3,10 @@ members = [ "bitreq", "client", "fuzz", "jsonrpc", "node", "types"]
 exclude = ["integration_test", "verify"]
 resolver = "2"
 
+[workspace.metadata.rbmt.toolchains]
+nightly = "nightly-2025-09-12"
+stable = "1.93.1"
+
 [patch.crates-io.corepc-client]
 path = "client"
 

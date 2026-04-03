@@ -5,13 +5,12 @@ of Core supported) we cannot stay under the 20 job limit.
 
 ref: https://docs.github.com/en/actions/learn-github-actions/usage-limits-billing-and-administration
 
-The minimal/recent lock files are handled by CI (`rust.yml`).
+The minimal/recent lock files are handled by CI (`rust.yaml`) via `cargo rbmt`.
 
 ## Jobs
 
-Run from `rust.yml` unless stated otherwise. Total 11 jobs.
+Run from `rust.yaml` unless stated otherwise. Total 11 jobs.
 
-0.  `Prepare`
 1.  `Stable - minimal`
 2.  `Stable - recent`
 3.  `Nightly - minimal`
@@ -24,6 +23,5 @@ Run from `rust.yml` unless stated otherwise. Total 11 jobs.
 10. `Format`
 11. `Verify`
 
-+16 jobs - 1 for each supported version of Core.
-
++18 jobs - 1 for each supported version of Core.
 
