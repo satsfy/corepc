@@ -73,3 +73,25 @@ latest = ["30_2"]
 [package.metadata.docs.rs]
 features = ["28_2"]
 rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.rbmt.lint]
+# The node crate requires a version feature to compile; use `latest` for per-package lint.
+features = ["latest"]
+# Duplicates that appear when `--all-features` enables the `download` feature.
+#
+# Same-version "duplicates" arise because cargo tree counts build-dependencies and
+# regular dependencies separately, and also because `--target=all` can surface the
+# same package from different platform subtrees.
+#
+# Version-mismatched duplicates are upstream conflicts that cannot be resolved in
+# this crate (e.g. `bitcoin` vs `jsonrpc` pin different `base64` releases; `ring`
+# vs `tar`/`tempfile` pin different `windows-sys` releases).
+allowed_duplicates = [
+    "anyhow",           # build-dep and regular dep, same version
+    "base64",           # bitcoin uses v0.21, jsonrpc uses v0.22
+    "bitcoin_hashes",   # build-dep (download) and transitive dep via bitcoin, same version
+    "bitreq",           # build-dep (download) and regular dep via jsonrpc, same version
+    "linux-raw-sys",    # same version, appears twice under --target=all
+    "rustix",           # same version, appears twice under --target=all
+    "windows-sys",      # ring/rustls pin v0.52, tar/tempfile/rustix pin v0.59
+]

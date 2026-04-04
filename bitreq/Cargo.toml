@@ -45,6 +45,14 @@ url = { version = "2.4" }
 [package.metadata.docs.rs]
 all-features = true
 
+[package.metadata.rbmt.lint]
+# Duplicate dependencies that are unavoidable with the current TLS/crypto dep graph.
+#
+# `base64`:     bitreq itself uses v0.22 but rustls-native-certs transitively pulls in v0.21.
+# `windows-sys`: different TLS backends pin different versions (tokio/ring use v0.52,
+#                tempfile/rustix use v0.59, native-tls/schannel/rustls-native-certs use v0.61).
+allowed_duplicates = ["base64", "windows-sys"]
+
 [features]
 default = ["std"]
 std = []
