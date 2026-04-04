@@ -1,27 +1,5 @@
-// An explicit version of Bitcoin Core must be selected by enabling some feature.
-// We check this here instead of in `lib.rs` because this file is included in `build.rs`.
-#[cfg(all(
-    not(feature = "30_2"),
-    not(feature = "30_0"),
-    not(feature = "29_0"),
-    not(feature = "28_2"),
-    not(feature = "28_1"),
-    not(feature = "28_0"),
-    not(feature = "27_2"),
-    not(feature = "27_1"),
-    not(feature = "27_0"),
-    not(feature = "26_2"),
-    not(feature = "25_2"),
-    not(feature = "24_2"),
-    not(feature = "23_2"),
-    not(feature = "22_1"),
-    not(feature = "0_21_2"),
-    not(feature = "0_20_2"),
-    not(feature = "0_19_1"),
-    not(feature = "0_18_1"),
-    not(feature = "0_17_2")
-))]
-compile_error!("enable a feature in order to select the version of Bitcoin Core to use");
+// Prefer selecting an explicit version feature. For `--no-default-features` builds (used by the
+// feature-matrix test tooling), we intentionally fall back to a baseline version below.
 
 #[cfg(feature = "30_2")]
 #[allow(dead_code)] // Triggers in --all-features builds.

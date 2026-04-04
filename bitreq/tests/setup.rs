@@ -4,19 +4,25 @@ extern crate bitreq;
 extern crate tiny_http;
 use std::io::Read;
 use std::str::FromStr;
-use std::sync::{Arc, Once};
+use std::sync::{Arc, Once, OnceLock};
 use std::thread;
 use std::time::Duration;
 
 use self::tiny_http::{Header, Method, Response, Server, StatusCode};
 
 static INIT: Once = Once::new();
+static SERVER_PORT: OnceLock<u16> = OnceLock::new();
 
 pub fn setup() {
     INIT.call_once(|| {
-        let server = Arc::new(Server::http("localhost:35562").unwrap());
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        SERVER_PORT.set(port).expect("server port must be initialized exactly once");
+        let base_url = format!("http://127.0.0.1:{port}");
+        let server = Arc::new(Server::from_listener(listener, None).unwrap());
         for _ in 0..16 {
             let server = server.clone();
+            let base_url = base_url.clone();
 
             thread::spawn(move || loop {
                 let mut request = {
@@ -107,45 +113,35 @@ pub fn setup() {
                     }
 
                     Method::Get if url == "/redirect-baz" => {
-                        let response = Response::empty(301).with_header(
-                            Header::from_str("Location: http://localhost:35562/a#baz").unwrap(),
-                        );
+                        let location = format!("Location: {base_url}/a#baz");
+                        let response =
+                            Response::empty(301).with_header(Header::from_str(&location).unwrap());
                         respond!(response);
                     }
 
                     Method::Get if url == "/redirect" => {
-                        let response = Response::empty(301).with_header(
-                            Header::from_bytes(&b"Location"[..], &b"http://localhost:35562/a"[..])
-                                .unwrap(),
-                        );
+                        let location = format!("Location: {base_url}/a");
+                        let response =
+                            Response::empty(301).with_header(Header::from_str(&location).unwrap());
                         respond!(response);
                     }
                     Method::Post if url == "/redirect" => {
-                        let response = Response::empty(303).with_header(
-                            Header::from_bytes(&b"Location"[..], &b"http://localhost:35562/a"[..])
-                                .unwrap(),
-                        );
+                        let location = format!("Location: {base_url}/a");
+                        let response =
+                            Response::empty(303).with_header(Header::from_str(&location).unwrap());
                         respond!(response);
                     }
 
                     Method::Get if url == "/infiniteredirect" => {
-                        let response = Response::empty(301).with_header(
-                            Header::from_bytes(
-                                &b"Location"[..],
-                                &b"http://localhost:35562/redirectpong"[..],
-                            )
-                            .unwrap(),
-                        );
+                        let location = format!("Location: {base_url}/redirectpong");
+                        let response =
+                            Response::empty(301).with_header(Header::from_str(&location).unwrap());
                         respond!(response);
                     }
                     Method::Get if url == "/redirectpong" => {
-                        let response = Response::empty(301).with_header(
-                            Header::from_bytes(
-                                &b"Location"[..],
-                                &b"http://localhost:35562/infiniteredirect"[..],
-                            )
-                            .unwrap(),
-                        );
+                        let location = format!("Location: {base_url}/infiniteredirect");
+                        let response =
+                            Response::empty(301).with_header(Header::from_str(&location).unwrap());
                         respond!(response);
                     }
                     Method::Get if url == "/relativeredirect" => {
@@ -199,7 +195,10 @@ pub fn setup() {
     });
 }
 
-pub fn url(req: &str) -> String { format!("http://localhost:35562{}", req) }
+pub fn url(req: &str) -> String {
+    let port = SERVER_PORT.get().copied().expect("setup() must run before building test URL");
+    format!("http://127.0.0.1:{port}{req}")
+}
 
 #[cfg(feature = "async")]
 static CLIENT: std::sync::OnceLock<bitreq::Client> = std::sync::OnceLock::new();

@@ -19,13 +19,10 @@ use std::process::{Child, Command, ExitStatus, Stdio};
 use std::time::Duration;
 use std::{env, fmt, fs, thread};
 
-pub use anyhow;
 use anyhow::Context;
 use corepc_client::client_sync::{self, Auth};
-pub use serde_json;
-pub use tempfile;
 use tempfile::TempDir;
-pub use which;
+pub use {anyhow, serde_json, tempfile, which};
 
 #[rustfmt::skip]                // Keep pubic re-exports separate.
 #[doc(inline)]

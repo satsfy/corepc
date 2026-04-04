@@ -21,6 +21,22 @@ jobs:
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Cache downloaded bitcoind"
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/corepc/bitcoind
+          key: bitcoind-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.toml') }}
+      - name: "Prepare bitcoind"
+        env:
+          BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
+        run: |
+          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          if [ -z "$BITCOIND_EXE" ]; then
+            echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
+            exit 1
+          fi
+          echo "BITCOIND_EXE=$BITCOIND_EXE" >> "$GITHUB_ENV"
       - name: "Run stable tests"
         run: cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain stable
 
@@ -36,6 +52,22 @@ jobs:
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Cache downloaded bitcoind"
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/corepc/bitcoind
+          key: bitcoind-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.toml') }}
+      - name: "Prepare bitcoind"
+        env:
+          BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
+        run: |
+          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          if [ -z "$BITCOIND_EXE" ]; then
+            echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
+            exit 1
+          fi
+          echo "BITCOIND_EXE=$BITCOIND_EXE" >> "$GITHUB_ENV"
       - name: "Run nightly tests"
         run: cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain nightly
 
@@ -51,6 +83,22 @@ jobs:
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
       - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Cache downloaded bitcoind"
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/corepc/bitcoind
+          key: bitcoind-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.toml') }}
+      - name: "Prepare bitcoind"
+        env:
+          BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
+        run: |
+          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          if [ -z "$BITCOIND_EXE" ]; then
+            echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
+            exit 1
+          fi
+          echo "BITCOIND_EXE=$BITCOIND_EXE" >> "$GITHUB_ENV"
       - name: "Run MSRV tests"
         run: cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain msrv
 

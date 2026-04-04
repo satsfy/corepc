@@ -38,7 +38,8 @@ zip = { version = "0.6.6", default-features = false, features = ["bzip2", "defla
 # - `cargo test --features=28_0` to use `bitcoind` from the host environment.
 # - `cargo test` is equivalent to `cargo test --features=0_17_2`.
 # - `cargo test --all-features`: Same as using latest version.
-# - `cargo test --no-default-features` does not work, you MUST enable a version feature.
+# - `cargo test --no-default-features` builds with a baseline fallback; for real usage, enable an
+#   explicit version feature.
 [features]
 default = ["0_17_2"]
 
