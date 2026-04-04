@@ -161,7 +161,7 @@ fn hidden__get_orphan_txs__modelled() {
     for orphan in orphans.iter() {
         assert!(model_v0.0.contains(&orphan.compute_txid()));
 
-        match model_v1.0.iter().filter(|e| e.txid == orphan.compute_txid()).next_back() {
+        match model_v1.0.iter().rfind(|e| e.txid == orphan.compute_txid()) {
             Some(e) => {
                 assert_eq!(e.wtxid, orphan.compute_wtxid());
                 assert_eq!(e.bytes as usize, orphan.total_size());
@@ -178,7 +178,7 @@ fn hidden__get_orphan_txs__modelled() {
             }
         }
 
-        match model_v2.0.iter().filter(|e| e.txid == orphan.compute_txid()).next_back() {
+        match model_v2.0.iter().rfind(|e| e.txid == orphan.compute_txid()) {
             Some(e) => {
                 assert_eq!(e.wtxid, orphan.compute_wtxid());
                 assert_eq!(e.bytes as usize, orphan.total_size());
