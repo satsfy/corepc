@@ -6,7 +6,8 @@
 set -euox pipefail
 
 REPO_DIR=$(git rev-parse --show-toplevel)
+NIGHTLY=$(cargo metadata --no-deps --manifest-path "$REPO_DIR/Cargo.toml" --format-version 1 | jq -re '.metadata.rbmt.toolchains.nightly // .workspace_metadata.rbmt.toolchains.nightly')
 
-cargo +"$(cat ./nightly-version)" fmt \
+cargo +"$NIGHTLY" fmt \
       --manifest-path "$REPO_DIR/verify/Cargo.toml" \
       --all -- --check

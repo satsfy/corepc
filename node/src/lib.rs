@@ -508,6 +508,24 @@ impl Node {
     /// If the wallet already exists, it will load it.
     ///
     /// The client or wallet may not be immediately available, so retry up to 10 times.
+    fn wallet_is_loaded(client: &Client, wallet: &str) -> bool {
+        let wallets = match client.call::<serde_json::Value>("listwallets", &[]) {
+            Ok(wallets) => wallets,
+            Err(_) => return false,
+        };
+        let wallets = match wallets.as_array() {
+            Some(wallets) => wallets,
+            None => return false,
+        };
+        wallets.iter().any(|loaded_wallet| loaded_wallet.as_str() == Some(wallet))
+    }
+
+    fn wallet_rpc_call(client: &Client, method: &str, wallet: &str) -> bool {
+        // Use untyped JSON responses so this keeps working when running newer bitcoind versions
+        // with older API feature flags enabled in this crate.
+        client.call::<serde_json::Value>(method, &[wallet.into()]).is_ok()
+    }
+
     fn create_client_wallet(
         client_base: &Client,
         rpc_url: &str,
@@ -515,8 +533,12 @@ impl Node {
         wallet: &str,
     ) -> anyhow::Result<Client> {
         for _ in 0..10 {
-            // Try to create the wallet, or if that fails it might already exist so try to load it.
-            if client_base.create_wallet(wallet).is_ok() || client_base.load_wallet(wallet).is_ok()
+            // Check loaded wallets first, then try create/load, then check again in case a wallet
+            // got loaded between calls.
+            if Self::wallet_is_loaded(client_base, wallet)
+                || Self::wallet_rpc_call(client_base, "createwallet", wallet)
+                || Self::wallet_rpc_call(client_base, "loadwallet", wallet)
+                || Self::wallet_is_loaded(client_base, wallet)
             {
                 let url = format!("{}/wallet/{}", rpc_url, wallet);
                 return Client::new_with_auth(&url, auth.clone())
@@ -553,7 +575,8 @@ impl Node {
     /// Create a new wallet in the running node, and return an RPC client connected to the just
     /// created wallet.
     pub fn create_wallet<T: AsRef<str>>(&self, wallet: T) -> anyhow::Result<Client> {
-        let _ = self.client.create_wallet(wallet.as_ref())?;
+        let wallet = wallet.as_ref();
+        self.client.call::<serde_json::Value>("createwallet", &[wallet.into()])?;
         Ok(Client::new_with_auth(
             &self.rpc_url_with_wallet(wallet),
             Auth::CookieFile(self.params.cookie_file.clone()),
@@ -605,6 +628,9 @@ pub fn downloaded_exe_path() -> anyhow::Result<String> { Err(Error::NoFeature.in
 /// Provide the bitcoind executable path if a version feature has been specified.
 #[cfg(feature = "download")]
 pub fn downloaded_exe_path() -> anyhow::Result<String> {
+    if VERSION == "never-used" {
+        return Err(Error::NoFeature.into());
+    }
     if std::env::var_os("BITCOIND_SKIP_DOWNLOAD").is_some() {
         return Err(Error::SkipDownload.into());
     }
@@ -681,21 +707,17 @@ mod test {
     fn test_node_get_blockchain_info() {
         let exe = init();
         let node = Node::new(exe).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(0, info.blocks);
+        assert_eq!(0_u64, blocks(&node.client));
     }
 
     #[test]
     fn test_node() {
         let exe = init();
         let node = Node::new(exe).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-
-        assert_eq!(0, info.blocks);
+        assert_eq!(0_u64, blocks(&node.client));
         let address = node.client.new_address().unwrap();
         let _ = node.client.generate_to_address(1, &address).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(1, info.blocks);
+        assert_eq!(1_u64, blocks(&node.client));
     }
 
     #[test]
@@ -705,14 +727,15 @@ mod test {
         let mut conf = Conf::default();
         conf.args.push("-txindex");
         let node = Node::with_conf(&exe, &conf).unwrap();
-        assert!(
-            node.client.server_version().unwrap() >= 210_000,
-            "getindexinfo requires bitcoin >0.21"
-        );
+        // The test binary can be pointed at an older daemon via BITCOIND_EXE in CI/local runs.
+        // Skip when the runtime daemon does not support this RPC.
+        if server_version(&node.client) < 210_000 {
+            return;
+        }
         let info: std::collections::HashMap<String, serde_json::Value> =
             node.client.call("getindexinfo", &[]).unwrap();
         assert!(info.contains_key("txindex"));
-        assert!(node.client.server_version().unwrap() >= 210_000);
+        assert!(server_version(&node.client) >= 210_000);
     }
 
     #[test]
@@ -797,6 +820,10 @@ mod test {
 
         let exe = init();
         let node = Node::new(exe).unwrap();
+        // `getbalances` was introduced after older daemons; skip if unavailable at runtime.
+        if server_version(&node.client) < 190_000 {
+            return;
+        }
         let alice = node.create_wallet("alice").unwrap();
         let alice_address = alice.new_address().unwrap();
         let bob = node.create_wallet("bob").unwrap();
@@ -884,13 +911,11 @@ mod test {
             auth,
         )
         .unwrap();
-        let info = client.get_blockchain_info().unwrap();
-        assert_eq!(0, info.blocks);
+        assert_eq!(0_u64, blocks(&client));
 
         let address = client.new_address().unwrap();
         let _ = client.generate_to_address(1, &address).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(1, info.blocks);
+        assert_eq!(1_u64, blocks(&node.client));
     }
 
     #[test]
@@ -928,8 +953,31 @@ mod test {
     }
 
     fn peers_connected(client: &Client) -> usize {
-        let json = client.get_peer_info().expect("get_peer_info");
-        json.0.len()
+        client
+            .call::<serde_json::Value>("getpeerinfo", &[])
+            .expect("getpeerinfo")
+            .as_array()
+            .expect("getpeerinfo array")
+            .len()
+    }
+
+    fn blocks(client: &Client) -> u64 {
+        client
+            .call::<serde_json::Value>("getblockchaininfo", &[])
+            .expect("getblockchaininfo")
+            .get("blocks")
+            .and_then(serde_json::Value::as_u64)
+            .expect("blocks")
+    }
+
+    #[allow(dead_code)]
+    fn server_version(client: &Client) -> u64 {
+        client
+            .call::<serde_json::Value>("getnetworkinfo", &[])
+            .expect("getnetworkinfo")
+            .get("version")
+            .and_then(serde_json::Value::as_u64)
+            .expect("version")
     }
 
     fn init() -> String {

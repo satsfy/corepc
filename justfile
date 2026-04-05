@@ -1,6 +1,7 @@
 set export
 
 REPO_DIR := `git rev-parse --show-toplevel`
+NIGHTLY := `cargo metadata --no-deps --format-version 1 | jq -re '.metadata.rbmt.toolchains.nightly // .workspace_metadata.rbmt.toolchains.nightly'`
 
 # Targets where `--all-features` is used.
 ALL_FEATURE_CRATES := "bitreq client fuzz jsonrpc types verify"
@@ -31,31 +32,31 @@ check:
 
 # Lint everything.
 lint: lint-verify lint-integration-tests
-  for crate in {{ALL_FEATURE_CRATES}}; do cargo +$(cat ./nightly-version) clippy --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-targets --all-features -- --deny warnings; done
+  for crate in {{ALL_FEATURE_CRATES}}; do cargo +$NIGHTLY clippy --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-targets --all-features -- --deny warnings; done
 
-  for crate in {{SPECIFIC_FEATURES_CRATES}}; do cargo +$(cat ./nightly-version) clippy --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-targets --no-default-features --features={{SPECIFIC_FEATURES}} -- --deny warnings; done
+  for crate in {{SPECIFIC_FEATURES_CRATES}}; do cargo +$NIGHTLY clippy --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-targets --no-default-features --features={{SPECIFIC_FEATURES}} -- --deny warnings; done
 
 lint-verify:
   $REPO_DIR/contrib/lint-verify.sh
 
 lint-integration-tests:
-  $REPO_DIR/contrib/lint-integtation-tests.sh
+  $REPO_DIR/contrib/lint-integration-tests.sh
 
 # Run cargo fmt
 fmt:
-  cargo +$(cat ./nightly-version) fmt --all
-  cargo +$(cat ./nightly-version) fmt --manifest-path $REPO_DIR/integration_test/Cargo.toml
-  cargo +$(cat ./nightly-version) fmt --manifest-path $REPO_DIR/verify/Cargo.toml
+  cargo +$NIGHTLY fmt --all
+  cargo +$NIGHTLY fmt --manifest-path $REPO_DIR/integration_test/Cargo.toml
+  cargo +$NIGHTLY fmt --manifest-path $REPO_DIR/verify/Cargo.toml
 
 # Check the formatting
 format:
-  cargo +$(cat ./nightly-version) fmt --all --check
+  cargo +$NIGHTLY fmt --all --check
 
 # Generate documentation.
 docsrs *flags:
-  for crate in {{ALL_FEATURE_CRATES}}; do RUSTDOCFLAGS="--cfg docsrs -D warnings -D rustdoc::broken-intra-doc-links" cargo +$(cat ./nightly-version) doc --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-features {{flags}}; done
+  for crate in {{ALL_FEATURE_CRATES}}; do RUSTDOCFLAGS="--cfg docsrs -D warnings -D rustdoc::broken-intra-doc-links" cargo +$NIGHTLY doc --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-features {{flags}}; done
 
-  for crate in {{SPECIFIC_FEATURES_CRATES}}; do RUSTDOCFLAGS="--cfg docsrs -D warnings -D rustdoc::broken-intra-doc-links" cargo +$(cat ./nightly-version) doc --manifest-path "$REPO_DIR/$crate/Cargo.toml" --no-default-features --features={{SPECIFIC_FEATURES}} {{flags}}; done
+  for crate in {{SPECIFIC_FEATURES_CRATES}}; do RUSTDOCFLAGS="--cfg docsrs -D warnings -D rustdoc::broken-intra-doc-links" cargo +$NIGHTLY doc --manifest-path "$REPO_DIR/$crate/Cargo.toml" --no-default-features --features={{SPECIFIC_FEATURES}} {{flags}}; done
 
 # Update the recent and minimal lock files.
 update-lock-files:

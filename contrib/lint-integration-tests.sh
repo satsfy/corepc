@@ -6,6 +6,7 @@
 set -euox pipefail
 
 REPO_DIR=$(git rev-parse --show-toplevel)
+NIGHTLY=$(cargo metadata --no-deps --manifest-path "$REPO_DIR/Cargo.toml" --format-version 1 | jq -re '.metadata.rbmt.toolchains.nightly // .workspace_metadata.rbmt.toolchains.nightly')
 
 # Run clippy for each feature starting with an integer i.e., all
 # the 'public' features.
@@ -16,7 +17,7 @@ function main() {
     features=$(grep -E '^[0-9]' Cargo.toml | grep '=' | cut -d' ' -f1)
 
     for feature in $features; do
-        cargo +"$(cat ../nightly-version)" clippy --all-targets --features="$feature" -- -D warnings
+        cargo +"$NIGHTLY" clippy --all-targets --features="$feature" -- -D warnings
     done
 
     popd

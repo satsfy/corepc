@@ -78,6 +78,12 @@ mod download {
         if std::env::var_os("BITCOIND_SKIP_DOWNLOAD").is_some() {
             return Ok(());
         }
+        // In feature-matrix no-default builds the crate intentionally has no selected node
+        // version. `download` can still be enabled alone for compilation checks; in that case
+        // there is nothing concrete to fetch.
+        if VERSION == "never-used" {
+            return Ok(());
+        }
         let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
 
         let bitcoin_exe_home = download_dir(&out_dir);
