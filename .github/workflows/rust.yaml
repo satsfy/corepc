@@ -30,8 +30,8 @@ jobs:
         env:
           BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
         run: |
-          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
-          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          cargo +stable --locked build --manifest-path node/Cargo.toml --no-default-features --features download,latest
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -path '*/bitcoin-*/bin/bitcoind' | sort -V | tail -n 1)"
           if [ -z "$BITCOIND_EXE" ]; then
             echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
             exit 1
@@ -61,8 +61,8 @@ jobs:
         env:
           BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
         run: |
-          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
-          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          cargo +stable --locked build --manifest-path node/Cargo.toml --no-default-features --features download,latest
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -path '*/bitcoin-*/bin/bitcoind' | sort -V | tail -n 1)"
           if [ -z "$BITCOIND_EXE" ]; then
             echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
             exit 1
@@ -92,8 +92,8 @@ jobs:
         env:
           BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
         run: |
-          cargo +stable --locked build --manifest-path node/Cargo.toml --features download
-          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -name bitcoind | head -n 1)"
+          cargo +stable --locked build --manifest-path node/Cargo.toml --no-default-features --features download,latest
+          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -path '*/bitcoin-*/bin/bitcoind' | sort -V | tail -n 1)"
           if [ -z "$BITCOIND_EXE" ]; then
             echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
             exit 1
