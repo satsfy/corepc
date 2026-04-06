@@ -514,10 +514,19 @@ impl Node {
         auth: &Auth,
         wallet: &str,
     ) -> anyhow::Result<Client> {
+        // Use serde_json::Value to be resilient to response-format differences across
+        // Bitcoin Core versions (e.g. the "warning" → "warnings" field rename in v26).
+        let wallet_arg = serde_json::Value::String(wallet.to_string());
         for _ in 0..10 {
             // Try to create the wallet, or if that fails it might already exist so try to load it.
-            if client_base.create_wallet(wallet).is_ok() || client_base.load_wallet(wallet).is_ok()
-            {
+            let created = client_base
+                .call::<serde_json::Value>("createwallet", std::slice::from_ref(&wallet_arg))
+                .is_ok();
+            let loaded = !created
+                && client_base
+                    .call::<serde_json::Value>("loadwallet", std::slice::from_ref(&wallet_arg))
+                    .is_ok();
+            if created || loaded {
                 let url = format!("{}/wallet/{}", rpc_url, wallet);
                 return Client::new_with_auth(&url, auth.clone())
                     .map_err(|e| Error::NoBitcoindInstance(e.to_string()).into());
@@ -553,7 +562,11 @@ impl Node {
     /// Create a new wallet in the running node, and return an RPC client connected to the just
     /// created wallet.
     pub fn create_wallet<T: AsRef<str>>(&self, wallet: T) -> anyhow::Result<Client> {
-        let _ = self.client.create_wallet(wallet.as_ref())?;
+        let wallet = wallet.as_ref();
+        let wallet_arg = serde_json::Value::String(wallet.to_string());
+        let _ = self
+            .client
+            .call::<serde_json::Value>("createwallet", std::slice::from_ref(&wallet_arg))?;
         Ok(Client::new_with_auth(
             &self.rpc_url_with_wallet(wallet),
             Auth::CookieFile(self.params.cookie_file.clone()),
@@ -605,6 +618,9 @@ pub fn downloaded_exe_path() -> anyhow::Result<String> { Err(Error::NoFeature.in
 /// Provide the bitcoind executable path if a version feature has been specified.
 #[cfg(feature = "download")]
 pub fn downloaded_exe_path() -> anyhow::Result<String> {
+    if VERSION == "never-used" {
+        return Err(Error::NoFeature.into());
+    }
     if std::env::var_os("BITCOIND_SKIP_DOWNLOAD").is_some() {
         return Err(Error::SkipDownload.into());
     }
@@ -681,21 +697,20 @@ mod test {
     fn test_node_get_blockchain_info() {
         let exe = init();
         let node = Node::new(exe).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(0, info.blocks);
+        let info: serde_json::Value = node.client.call("getblockchaininfo", &[]).unwrap();
+        assert_eq!(0, info["blocks"].as_u64().unwrap());
     }
 
     #[test]
     fn test_node() {
         let exe = init();
         let node = Node::new(exe).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-
-        assert_eq!(0, info.blocks);
+        let info: serde_json::Value = node.client.call("getblockchaininfo", &[]).unwrap();
+        assert_eq!(0, info["blocks"].as_u64().unwrap());
         let address = node.client.new_address().unwrap();
         let _ = node.client.generate_to_address(1, &address).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(1, info.blocks);
+        let info: serde_json::Value = node.client.call("getblockchaininfo", &[]).unwrap();
+        assert_eq!(1, info["blocks"].as_u64().unwrap());
     }
 
     #[test]
@@ -705,14 +720,13 @@ mod test {
         let mut conf = Conf::default();
         conf.args.push("-txindex");
         let node = Node::with_conf(&exe, &conf).unwrap();
-        assert!(
-            node.client.server_version().unwrap() >= 210_000,
-            "getindexinfo requires bitcoin >0.21"
-        );
+        let network_info: serde_json::Value = node.client.call("getnetworkinfo", &[]).unwrap();
+        let version = network_info["version"].as_u64().unwrap();
+        assert!(version >= 210_000, "getindexinfo requires bitcoin >0.21");
         let info: std::collections::HashMap<String, serde_json::Value> =
             node.client.call("getindexinfo", &[]).unwrap();
         assert!(info.contains_key("txindex"));
-        assert!(node.client.server_version().unwrap() >= 210_000);
+        assert!(version >= 210_000);
     }
 
     #[test]
@@ -884,13 +898,13 @@ mod test {
             auth,
         )
         .unwrap();
-        let info = client.get_blockchain_info().unwrap();
-        assert_eq!(0, info.blocks);
+        let info: serde_json::Value = client.call("getblockchaininfo", &[]).unwrap();
+        assert_eq!(0, info["blocks"].as_u64().unwrap());
 
         let address = client.new_address().unwrap();
         let _ = client.generate_to_address(1, &address).unwrap();
-        let info = node.client.get_blockchain_info().unwrap();
-        assert_eq!(1, info.blocks);
+        let info: serde_json::Value = node.client.call("getblockchaininfo", &[]).unwrap();
+        assert_eq!(1, info["blocks"].as_u64().unwrap());
     }
 
     #[test]
