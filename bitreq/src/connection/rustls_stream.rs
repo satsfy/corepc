@@ -13,26 +13,16 @@ use std::sync::OnceLock;
 use native_tls::{HandshakeError, TlsConnector, TlsStream};
 #[cfg(feature = "rustls")]
 use rustls::{self, ClientConfig, ClientConnection, RootCertStore, ServerName, StreamOwned};
-#[cfg(all(
-    feature = "async",
-    feature = "native-tls",
-    not(feature = "rustls"),
-    feature = "tokio-native-tls"
-))]
+#[cfg(all(feature = "native-tls", not(feature = "rustls"), feature = "tokio-native-tls"))]
 use tokio_native_tls::TlsConnector as AsyncTlsConnector;
-#[cfg(all(feature = "async", feature = "tokio-rustls"))]
+#[cfg(feature = "tokio-rustls")]
 use tokio_rustls::{client::TlsStream, TlsConnector};
-#[cfg(feature = "webpki-roots")]
+#[cfg(feature = "rustls-webpki")]
 use webpki_roots::TLS_SERVER_ROOTS;
 
-#[cfg(all(feature = "async", feature = "tokio-rustls"))]
+#[cfg(feature = "tokio-rustls")]
 use super::{AsyncHttpStream, AsyncTcpStream};
-#[cfg(all(
-    feature = "async",
-    feature = "native-tls",
-    not(feature = "rustls"),
-    feature = "tokio-native-tls"
-))]
+#[cfg(all(feature = "native-tls", not(feature = "rustls"), feature = "tokio-native-tls"))]
 use super::{AsyncHttpStream, AsyncTcpStream};
 use crate::Error;
 
@@ -56,7 +46,7 @@ fn build_client_config() -> Arc<ClientConfig> {
         }
     }
 
-    #[cfg(feature = "webpki-roots")]
+    #[cfg(feature = "rustls-webpki")]
     #[allow(deprecated)] // Need to use add_server_trust_anchors to compile with rustls 0.21.1
     root_certificates.add_server_trust_anchors(TLS_SERVER_ROOTS.iter().map(|ta| {
         rustls::OwnedTrustAnchor::from_subject_spki_name_constraints(
@@ -91,10 +81,10 @@ pub(super) fn wrap_stream(tcp: TcpStream, host: &str) -> Result<SecuredStream, E
 
 // Async rustls TLS implementation
 
-#[cfg(all(feature = "async", feature = "rustls", feature = "tokio-rustls"))]
+#[cfg(all(feature = "rustls", feature = "tokio-rustls"))]
 pub type AsyncSecuredStream = TlsStream<tokio::net::TcpStream>;
 
-#[cfg(all(feature = "async", feature = "rustls", feature = "tokio-rustls"))]
+#[cfg(all(feature = "rustls", feature = "tokio-rustls"))]
 pub(super) async fn wrap_async_stream(
     tcp: AsyncTcpStream,
     host: &str,
@@ -153,20 +143,10 @@ pub(super) fn wrap_stream(tcp: TcpStream, host: &str) -> Result<SecuredStream, E
     connector.connect(host, tcp).map_err(native_tls_err)
 }
 
-#[cfg(all(
-    feature = "async",
-    feature = "native-tls",
-    not(feature = "rustls"),
-    feature = "tokio-native-tls"
-))]
+#[cfg(all(feature = "native-tls", not(feature = "rustls"), feature = "tokio-native-tls"))]
 pub type AsyncSecuredStream = tokio_native_tls::TlsStream<tokio::net::TcpStream>;
 
-#[cfg(all(
-    feature = "async",
-    feature = "native-tls",
-    not(feature = "rustls"),
-    feature = "tokio-native-tls"
-))]
+#[cfg(all(feature = "native-tls", not(feature = "rustls"), feature = "tokio-native-tls"))]
 pub(super) async fn wrap_async_stream(
     tcp: AsyncTcpStream,
     host: &str,
