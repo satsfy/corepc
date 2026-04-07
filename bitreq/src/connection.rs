@@ -158,7 +158,7 @@ impl Write for HttpStream {
     }
 }
 
-#[cfg(feature = "tokio-rustls")]
+#[cfg(all(feature = "async", feature = "tokio-rustls"))]
 type AsyncSecuredStream = rustls_stream::AsyncSecuredStream;
 
 #[cfg(feature = "async")]
