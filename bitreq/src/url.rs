@@ -86,9 +86,7 @@ impl Url {
     ///
     /// Validates that the input contains only valid non-control ASCII characters.
     pub fn parse(url_str: &str) -> Result<Self, ParseError> {
-        // Only trim ASCII whitespace around the URL. This preserves rejection of other
-        // control characters (for example, vertical tab `\x0b`).
-        let url_str = url_str.trim_matches(|c: char| c.is_ascii_whitespace());
+        let url_str = url_str.trim();
         if url_str.is_empty() {
             return Err(ParseError::EmptyInput);
         }
@@ -385,7 +383,6 @@ impl Url {
     pub fn as_str(&self) -> &str { &self.serialization }
 
     /// Returns `true` if the URL scheme is "https" or "wss".
-    #[allow(dead_code)]
     pub(crate) fn is_https(&self) -> bool { matches!(self.scheme(), "https" | "wss") }
 
     /// Returns `true` if a non-default port was explicitly specified in the URL.
@@ -404,7 +401,6 @@ impl Url {
     ///
     /// The returned string includes the leading `/` (if present) and the `?`
     /// separator (if there's a query string). Returns "/" if the path is empty.
-    #[allow(dead_code)]
     pub(crate) fn path_and_query(&self) -> String {
         let path = self.path();
         let path = if path.is_empty() { "/" } else { path };
