@@ -10,88 +10,40 @@ name: Continuous integration
 
 jobs:
   Prepare:
-    runs-on: ubuntu-slim
-    outputs:
-      nightly_version: ${{ steps.read_toolchain.outputs.nightly_version }}
-    steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@v4
-      - name: "Read nightly version"
-        id: read_toolchain
-        run: echo "nightly_version=$(cat nightly-version)" >> $GITHUB_OUTPUT
-
-  Stable:                       # 2 jobs, one per lock file.
-    name: Test - stable toolchain
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dep: [minimal, recent]
+    outputs:
+      rbmt_version: ${{ steps.read_rbmt_version.outputs.value }}
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
-        with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          ref: c3324024ced9bb1eb854397686919c3ff7d97e1e
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@stable
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
-        run: ./maintainer-tools/ci/run_task.sh stable
+      - name: "Read rbmt version"
+        id: read_rbmt_version
+        run: echo "value=$(cat rbmt-version)" >> "$GITHUB_OUTPUT"
 
-  Nightly:                      # 2 jobs, one per lock file.
-    name: Test - nightly toolchain
+  Test: # 6 jobs: 3 toolchains × 2 lock files.
+    name: Test - ${{ matrix.toolchain }} toolchain (${{ matrix.dep }})
     needs: Prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         dep: [minimal, recent]
+        toolchain: [stable, nightly, msrv]
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          ref: c3324024ced9bb1eb854397686919c3ff7d97e1e
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ needs.Prepare.outputs.nightly_version }}
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
-        run: ./maintainer-tools/ci/run_task.sh nightly
-
-  MSRV:                         # 2 jobs, one per lock file.
-    name: Test - 1.75.0 toolchain
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dep: [minimal, recent]
-    steps:
-      - name: "Checkout repo"
-        uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
-        with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: "1.75.0"
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
-        run: ./maintainer-tools/ci/run_task.sh msrv
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
+      - name: "Run ${{ matrix.toolchain }} tests"
+        run: |
+          cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain ${{ matrix.toolchain }} \
+            -p bitreq \
+            -p corepc-client \
+            -p jsonrpc-fuzz \
+            -p jsonrpc \
+            -p corepc-types
 
   Lint:
     name: Lint - nightly toolchain
@@ -106,28 +58,24 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          ref: c3324024ced9bb1eb854397686919c3ff7d97e1e
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ needs.Prepare.outputs.nightly_version }}
-      - name: "Install clippy"
-        run: rustup component add clippy
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
+      - name: "Run lints"
         run: |
-          ./maintainer-tools/ci/run_task.sh lint
-          ./contrib/lint-integtation-tests.sh
+          cargo rbmt --lock-file ${{ matrix.dep }} lint \
+            -p bitreq \
+            -p corepc-client \
+            -p jsonrpc-fuzz \
+            -p jsonrpc \
+            -p corepc-types
+          ./contrib/lint-integration-tests.sh
           ./contrib/lint-verify.sh
 
   Docs:
     name: Docs - stable toolchain
+    needs: Prepare
     runs-on: ubuntu-latest
     env:
       BITCOIND_SKIP_DOWNLOAD: "1"
@@ -138,18 +86,12 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          ref: c3324024ced9bb1eb854397686919c3ff7d97e1e
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@stable
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
-        run: ./maintainer-tools/ci/run_task.sh docs
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
+      - name: "Run doc tests"
+        run: cargo rbmt --lock-file ${{ matrix.dep }} docs
 
   Docsrs:
     name: Docs - nightly toolchain
@@ -164,20 +106,12 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Checkout maintainer tools"
-        uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
-          repository: rust-bitcoin/rust-bitcoin-maintainer-tools
-          ref: c3324024ced9bb1eb854397686919c3ff7d97e1e
-          path: maintainer-tools
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@v1
-        with:
-          toolchain: ${{ needs.Prepare.outputs.nightly_version }}
-      - name: "Set dependencies"
-        run: cp Cargo-${{ matrix.dep }}.lock Cargo.lock
-      - name: "Run test script"
-        run: ./maintainer-tools/ci/run_task.sh docsrs
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
+      - name: "Run docsrs tests"
+        run: cargo rbmt --lock-file ${{ matrix.dep }} docsrs
 
   Format:                       #  1 job, run cargo fmt directly.
     name: Format - nightly toolchain
@@ -188,18 +122,14 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@v1
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
-          toolchain: ${{ needs.Prepare.outputs.nightly_version }}
-      - name: "Install rustfmt"
-        run: rustup component add rustfmt
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
       - name: "Check formatting"
         run: |
-          cargo fmt --all -- --check
+          cargo rbmt fmt --check
           ./contrib/fmt-integration-tests.sh
           ./contrib/fmt-verify.sh
-
 
   Verify:                       #  1 job, run `verify` directly.
     name: Verify - stable toolchain
@@ -217,6 +147,7 @@ jobs:
 
   Integration:                  # 1 job for each bitcoind version we support.
     name: Integration tests - stable toolchain
+    needs: Prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -247,8 +178,10 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - name: "Select toolchain"
-        uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+        with:
+          rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
       - name: "Cache downloaded bitcoind"
         uses: actions/cache@v4
         with:
