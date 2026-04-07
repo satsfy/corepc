@@ -71,9 +71,9 @@ jobs:
             *) echo "unknown toolchain '${{ matrix.toolchain }}'"; exit 1 ;;
           esac
 
-          cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml
-          cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml --all-features
+          # Keep node tests on the latest supported Core feature set (30_2).
           cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml --no-default-features --features latest
+          cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml --no-default-features --features download,latest
 
   Lint:
     name: Lint - nightly toolchain
@@ -101,8 +101,8 @@ jobs:
             -p jsonrpc-fuzz \
             -p jsonrpc \
             -p corepc-types
-          cargo +$(cat nightly-version) clippy --manifest-path node/Cargo.toml --all-targets --all-features -- -D warnings
           cargo +$(cat nightly-version) clippy --manifest-path node/Cargo.toml --all-targets --no-default-features --features latest -- -D warnings
+          cargo +$(cat nightly-version) clippy --manifest-path node/Cargo.toml --all-targets --no-default-features --features download,latest -- -D warnings
           ./contrib/lint-integration-tests.sh
           ./contrib/lint-verify.sh
 
