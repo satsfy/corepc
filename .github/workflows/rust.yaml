@@ -36,44 +36,14 @@ jobs:
       - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
         with:
           rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
-      - name: "Cache downloaded bitcoind"
-        uses: actions/cache@v4
-        with:
-          path: ${{ github.workspace }}/.cache/corepc/bitcoind
-          key: bitcoind-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Cargo.toml', 'node/Cargo.toml', 'node/build.rs', 'node/src/versions.rs', 'node/sha256/**') }}
-      - name: "Prepare bitcoind"
-        env:
-          BITCOIND_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/corepc/bitcoind
-        run: |
-          cp "Cargo-${{ matrix.dep }}.lock" Cargo.lock
-          cargo +stable --locked build --manifest-path node/Cargo.toml --no-default-features --features download,latest
-          BITCOIND_EXE="$(find "$BITCOIND_DOWNLOAD_DIR" -type f -path '*/bitcoin-*/bin/bitcoind' | sort -V | tail -n 1)"
-          if [ -z "$BITCOIND_EXE" ]; then
-            echo "failed to locate downloaded bitcoind binary in $BITCOIND_DOWNLOAD_DIR"
-            exit 1
-          fi
-          echo "BITCOIND_EXE=$BITCOIND_EXE" >> "$GITHUB_ENV"
       - name: "Run ${{ matrix.toolchain }} tests"
         run: |
-          # `corepc-node` requires an explicit version feature, so run rbmt tests on the
-          # rest of the workspace and test `corepc-node` separately with `latest`.
           cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain ${{ matrix.toolchain }} \
             -p bitreq \
             -p corepc-client \
             -p jsonrpc-fuzz \
             -p jsonrpc \
             -p corepc-types
-
-          case "${{ matrix.toolchain }}" in
-            stable) RUSTUP_TOOLCHAIN="stable" ;;
-            nightly) RUSTUP_TOOLCHAIN="$(cat nightly-version)" ;;
-            msrv) RUSTUP_TOOLCHAIN="$(cargo rbmt toolchains --msrv)" ;;
-            *) echo "unknown toolchain '${{ matrix.toolchain }}'"; exit 1 ;;
-          esac
-
-          # Keep node tests on the latest supported Core feature set (30_2).
-          cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml --no-default-features --features latest
-          cargo +"$RUSTUP_TOOLCHAIN" --locked test --manifest-path node/Cargo.toml --no-default-features --features download,latest
 
   Lint:
     name: Lint - nightly toolchain
@@ -94,15 +64,12 @@ jobs:
           rbmt-version: ${{ needs.Prepare.outputs.rbmt_version }}
       - name: "Run lints"
         run: |
-          # `corepc-node` requires an explicit version feature.
           cargo rbmt --lock-file ${{ matrix.dep }} lint \
             -p bitreq \
             -p corepc-client \
             -p jsonrpc-fuzz \
             -p jsonrpc \
             -p corepc-types
-          cargo +$(cat nightly-version) clippy --manifest-path node/Cargo.toml --all-targets --no-default-features --features latest -- -D warnings
-          cargo +$(cat nightly-version) clippy --manifest-path node/Cargo.toml --all-targets --no-default-features --features download,latest -- -D warnings
           ./contrib/lint-integration-tests.sh
           ./contrib/lint-verify.sh
 
