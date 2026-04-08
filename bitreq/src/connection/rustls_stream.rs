@@ -25,13 +25,12 @@ use tokio_rustls::{client::TlsStream, TlsConnector};
 #[cfg(feature = "webpki-roots")]
 use webpki_roots::TLS_SERVER_ROOTS;
 
-#[cfg(all(feature = "async", feature = "tokio-rustls"))]
-use super::{AsyncHttpStream, AsyncTcpStream};
 #[cfg(all(
     feature = "async",
-    feature = "native-tls",
-    not(feature = "rustls"),
-    feature = "tokio-native-tls"
+    any(
+        feature = "tokio-rustls",
+        all(feature = "native-tls", not(feature = "rustls"), feature = "tokio-native-tls")
+    )
 ))]
 use super::{AsyncHttpStream, AsyncTcpStream};
 use crate::Error;
