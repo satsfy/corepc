@@ -31,9 +31,12 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 ] }
 bitreq = { version = "0.3.4", path = "../bitreq", default-features = false, optional = true, features = [
   "https",
+  "std",
 ] }
 
 [features]
+latest = ["electrs_0_10_6", "bitcoind/latest"]
+
 legacy = []
 
 # download is not supposed to be used directly only through selecting one of the version feature
@@ -59,3 +62,17 @@ bitcoind_0_20_2 = ["bitcoind/download", "bitcoind/0_20_2"]
 bitcoind_0_19_1 = ["bitcoind/download", "bitcoind/0_19_1"]
 bitcoind_0_18_1 = ["bitcoind/download", "bitcoind/0_18_1"]
 bitcoind_0_17_2 = ["bitcoind/download", "bitcoind/0_17_2"]
+
+[package.metadata.rbmt.lint]
+# `cargo rbmt lint` checks the package's all-features dependency tree.
+allowed_duplicates = [
+    "anyhow",
+    "base64",
+    "bitcoin_hashes",
+    "bitflags",
+    "bitreq",
+    "libc",
+    "linux-raw-sys",
+    "rustix",
+    "windows-sys",
+]
