@@ -39,11 +39,13 @@ default = ["electrs_0_8_10", "download"]
 # download is not supposed to be used directly only through selecting one of the version feature
 download = ["bitcoin_hashes", "zip", "bitreq"]
 
+# On --all-features it selects 0.8.10.
+electrs_0_8_10 = ["electrs_0_9_1"]
+electrs_0_9_1 = ["electrs_0_9_11"]
+electrs_0_9_11 = ["electrs_0_10_6"]
+electrs_0_10_6 = []
+# esplora is a separate fork lineage, not part of the chain.
 esplora_a33e97e1 = ["download"]
-electrs_0_8_10 = ["download"]
-electrs_0_9_1 = ["download"]
-electrs_0_9_11 = ["download"]
-electrs_0_10_6 = ["download"]
 
 bitcoind_30_2 = ["bitcoind/download", "bitcoind/30_2"]
 bitcoind_29_0 = ["bitcoind/download", "bitcoind/29_0"]
