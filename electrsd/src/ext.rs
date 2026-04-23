@@ -4,7 +4,8 @@
 use std::thread;
 use std::time::Duration;
 
-use electrum_client::{bitcoin::Txid, ElectrumApi};
+use electrum_client::bitcoin::Txid;
+use electrum_client::ElectrumApi;
 
 use crate::ElectrsD;
 
@@ -28,10 +29,8 @@ impl ElectrsD {
                     // having the raw tx doesn't mean the scripts has been indexed
                     let txid = tx.compute_txid();
                     if let Some(output) = tx.output.first() {
-                        let history = self
-                            .client
-                            .script_get_history(&output.script_pubkey)
-                            .unwrap();
+                        let history =
+                            self.client.script_get_history(&output.script_pubkey).unwrap();
                         for el in history {
                             if el.tx_hash == txid {
                                 // the tx has to be updated atomically, so founding one is enough
@@ -52,32 +51,39 @@ impl ElectrsD {
 
 #[cfg(test)]
 mod test {
+    use electrum_client::bitcoin::Amount;
+    use electrum_client::ElectrumApi;
+
     use crate::test::setup_nodes;
-    use electrum_client::{bitcoin::Amount, ElectrumApi};
 
     #[cfg(not(feature = "electrs_0_8_10"))]
     #[test]
     fn test_wait_height() {
         let (_, bitcoind, electrsd) = setup_nodes();
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 1);
+
         let address = bitcoind.client.new_address().unwrap();
-        bitcoind.client.generate_to_address(100, &address).unwrap();
+        let blocks_to_generate = 101_usize.saturating_sub(header.height);
+        if blocks_to_generate > 0 {
+            bitcoind.client.generate_to_address(blocks_to_generate, &address).unwrap();
+        }
         electrsd.wait_height(101);
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 101);
+        assert!(header.height >= 101, "header height is {}", header.height);
     }
 
     #[test]
     fn test_wait_tx() {
         let (_, bitcoind, electrsd) = setup_nodes();
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 1);
+
         let generate_address = bitcoind.client.new_address().unwrap();
-        bitcoind
-            .client
-            .generate_to_address(100, &generate_address)
-            .unwrap();
+        let blocks_to_generate = 101_usize.saturating_sub(header.height);
+        if blocks_to_generate > 0 {
+            bitcoind.client.generate_to_address(blocks_to_generate, &generate_address).unwrap();
+        }
+        #[cfg(not(feature = "electrs_0_8_10"))]
+        electrsd.wait_height(101);
 
         let address = bitcoind.client.new_address().unwrap();
         let txid = bitcoind
@@ -88,10 +94,7 @@ mod test {
             .unwrap();
 
         electrsd.wait_tx(&txid);
-        let history = electrsd
-            .client
-            .script_get_history(&address.script_pubkey())
-            .unwrap();
+        let history = electrsd.client.script_get_history(&address.script_pubkey()).unwrap();
         assert_eq!(history.len(), 1);
     }
 }

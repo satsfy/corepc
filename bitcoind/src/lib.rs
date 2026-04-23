@@ -332,7 +332,7 @@ impl BitcoinD {
             match process.try_wait() {
                 Ok(Some(_)) | Err(_) => {
                     // Process has exited or an error occurred, kill and retry
-                    let _ = process.kill();
+                    Self::kill_and_wait(&mut process);
                     continue;
                 }
                 Ok(None) => {
@@ -343,7 +343,7 @@ impl BitcoinD {
             if Self::wait_for_cookie_file(cookie_file.as_path(), Duration::from_secs(5)).is_err() {
                 // If the cookie file is not accessible a new work_dir is needed and therefore a new
                 // process. Kill the process and retry.
-                let _ = process.kill();
+                Self::kill_and_wait(&mut process);
                 continue;
             }
             let auth = Auth::CookieFile(cookie_file.clone());
@@ -359,7 +359,7 @@ impl BitcoinD {
                             } else {
                                 // If the wallet cannot be created or loaded, there might be an issue
                                 // with the work_dir or process. Kill the process and retry.
-                                let _ = process.kill();
+                                Self::kill_and_wait(&mut process);
                                 continue;
                             },
                     },
@@ -368,7 +368,7 @@ impl BitcoinD {
             if Self::wait_for_client(&client, Duration::from_secs(5)).is_err() {
                 // If the client times out there might be an issue with the work_dir or process. Kill
                 // the process and retry.
-                let _ = process.kill();
+                Self::kill_and_wait(&mut process);
                 continue;
             }
 
@@ -408,6 +408,12 @@ impl BitcoinD {
             (None, None) => DataDir::Temporary(TempDir::new()?),
         };
         Ok(work_dir)
+    }
+
+    fn kill_and_wait(process: &mut Child) {
+        let _ = process.kill();
+        // waits here so temporary datadirs are removed
+        let _ = process.wait();
     }
 
     /// Returns the p2p args and the p2p socket address if any.
@@ -576,7 +582,7 @@ impl Drop for BitcoinD {
         if let DataDir::Persistent(_) = self.work_dir {
             let _ = self.stop();
         }
-        let _ = self.process.kill();
+        Self::kill_and_wait(&mut self.process);
     }
 }
 
