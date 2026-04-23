@@ -31,12 +31,9 @@ zip = { version = "0.6", default-features = false, optional = true, features = [
 ] }
 bitreq = { version = "0.3.4", path = "../bitreq", default-features = false, optional = true, features = [
   "https",
-  "std",
 ] }
 
 [features]
-latest = ["electrs_0_10_6", "bitcoind/latest"]
-
 legacy = []
 
 # download is not supposed to be used directly only through selecting one of the version feature
