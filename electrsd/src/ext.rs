@@ -85,6 +85,12 @@ mod test {
             .txid()
             .unwrap();
 
+        // electrs v0.8.10 does not expose mempool txs against newer bitcoind
+        // (`cargo test --all-features` pairs old electrs with newest bitcoind).
+        // Confirm the tx so every supported version indexes it deterministically.
+        bitcoind.client.generate_to_address(1, &generate_address).unwrap();
+        let _ = electrsd.trigger();
+
         electrsd.wait_tx(&txid);
         let history = electrsd.client.script_get_history(&address.script_pubkey()).unwrap();
         assert_eq!(history.len(), 1);

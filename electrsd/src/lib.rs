@@ -180,26 +180,19 @@ impl ElectrsD {
         args.push("--network");
         args.push(conf.network);
 
-        #[cfg(not(feature = "legacy"))]
-        let cookie_file;
-        #[cfg(not(feature = "legacy"))]
-        {
-            args.push("--cookie-file");
-            cookie_file = format!("{}", bitcoind.params.cookie_file.display());
-            args.push(&cookie_file);
-        }
-
-        #[cfg(feature = "legacy")]
-        let mut cookie_value;
-        #[cfg(feature = "legacy")]
-        {
+        // The legacy esplora build uses `--cookie`, while released electrs follows `--cookie-file`.
+        let cookie_arg = if versions::USES_LEGACY_COOKIE_ARG {
             use std::io::Read;
             args.push("--cookie");
             let mut cookie = std::fs::File::open(&bitcoind.params.cookie_file)?;
-            cookie_value = String::new();
+            let mut cookie_value = String::new();
             cookie.read_to_string(&mut cookie_value)?;
-            args.push(&cookie_value);
-        }
+            cookie_value
+        } else {
+            args.push("--cookie-file");
+            bitcoind.params.cookie_file.display().to_string()
+        };
+        args.push(&cookie_arg);
 
         args.push("--daemon-rpc-addr");
         let rpc_socket = bitcoind.params.rpc_socket.to_string();

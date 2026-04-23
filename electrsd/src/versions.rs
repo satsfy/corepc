@@ -8,20 +8,23 @@ const OS: &str = "linux";
 const OS: &str = "undefined";
 
 #[cfg(feature = "electrs_0_8_10")]
+#[allow(dead_code)] // Triggers in --all-features builds.
 const VERSION: &str = "v0.8.10";
 
-#[cfg(feature = "esplora_a33e97e1")]
+#[cfg(all(feature = "esplora_a33e97e1", not(feature = "electrs_0_8_10")))]
 const VERSION: &str = "esplora_a33e97e1a1fc63fa9c20a116bb92579bbf43b254";
 
-#[cfg(feature = "electrs_0_9_1")]
+#[cfg(all(feature = "electrs_0_9_1", not(feature = "electrs_0_8_10")))]
 const VERSION: &str = "v0.9.1";
 
-#[cfg(feature = "electrs_0_9_11")]
+#[cfg(all(feature = "electrs_0_9_11", not(feature = "electrs_0_9_1")))]
 const VERSION: &str = "v0.9.11";
 
-#[cfg(feature = "electrs_0_10_6")]
+#[cfg(all(feature = "electrs_0_10_6", not(feature = "electrs_0_9_11")))]
 const VERSION: &str = "v0.10.6";
 
+/// This is meaningless but we need it otherwise we can't get far enough into
+/// the build process to trigger the `compile_error!` in `./versions.rs`.
 #[cfg(not(any(
     feature = "electrs_0_8_10",
     feature = "electrs_0_9_1",
@@ -38,5 +41,10 @@ pub const HAS_FEATURE: bool = cfg!(any(
     feature = "electrs_0_10_6",
     feature = "esplora_a33e97e1",
 ));
+
+/// `true` when this build uses the legacy esplora-style `--cookie` flag.
+#[allow(unused)] // Not used by build.rs, which also includes this file.
+pub const USES_LEGACY_COOKIE_ARG: bool =
+    cfg!(all(feature = "legacy", not(feature = "electrs_0_8_10")));
 
 pub fn electrs_name() -> String { format!("electrs_{}_{}", OS, VERSION) }
