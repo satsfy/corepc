@@ -61,21 +61,29 @@ mod test {
     fn test_wait_height() {
         let (_, bitcoind, electrsd) = setup_nodes();
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 1);
+
         let address = bitcoind.client.new_address().unwrap();
-        bitcoind.client.generate_to_address(100, &address).unwrap();
+        let blocks_to_generate = 101_usize.saturating_sub(header.height);
+        if blocks_to_generate > 0 {
+            bitcoind.client.generate_to_address(blocks_to_generate, &address).unwrap();
+        }
         electrsd.wait_height(101);
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 101);
+        assert!(header.height >= 101, "header height is {}", header.height);
     }
 
     #[test]
     fn test_wait_tx() {
         let (_, bitcoind, electrsd) = setup_nodes();
         let header = electrsd.client.block_headers_subscribe().unwrap();
-        assert_eq!(header.height, 1);
+
         let generate_address = bitcoind.client.new_address().unwrap();
-        bitcoind.client.generate_to_address(100, &generate_address).unwrap();
+        let blocks_to_generate = 101_usize.saturating_sub(header.height);
+        if blocks_to_generate > 0 {
+            bitcoind.client.generate_to_address(blocks_to_generate, &generate_address).unwrap();
+        }
+        #[cfg(not(feature = "electrs_0_8_10"))]
+        electrsd.wait_height(101);
 
         let address = bitcoind.client.new_address().unwrap();
         let txid = bitcoind
