@@ -83,14 +83,7 @@ pub struct Conf<'a> {
 
 impl Default for Conf<'_> {
     fn default() -> Self {
-        let args = if cfg!(feature = "electrs_0_9_1")
-            || cfg!(feature = "electrs_0_8_10")
-            || cfg!(feature = "esplora_a33e97e1")
-        {
-            vec!["-vvv"]
-        } else {
-            vec![]
-        };
+        let args = if versions::USE_VERBOSE_ARG { vec!["-vvv"] } else { vec![] };
 
         Conf {
             args,
@@ -196,7 +189,7 @@ impl ElectrsD {
         args.push(&rpc_socket);
 
         let p2p_socket;
-        if cfg!(feature = "electrs_0_8_10") || cfg!(feature = "esplora_a33e97e1") {
+        if versions::USE_JSONRPC_IMPORT {
             args.push("--jsonrpc-import");
         } else {
             args.push("--daemon-p2p-addr");
@@ -436,7 +429,7 @@ mod test {
         debug!("electrs: {}", &electrs_exe);
         let mut conf = bitcoind::Conf::default();
         conf.view_stdout = log_enabled!(Level::Debug);
-        if !cfg!(feature = "electrs_0_8_10") && !cfg!(feature = "esplora_a33e97e1") {
+        if !crate::versions::USE_JSONRPC_IMPORT {
             conf.p2p = P2P::Yes;
         }
         let bitcoind = bitcoind::BitcoinD::with_conf(&bitcoind_exe, &conf).unwrap();
