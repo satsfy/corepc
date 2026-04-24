@@ -34,6 +34,7 @@ bitreq = { version = "0.3.4", path = "../bitreq", default-features = false, opti
 ] }
 
 [features]
+default = ["electrs_0_8_10"]
 legacy = []
 
 # download is not supposed to be used directly only through selecting one of the version feature
