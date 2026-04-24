@@ -180,25 +180,19 @@ impl ElectrsD {
         args.push("--network");
         args.push(conf.network);
 
-        #[cfg(not(feature = "legacy"))]
         let cookie_file;
-        #[cfg(not(feature = "legacy"))]
-        {
-            args.push("--cookie-file");
-            cookie_file = format!("{}", bitcoind.params.cookie_file.display());
-            args.push(&cookie_file);
-        }
-
-        #[cfg(feature = "legacy")]
         let mut cookie_value;
-        #[cfg(feature = "legacy")]
-        {
+        if versions::USE_LEGACY_COOKIE {
             use std::io::Read;
             args.push("--cookie");
             let mut cookie = std::fs::File::open(&bitcoind.params.cookie_file)?;
             cookie_value = String::new();
             cookie.read_to_string(&mut cookie_value)?;
             args.push(&cookie_value);
+        } else {
+            args.push("--cookie-file");
+            cookie_file = format!("{}", bitcoind.params.cookie_file.display());
+            args.push(&cookie_file);
         }
 
         args.push("--daemon-rpc-addr");
