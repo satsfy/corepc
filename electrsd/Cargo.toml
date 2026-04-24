@@ -35,7 +35,7 @@ bitreq = { version = "0.3.4", path = "../bitreq", default-features = false, opti
 ] }
 
 [features]
-default = ["electrs_0_8_10"]
+default = ["electrs_0_8_10", "download"]
 legacy = []
 
 # download is not supposed to be used directly only through selecting one of the version feature
@@ -47,7 +47,7 @@ latest = ["electrs_0_8_10"]
 electrs_0_8_10 = ["electrs_0_9_1"]
 electrs_0_9_1 = ["electrs_0_9_11"]
 electrs_0_9_11 = ["electrs_0_10_6"]
-electrs_0_10_6 = ["download"]
+electrs_0_10_6 = []
 # esplora is a separate fork lineage, not part of the chain.
 esplora_a33e97e1 = ["download", "legacy"]
 
