@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BITCOIND_SKIP_DOWNLOAD: "1"
+      ELECTRSD_SKIP_DOWNLOAD: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -50,6 +51,7 @@ jobs:
           cargo rbmt --lock-file ${{ matrix.dep }} lint \
             -p bitreq \
             -p corepc-client \
+            -p electrsd \
             -p jsonrpc-fuzz \
             -p jsonrpc \
             -p corepc-types
@@ -61,6 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BITCOIND_SKIP_DOWNLOAD: "1"
+      ELECTRSD_SKIP_DOWNLOAD: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -78,6 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BITCOIND_SKIP_DOWNLOAD: "1"
+      ELECTRSD_SKIP_DOWNLOAD: "1"
     strategy:
       fail-fast: false
       matrix:
