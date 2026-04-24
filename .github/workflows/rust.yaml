@@ -51,7 +51,6 @@ jobs:
           cargo rbmt --lock-file ${{ matrix.dep }} lint \
             -p bitreq \
             -p corepc-client \
-            -p electrsd \
             -p jsonrpc-fuzz \
             -p jsonrpc \
             -p corepc-types
