@@ -41,6 +41,8 @@ legacy = []
 # download is not supposed to be used directly only through selecting one of the version feature
 download = ["bitcoin_hashes", "zip", "bitreq"]
 
+latest = ["electrs_0_8_10"]
+
 # On --all-features it selects 0.8.10.
 electrs_0_8_10 = ["electrs_0_9_1"]
 electrs_0_9_1 = ["electrs_0_9_11"]
@@ -65,8 +67,8 @@ bitcoind_0_18_1 = ["bitcoind/download", "bitcoind/0_18_1"]
 bitcoind_0_17_2 = ["bitcoind/download", "bitcoind/0_17_2"]
 
 [package.metadata.rbmt.lint]
-# The electrsd crate requires a version feature to compile
-features = ["electrs_0_8_10"]
+# The electrsd crate requires a version feature to compile; use `latest` for per-package lint.
+features = ["latest"]
 # Duplicates from build-dep/dep splits, --target=all, or upstream version conflicts.
 allowed_duplicates = [
     "anyhow",           # build-dep and regular dep, same version
