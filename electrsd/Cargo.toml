@@ -45,7 +45,7 @@ download = ["bitcoin_hashes", "zip", "bitreq"]
 electrs_0_8_10 = ["electrs_0_9_1"]
 electrs_0_9_1 = ["electrs_0_9_11"]
 electrs_0_9_11 = ["electrs_0_10_6"]
-electrs_0_10_6 = ["download"]
+electrs_0_10_6 = []
 # esplora is a separate fork lineage, not part of the chain.
 esplora_a33e97e1 = ["download", "legacy"]
 
