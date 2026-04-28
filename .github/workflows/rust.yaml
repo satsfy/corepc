@@ -184,14 +184,14 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@stable
-      - run: cd electrsd && cargo test --features ${{ matrix.features }}
-
+      - run: cd electrsd && cargo test --no-default-features --features ${{ matrix.features }}
 
   test-electrs-esplora:
     name: Test Electrs Esplora
     runs-on: ubuntu-24.04
     env:
       CARGO_TERM_COLOR: always
+      RUST_LOG: debug
     strategy:
       matrix:
         features: ["bitcoind_22_1,bitcoind_download,legacy,esplora_a33e97e1"]
@@ -200,7 +200,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@stable
-      - run: cd electrsd && cargo test --features ${{ matrix.features }}
+      - run: cd electrsd && cargo test --no-default-features --features ${{ matrix.features }}
 
   test-electrs-no-download:
     name: Test Electrs no auto-download features
@@ -209,6 +209,7 @@ jobs:
       CARGO_TERM_COLOR: always
       ELECTRS_EXEC: "/home/runner/.cargo-install/electrs/bin/electrs"
       ELECTRSD_SKIP_DOWNLOAD: "1"
+      RUST_LOG: debug
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install LLVM and Clang
@@ -238,4 +239,4 @@ jobs:
       - name: Checkout Crate
         uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - run: cd electrsd && cargo test --features 'bitcoind_25_2,electrs_0_10_6,bitcoind_download'
+      - run: cd electrsd && cargo test --no-default-features --features 'bitcoind_25_2,electrs_0_10_6,bitcoind_download'
