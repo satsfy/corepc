@@ -241,4 +241,4 @@ jobs:
       - name: Checkout Crate
         uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
-      - run: cd electrsd && cargo test --no-default-features --features 'bitcoind_25_2,electrs_0_10_6'
+      - run: cd electrsd && cargo test --no-default-features --features 'bitcoind_25_2,electrs_0_10_6,bitcoind_download'
