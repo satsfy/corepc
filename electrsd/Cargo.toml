@@ -63,7 +63,7 @@ bitcoind_0_17_2 = ["bitcoind/0_17_2"]
 
 [package.metadata.rbmt.lint]
 # The electrsd crate requires a version feature to compile
-features = ["electrs_0_8_10"]
+features = ["electrs_0_10_6"]
 # Duplicates from build-dep/dep splits, --target=all, or upstream version conflicts.
 allowed_duplicates = [
     "anyhow",           # build-dep and regular dep, same version

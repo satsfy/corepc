@@ -48,6 +48,28 @@ const VERSION: &str = "NA";
 pub const USE_LEGACY_COOKIE: bool =
     cfg!(all(feature = "esplora_a33e97e1", not(feature = "electrs_0_10_6")));
 
+// Feature flags cascade (e.g. enabling `electrs_0_9_1` also enables `electrs_0_8_10`),
+// so the "current" version is the highest enabled one. These constants identify the
+// current selection by checking that no higher version is enabled.
+
+#[allow(unused)] // this is not used in `build.rs`
+pub const IS_ELECTRS_0_8_10: bool =
+    cfg!(all(feature = "electrs_0_8_10", not(feature = "electrs_0_9_1")));
+
+#[allow(unused)] // this is not used in `build.rs`
+const IS_ELECTRS_0_9_1: bool =
+    cfg!(all(feature = "electrs_0_9_1", not(feature = "electrs_0_9_11")));
+
+#[allow(unused)] // this is not used in `build.rs`
+const IS_ESPLORA: bool =
+    cfg!(all(feature = "esplora_a33e97e1", not(feature = "electrs_0_10_6")));
+
+#[allow(unused)] // this is not used in `build.rs`
+pub const USE_JSONRPC_IMPORT: bool = IS_ELECTRS_0_8_10 || IS_ESPLORA;
+
+#[allow(unused)] // this is not used in `build.rs`
+pub const USE_VERBOSE_ARG: bool = IS_ELECTRS_0_8_10 || IS_ELECTRS_0_9_1 || IS_ESPLORA;
+
 pub const HAS_FEATURE: bool = cfg!(any(
     feature = "electrs_0_8_10",
     feature = "electrs_0_9_1",
