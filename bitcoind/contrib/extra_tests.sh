@@ -2,11 +2,11 @@
 #
 # Run Bitcoin Core version specific tests.
 #
-# The `node` crate features are different from a normal crate because:
+# The `bitcoind` crate features are different from a normal crate because:
 #
-# - `node` cannot be built with --no-default-features
-# - `node` expects at least one version feature e.g., --features=28_0
-# - `node` supports downloading the Bitcoin Core binary and also running `bitcoind` from the host.
+# - `bitcoind` cannot be built with --no-default-features
+# - `bitcoind` expects at least one version feature e.g., --features=28_0
+# - `bitcoind` supports downloading the Bitcoin Core binary and also running `bitcoind` from the host.
 #
 # In CI we always want to download the Bitcoin Core binary. This means we always enable `download`.
 # Also, we always enable exactly one feature (even though multiple features will just cause the
