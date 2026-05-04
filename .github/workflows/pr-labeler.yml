@@ -32,7 +32,8 @@ jobs:
               'integration_test/': 'C-integration-test',
               'jsonrpc/': 'C-jsonrpc',
               'types/': 'C-types',
-              'verify/': 'C-verify'
+              'verify/': 'C-verify',
+              'electrsd/': 'C-electrsd',
             };
 
             const labelsToAdd = new Set();
