@@ -35,6 +35,7 @@ bitreq = { version = "0.3.5", path = "../bitreq", default-features = false, opti
 ] }
 
 [features]
+# download is not supposed to be used directly only through selecting one of the version feature
 download = ["bitcoin_hashes", "zip", "bitreq"]
 bitcoind_download = ["bitcoind/download", "download"]
 default = ["electrs_0_10_6", "download"]
