@@ -193,7 +193,7 @@ impl ElectrsD {
         args.push(&rpc_socket);
 
         let p2p_socket;
-        if cfg!(any(electrs_0_8_10_only, esplora_a33e97e1_only)) {
+        if cfg!(any(electrs_0_8_10_only, esplora_a33e97e1_only, esplora_a33e97e1)) {
             args.push("--jsonrpc-import");
         } else {
             args.push("--daemon-p2p-addr");
