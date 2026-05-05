@@ -172,26 +172,17 @@ impl ElectrsD {
         args.push("--network");
         args.push(conf.network);
 
-        #[cfg(not(feature = "legacy"))]
-        let cookie_file;
-        #[cfg(not(feature = "legacy"))]
-        {
-            args.push("--cookie-file");
-            cookie_file = format!("{}", bitcoind.params.cookie_file.display());
-            args.push(&cookie_file);
-        }
-
-        #[cfg(feature = "legacy")]
-        let mut cookie_value;
-        #[cfg(feature = "legacy")]
-        {
+        let cookie_value = if cfg!(esplora_a33e97e1_only) {
             use std::io::Read;
             args.push("--cookie");
-            let mut cookie = std::fs::File::open(&bitcoind.params.cookie_file)?;
-            cookie_value = String::new();
-            cookie.read_to_string(&mut cookie_value)?;
-            args.push(&cookie_value);
-        }
+            let mut cookie = String::new();
+            std::fs::File::open(&bitcoind.params.cookie_file)?.read_to_string(&mut cookie)?;
+            cookie
+        } else {
+            args.push("--cookie-file");
+            bitcoind.params.cookie_file.display().to_string()
+        };
+        args.push(&cookie_value);
 
         args.push("--daemon-rpc-addr");
         let rpc_socket = bitcoind.params.rpc_socket.to_string();
