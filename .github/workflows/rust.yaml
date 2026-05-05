@@ -197,7 +197,7 @@ jobs:
       RUST_LOG: debug
     strategy:
       matrix:
-        features: ["bitcoind_22_1,bitcoind_download,legacy,esplora_a33e97e1"]
+        features: ["bitcoind_22_1,bitcoind_download,esplora_a33e97e1"]
 
     steps:
       - uses: actions/checkout@v3

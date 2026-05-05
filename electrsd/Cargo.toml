@@ -35,7 +35,6 @@ bitreq = { version = "0.3.5", path = "../bitreq", default-features = false, opti
 ] }
 
 [features]
-legacy = []
 download = ["bitcoin_hashes", "zip", "bitreq"]
 bitcoind_download = ["bitcoind/download", "download"]
 default = ["electrs_0_10_6"]
