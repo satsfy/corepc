@@ -87,6 +87,13 @@ mod test {
             .txid()
             .unwrap();
 
+        // electrs 0.8.10 has no mempool, so the tx is only indexed after a block confirms it.
+        #[cfg(feature = "electrs_0_8_10")]
+        {
+            bitcoind.client.generate_to_address(1, &generate_address).unwrap();
+            electrsd.trigger().unwrap();
+        }
+
         electrsd.wait_tx(&txid);
         let history = electrsd
             .client
