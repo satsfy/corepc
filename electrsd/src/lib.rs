@@ -83,10 +83,11 @@ pub struct Conf<'a> {
 
 impl Default for Conf<'_> {
     fn default() -> Self {
-        let args = if cfg!(feature = "electrs_0_9_1")
-            || cfg!(feature = "electrs_0_8_10")
-            || cfg!(feature = "esplora_a33e97e1")
-            || cfg!(feature = "legacy")
+        let args = if !cfg!(feature = "test_all_features")
+            && (cfg!(feature = "electrs_0_9_1")
+                || cfg!(feature = "electrs_0_8_10")
+                || cfg!(feature = "esplora_a33e97e1")
+                || cfg!(feature = "legacy"))
         {
             vec!["-vvv"]
         } else {
@@ -180,22 +181,24 @@ impl ElectrsD {
         args.push("--network");
         args.push(conf.network);
 
-        #[cfg(not(feature = "legacy"))]
+        println!("calling 1");
+
+        #[cfg(not(all(feature = "legacy", not(feature = "test_all_features"))))]
         let cookie_file;
-        #[cfg(not(feature = "legacy"))]
+        #[cfg(not(all(feature = "legacy", not(feature = "test_all_features"))))]
         {
             args.push("--cookie-file");
             cookie_file = format!("{}", bitcoind.params.cookie_file.display());
             args.push(&cookie_file);
         }
 
-        #[cfg(feature = "legacy")]
+        #[cfg(all(feature = "legacy", not(feature = "test_all_features")))]
         let mut cookie_value;
-        #[cfg(feature = "legacy")]
+        #[cfg(all(feature = "legacy", not(feature = "test_all_features")))]
         {
             use std::io::Read;
             args.push("--cookie");
-            let mut cookie = std::fs::File::open(&bitcoind.params.cookie_file)?;
+            let mut cookie: std::fs::File = std::fs::File::open(&bitcoind.params.cookie_file)?;
             cookie_value = String::new();
             cookie.read_to_string(&mut cookie_value)?;
             args.push(&cookie_value);
@@ -205,10 +208,23 @@ impl ElectrsD {
         let rpc_socket = bitcoind.params.rpc_socket.to_string();
         args.push(&rpc_socket);
 
+        debug!(
+            "[lib] 0_8_10={} 0_9_1={} 0_9_11={} 0_10_6={} esplora={} legacy={} test_all={}",
+            cfg!(feature = "electrs_0_8_10"),
+            cfg!(feature = "electrs_0_9_1"),
+            cfg!(feature = "electrs_0_9_11"),
+            cfg!(feature = "electrs_0_10_6"),
+            cfg!(feature = "esplora_a33e97e1"),
+            cfg!(feature = "legacy"),
+            cfg!(feature = "test_all_features"),
+        );
+        debug!("calling 2");
+
         let p2p_socket;
-        if cfg!(feature = "electrs_0_8_10")
-            || cfg!(feature = "esplora_a33e97e1")
-            || cfg!(feature = "legacy")
+        if !cfg!(feature = "test_all_features")
+            && (cfg!(feature = "electrs_0_8_10")
+                || cfg!(feature = "esplora_a33e97e1")
+                || cfg!(feature = "legacy"))
         {
             args.push("--jsonrpc-import");
         } else {
@@ -216,19 +232,22 @@ impl ElectrsD {
             p2p_socket = bitcoind
                 .params
                 .p2p_socket
-                .expect("electrs_0_9_1 requires bitcoind with p2p port open")
+                .expect("electrs needs bitcoind with p2p port open")
                 .to_string();
             args.push(&p2p_socket);
         }
+        debug!("calling 3");
 
         let electrum_url = format!("0.0.0.0:{}", get_available_port()?);
         args.push("--electrum-rpc-addr");
         args.push(&electrum_url);
+        debug!("calling 4");
 
         // would be better to disable it, didn't found a flag
         let monitoring = format!("0.0.0.0:{}", get_available_port()?);
         args.push("--monitoring-addr");
         args.push(&monitoring);
+        debug!("calling 5");
 
         let esplora_url_string;
         let esplora_url = if conf.http_enabled {
@@ -240,6 +259,7 @@ impl ElectrsD {
         } else {
             None
         };
+        debug!("calling 6");
 
         let view_stderr = if conf.view_stderr { Stdio::inherit() } else { Stdio::null() };
 
@@ -249,20 +269,25 @@ impl ElectrsD {
             .stderr(view_stderr)
             .spawn()
             .with_context(|| format!("Error while executing {:?}", exe.as_ref()))?;
+        debug!("calling 7");
 
         let client = loop {
+            debug!("calling loop i");
             if let Some(status) = process.try_wait()? {
                 if conf.attempts > 0 {
+                    debug!("calling loo b");
                     warn!("early exit with: {:?}. Trying to launch again ({} attempts remaining), maybe some other process used our available port", status, conf.attempts);
                     let mut conf = conf.clone();
                     conf.attempts -= 1;
                     return Self::with_conf(exe, bitcoind, &conf)
                         .with_context(|| format!("Remaining attempts {}", conf.attempts));
                 } else {
+                    debug!("calling loop a");
                     error!("early exit with: {:?}", status);
                     return Err(Error::EarlyExit(status).into());
                 }
             }
+            debug!("calling no if");
             match RawClient::new(&electrum_url, None) {
                 Ok(client) => break client,
                 Err(_) => std::thread::sleep(Duration::from_millis(500)),
@@ -449,7 +474,9 @@ mod test {
         debug!("electrs: {}", &electrs_exe);
         let mut conf = bitcoind::Conf::default();
         conf.view_stdout = log_enabled!(Level::Debug);
-        if !cfg!(feature = "electrs_0_8_10") && !cfg!(feature = "esplora_a33e97e1") {
+        if cfg!(feature = "test_all_features")
+            || (!cfg!(feature = "electrs_0_8_10") && !cfg!(feature = "esplora_a33e97e1"))
+        {
             conf.p2p = P2P::Yes;
         }
         let bitcoind = bitcoind::BitcoinD::with_conf(&bitcoind_exe, &conf).unwrap();

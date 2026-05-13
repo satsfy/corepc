@@ -14,16 +14,16 @@ const OS: &str = "undefined";
 #[cfg(feature = "electrs_0_10_6")]
 const VERSION: &str = "v0.10.6";
 
-#[cfg(all(feature = "electrs_0_9_11", not(feature = "electrs_0_10_6")))]
+#[cfg(all(feature = "electrs_0_9_11", not(feature = "test_all_features")))]
 const VERSION: &str = "v0.9.11";
 
-#[cfg(all(feature = "electrs_0_9_1", not(feature = "electrs_0_9_11"), not(feature = "electrs_0_10_6")))]
+#[cfg(all(feature = "electrs_0_9_1", not(feature = "test_all_features")))]
 const VERSION: &str = "v0.9.1";
 
-#[cfg(all(feature = "electrs_0_8_10", not(feature = "electrs_0_9_1"), not(feature = "electrs_0_9_11"), not(feature = "electrs_0_10_6")))]
+#[cfg(all(feature = "electrs_0_8_10", not(feature = "test_all_features")))]
 const VERSION: &str = "v0.8.10";
 
-#[cfg(all(feature = "esplora_a33e97e1", not(feature = "electrs_0_8_10"), not(feature = "electrs_0_9_1"), not(feature = "electrs_0_9_11"), not(feature = "electrs_0_10_6")))]
+#[cfg(all(feature = "esplora_a33e97e1", not(feature = "test_all_features")))]
 const VERSION: &str = "esplora_a33e97e1a1fc63fa9c20a116bb92579bbf43b254";
 
 #[cfg(not(any(

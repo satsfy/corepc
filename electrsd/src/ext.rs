@@ -85,11 +85,22 @@ mod test {
             .txid()
             .unwrap();
 
+        println!(
+            "[ext] 0_8_10={} 0_9_1={} 0_9_11={} 0_10_6={} esplora={} legacy={} test_all={}",
+            cfg!(feature = "electrs_0_8_10"),
+            cfg!(feature = "electrs_0_9_1"),
+            cfg!(feature = "electrs_0_9_11"),
+            cfg!(feature = "electrs_0_10_6"),
+            cfg!(feature = "esplora_a33e97e1"),
+            cfg!(feature = "legacy"),
+            cfg!(feature = "test_all_features"),
+        );
+
         // electrs 0.8.10 has no mempool, so the tx is only indexed after a block confirms it.
-        #[cfg(feature = "electrs_0_8_10")]
-        {
+        if cfg!(all(feature = "electrs_0_8_10", not(feature = "test_all_features"))) {
             bitcoind.client.generate_to_address(1, &generate_address).unwrap();
             electrsd.trigger().unwrap();
+            // assert!(false);
         }
 
         electrsd.wait_tx(&txid);
