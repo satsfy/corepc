@@ -14,6 +14,11 @@ ALL_FEATURE_CRATES=(bitreq client fuzz jsonrpc types verify)
 SPECIFIC_FEATURES_CRATES=(integration_test bitcoind)
 SPECIFIC_FEATURES=(latest)
 
+# electrsd has mutually-exclusive version features (same shape as bitcoind) and
+# cannot be checked with --all-features. Pick the highest electrs version plus
+# a bitcoind version so the manifest resolves end-to-end.
+ELECTRSD_FEATURES="electrs_0_10_6,bitcoind_30_2,bitcoind_download"
+
 update_lock_files() {
     for crate in "${ALL_FEATURE_CRATES[@]}"; do
         cargo check --manifest-path "$REPO_DIR/$crate/Cargo.toml" --all-features
@@ -22,6 +27,8 @@ update_lock_files() {
     for crate in "${SPECIFIC_FEATURES_CRATES[@]}"; do
         cargo check --manifest-path "$REPO_DIR/$crate/Cargo.toml" --no-default-features --features="${SPECIFIC_FEATURES[*]}"
     done
+
+    cargo check --manifest-path "$REPO_DIR/electrsd/Cargo.toml" --no-default-features --features="$ELECTRSD_FEATURES"
 }
 
 for file in Cargo-minimal.lock Cargo-recent.lock; do
