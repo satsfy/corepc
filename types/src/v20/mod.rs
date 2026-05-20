@@ -226,6 +226,7 @@
 //! </details>
 
 // JSON-RPC types by API section.
+mod blockchain;
 mod control;
 mod generating;
 mod network;
@@ -234,6 +235,7 @@ mod wallet;
 
 #[doc(inline)]
 pub use self::{
+    blockchain::GetBlockStats,
     control::Logging,
     generating::GenerateToDescriptor,
     network::{Banned, ListBanned},
@@ -257,7 +259,7 @@ pub use crate::{
         FinalizePsbt, FinalizePsbtError, FundRawTransaction, FundRawTransactionError, Generate,
         GenerateToAddress, GetAddedNodeInfo, GetAddressInfoEmbeddedError, GetAddressesByLabel,
         GetBalance, GetBestBlockHash, GetBlockCount, GetBlockHash, GetBlockHeader,
-        GetBlockHeaderError, GetBlockHeaderVerbose, GetBlockHeaderVerboseError, GetBlockStats,
+        GetBlockHeaderError, GetBlockHeaderVerbose, GetBlockHeaderVerboseError,
         GetBlockStatsError, GetBlockTemplate, GetBlockTemplateError, GetBlockVerboseOne,
         GetBlockVerboseOneError, GetBlockVerboseZero, GetChainTips, GetChainTxStatsError,
         GetConnectionCount, GetDifficulty, GetMemoryInfoStats, GetMempoolInfoError, GetMiningInfo,

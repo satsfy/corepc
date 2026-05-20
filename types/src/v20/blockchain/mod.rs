@@ -1,16 +1,14 @@
 // SPDX-License-Identifier: CC0-1.0
 
-//! The JSON-RPC API for Bitcoin Core `v25` - blockchain.
+//! The JSON-RPC API for Bitcoin Core `v0.20` - blockchain.
 //!
 //! Types for methods found under the `== Blockchain ==` section of the API docs.
 
-mod error;
 mod into;
 
 use serde::{Deserialize, Serialize};
 
-pub use self::error::ScanBlocksStartError;
-pub use super::{GetBlockStatsError, ScanTxOutSetError};
+pub use crate::v17::GetBlockStatsError;
 
 /// Result of JSON-RPC method `getblockstats`.
 ///
@@ -68,7 +66,7 @@ pub struct GetBlockStats {
     /// The block median time past.
     #[serde(rename = "mediantime")]
     pub median_time: Option<i64>,
-    /// Truncated median transaction size
+    /// Truncated median transaction size.
     #[serde(rename = "mediantxsize")]
     pub median_tx_size: Option<i64>,
     /// Minimum fee in the block.
@@ -88,7 +86,7 @@ pub struct GetBlockStats {
     /// Total size of all segwit transactions.
     #[serde(rename = "swtotal_size")]
     pub segwit_total_size: Option<i64>,
-    /// Total weight of all segwit transactions.
+    /// Total weight of all segwit transactions divided by segwit scale factor (4).
     #[serde(rename = "swtotal_weight")]
     pub segwit_total_weight: Option<u64>,
     /// The number of segwit transactions.
@@ -100,7 +98,7 @@ pub struct GetBlockStats {
     pub total_out: Option<u64>,
     /// Total size of all non-coinbase transactions.
     pub total_size: Option<i64>,
-    /// Total weight of all non-coinbase transactions.
+    /// Total weight of all non-coinbase transactions divided by segwit scale factor (4).
     pub total_weight: Option<u64>,
     /// The fee total.
     #[serde(rename = "totalfee")]
@@ -112,94 +110,4 @@ pub struct GetBlockStats {
     /// The increase/decrease in size for the utxo index (not discounting op_return and similar).
     #[serde(rename = "utxo_size_inc")]
     pub utxo_size_increase: Option<i32>,
-    /// The increase/decrease in the number of unspent outputs, not counting unspendables.
-    pub utxo_increase_actual: Option<i32>,
-    /// The increase/decrease in size for the utxo index, not counting unspendables.
-    #[serde(rename = "utxo_size_inc_actual")]
-    pub utxo_size_increase_actual: Option<i32>,
-}
-
-/// Result of JSON-RPC method `scanblocks` with action "abort".
-///
-/// > scanblocks "abort"
-/// >
-/// > Aborts the current scan and returns whether an abort was successful.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub struct ScanBlocksAbort(pub bool);
-
-/// Result of JSON-RPC method `scanblocks` with action "start".
-///
-/// > scanblocks "start" [scanobjects,...] ( start_height stop_height "filtertype" "options" )
-/// >
-/// > Arguments:
-/// > 1. scanobjects                            (json array, required) Array of scan objects
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub struct ScanBlocksStart {
-    /// The height we started the scan from
-    pub from_height: i64,
-    /// The height we ended the scan at
-    pub to_height: i64,
-    /// Blocks that may have matched a scanobject
-    pub relevant_blocks: Vec<String>,
-}
-
-/// Result of JSON-RPC method `scanblocks` with action "status".
-///
-/// > scanblocks "status"
-/// >
-/// > Returns progress report (in %) of the current scan.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub struct ScanBlocksStatus {
-    /// Approximate percent complete
-    pub progress: f64,
-    /// Height of the block currently being scanned
-    pub current_height: i64,
-}
-
-/// Result of JSON-RPC method `scantxoutset`.
-///
-/// > scantxoutset "action" ( [scanobjects,...] )
-/// >
-/// > Arguments:
-/// > 1. action                        (string, required) The action to execute
-/// > 2. scanobjects                   (json array, required) Array of scan objects
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct ScanTxOutSetStart {
-    /// Whether the scan was completed.
-    pub success: bool,
-    /// The number of unspent transaction outputs scanned.
-    #[serde(rename = "txouts")]
-    pub tx_outs: u64,
-    /// The block height at which the scan was done.
-    pub height: u64,
-    /// The hash of the block at the tip of the chain.
-    #[serde(rename = "bestblock")]
-    pub best_block: String,
-    /// The unspents.
-    pub unspents: Vec<ScanTxOutSetUnspent>,
-    /// The total amount of all found unspent outputs in BTC.
-    pub total_amount: f64,
-}
-
-/// Unspent outputs. Part of `scantxoutset`.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct ScanTxOutSetUnspent {
-    /// The transaction id.
-    pub txid: String,
-    /// The vout value.
-    pub vout: u32,
-    /// The output script.
-    #[serde(rename = "scriptPubKey")]
-    pub script_pubkey: String,
-    /// A specialized descriptor for the matched output script.
-    #[serde(rename = "desc")]
-    pub descriptor: String,
-    /// The total amount in BTC of the unspent output.
-    pub amount: f64,
-    /// Whether this is a coinbase output.
-    pub coinbase: bool,
-    /// Height of the unspent transaction output.
-    pub height: u64,
 }
