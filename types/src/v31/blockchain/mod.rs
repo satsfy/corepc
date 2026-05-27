@@ -6,6 +6,8 @@
 
 mod into;
 
+pub use self::into::GetMempoolClusterError;
+
 use serde::{Deserialize, Serialize};
 
 /// Result of JSON-RPC method `getmempoolcluster`.
@@ -26,12 +28,12 @@ pub struct GetMempoolCluster {
     pub chunks: Vec<Chunk>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct Chunk {
-    /// Fees of the transactions in this chunk.
+    /// Fees of the transactions in this chunk, in BTC.
     #[serde(rename = "chunkfee")]
-    // FIXME: This is probably a float. https://github.com/rust-bitcoin/corepc/pull/598#discussion_r3283795812
-    pub chunk_fee: u64,
+    pub chunk_fee: f64,
     /// Sigops-adjusted weight of all transactions in this chunk.
     #[serde(rename = "chunkweight")]
     pub chunk_weight: u64,

@@ -194,7 +194,7 @@
 //! | getreceivedbyaddress               | version + model |                                        |
 //! | getreceivedbylabel                 | version + model |                                        |
 //! | gettransaction                     | version + model |                                        |
-//! | getwalletinfo                      | version + model | Untested in v30, unchanged from v29    |
+//! | getwalletinfo                      | version + model |                                        |
 //! | importdescriptors                  | version         |                                        |
 //! | importprunedfunds                  | returns nothing |                                        |
 //! | keypoolrefill                      | returns nothing |                                        |
@@ -249,7 +249,7 @@ mod raw_transactions;
 
 #[doc(inline)]
 pub use self::{
-    blockchain::{Chunk, GetMempoolCluster},
+    blockchain::{Chunk, GetMempoolCluster, GetMempoolClusterError},
     raw_transactions::{
         AbortPrivateBroadcast, GetPrivateBroadcastInfo, PrivateBroadcastPeer,
         PrivateBroadcastTransaction, RemovedTransaction,
