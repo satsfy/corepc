@@ -3,7 +3,10 @@
 use alloc::collections::BTreeMap;
 
 use bitcoin::consensus::encode;
-use bitcoin::{Amount, BlockHash, OutPoint, Transaction, Txid, Wtxid};
+use bitcoin::{
+    block, Amount, BlockHash, CompactTarget, OutPoint, Target, Transaction, TxMerkleNode, Txid,
+    Weight, Work, Wtxid,
+};
 
 use super::{
     CoinbaseTransaction, GetBlockVerboseOne, GetBlockVerboseThree, GetBlockVerboseTwo,
@@ -222,14 +225,21 @@ impl GetDeploymentInfo {
     pub fn into_model(
         self,
     ) -> Result<model::GetDeploymentInfo, crate::v23::GetDeploymentInfoError> {
-        let inner = crate::v23::GetDeploymentInfo {
-            hash: self.hash,
+        use crate::v23::GetDeploymentInfoError as E;
+
+        let hash = self.hash.parse::<BlockHash>().map_err(E::BlockHash)?;
+        let deployments = self
+            .deployments
+            .into_iter()
+            .map(|(name, dep)| dep.into_model().map(|d| (name, d)).map_err(E::Deployment))
+            .collect::<Result<_, _>>()?;
+
+        Ok(model::GetDeploymentInfo {
+            hash,
             height: self.height,
-            deployments: self.deployments,
-        };
-        let mut model = inner.into_model()?;
-        model.script_flags = Some(self.script_flags);
-        Ok(model)
+            script_flags: Some(self.script_flags),
+            deployments,
+        })
     }
 }
 
@@ -259,5 +269,172 @@ impl GetTxSpendingPrevoutItem {
             self.block_hash.map(|h| h.parse::<BlockHash>().map_err(E::BlockHash)).transpose()?;
 
         Ok(model::GetTxSpendingPrevoutItem { outpoint, spending_txid, spending_tx, block_hash })
+    }
+}
+
+impl CoinbaseTransaction {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(self) -> model::CoinbaseTransaction {
+        model::CoinbaseTransaction {
+            version: self.version,
+            locktime: self.locktime,
+            sequence: self.sequence,
+            coinbase: self.coinbase,
+            witness: self.witness,
+        }
+    }
+}
+
+impl GetBlockVerboseOne {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetBlockVerboseOne, crate::v29::GetBlockVerboseOneError> {
+        use crate::v29::GetBlockVerboseOneError as E;
+
+        let hash = self.hash.parse::<BlockHash>().map_err(E::Hash)?;
+        let stripped_size =
+            self.stripped_size.map(|size| crate::to_u32(size, "stripped_size")).transpose()?;
+        let weight = Weight::from_wu(self.weight);
+        let version = block::Version::from_consensus(self.version);
+        let merkle_root = self.merkle_root.parse::<TxMerkleNode>().map_err(E::MerkleRoot)?;
+        let tx = self
+            .tx
+            .iter()
+            .map(|t| t.parse::<Txid>().map_err(E::Hash))
+            .collect::<Result<Vec<_>, _>>()?;
+        let median_time = self.median_time.map(|t| crate::to_u32(t, "median_time")).transpose()?;
+        let bits = CompactTarget::from_unprefixed_hex(&self.bits).map_err(E::Bits)?;
+        let target = Some(Target::from_unprefixed_hex(self.target.as_ref()).map_err(E::Target)?);
+        let chain_work = Work::from_unprefixed_hex(&self.chain_work).map_err(E::ChainWork)?;
+        let previous_block_hash = self
+            .previous_block_hash
+            .map(|s| s.parse::<BlockHash>())
+            .transpose()
+            .map_err(E::PreviousBlockHash)?;
+        let next_block_hash = self
+            .next_block_hash
+            .map(|s| s.parse::<BlockHash>())
+            .transpose()
+            .map_err(E::NextBlockHash)?;
+
+        Ok(model::GetBlockVerboseOne {
+            hash,
+            confirmations: self.confirmations,
+            size: crate::to_u32(self.size, "size")?,
+            stripped_size,
+            weight,
+            coinbase_tx: Some(self.coinbase_tx.into_model()),
+            height: crate::to_u32(self.height, "height")?,
+            version,
+            merkle_root,
+            tx,
+            time: crate::to_u32(self.time, "time")?,
+            median_time,
+            nonce: crate::to_u32(self.nonce, "nonce")?,
+            bits,
+            target,
+            difficulty: self.difficulty,
+            chain_work,
+            n_tx: crate::to_u32(self.n_tx, "n_tx")?,
+            previous_block_hash,
+            next_block_hash,
+        })
+    }
+}
+
+impl GetBlockVerboseTwo {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetBlockVerboseTwo, crate::v29::GetBlockVerboseTwoError> {
+        use crate::v29::GetBlockVerboseTwoError as E;
+
+        let hash = self.hash.parse::<BlockHash>().map_err(E::Hash)?;
+        let stripped_size =
+            self.stripped_size.map(|size| crate::to_u32(size, "stripped_size")).transpose()?;
+        let weight = Weight::from_wu(self.weight);
+        let version = block::Version::from_consensus(self.version);
+        let merkle_root = self.merkle_root.parse::<TxMerkleNode>().map_err(E::MerkleRoot)?;
+        let tx = self
+            .tx
+            .into_iter()
+            .map(|entry| {
+                let transaction = entry.transaction.into_model().map_err(E::Transaction)?;
+                let fee = entry.fee.map(Amount::from_btc).transpose().map_err(E::Fee)?;
+                Ok(model::GetBlockVerboseTwoTransaction { transaction, fee })
+            })
+            .collect::<Result<Vec<_>, E>>()?;
+        let median_time = self.median_time.map(|t| crate::to_u32(t, "median_time")).transpose()?;
+        let bits = CompactTarget::from_unprefixed_hex(&self.bits).map_err(E::Bits)?;
+        let target = Some(Target::from_unprefixed_hex(self.target.as_ref()).map_err(E::Target)?);
+        let chain_work = Work::from_unprefixed_hex(&self.chain_work).map_err(E::ChainWork)?;
+        let previous_block_hash = self
+            .previous_block_hash
+            .map(|s| s.parse::<BlockHash>())
+            .transpose()
+            .map_err(E::PreviousBlockHash)?;
+        let next_block_hash = self
+            .next_block_hash
+            .map(|s| s.parse::<BlockHash>())
+            .transpose()
+            .map_err(E::NextBlockHash)?;
+
+        Ok(model::GetBlockVerboseTwo {
+            hash,
+            confirmations: self.confirmations,
+            size: crate::to_u32(self.size, "size")?,
+            stripped_size,
+            weight,
+            coinbase_tx: Some(self.coinbase_tx.into_model()),
+            height: crate::to_u32(self.height, "height")?,
+            version,
+            merkle_root,
+            tx,
+            time: crate::to_u32(self.time, "time")?,
+            median_time,
+            nonce: crate::to_u32(self.nonce, "nonce")?,
+            bits,
+            target,
+            difficulty: self.difficulty,
+            chain_work,
+            n_tx: crate::to_u32(self.n_tx, "n_tx")?,
+            previous_block_hash,
+            next_block_hash,
+        })
+    }
+}
+
+impl GetBlockVerboseThree {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetBlockVerboseThree, crate::v29::GetBlockVerboseThreeError> {
+        let coinbase_tx = Some(self.coinbase_tx.into_model());
+        let inner = crate::v29::GetBlockVerboseThree {
+            hash: self.hash,
+            confirmations: self.confirmations,
+            size: self.size,
+            stripped_size: self.stripped_size,
+            weight: self.weight,
+            height: self.height,
+            version: self.version,
+            version_hex: self.version_hex,
+            merkle_root: self.merkle_root,
+            tx: self.tx,
+            time: self.time,
+            median_time: self.median_time,
+            nonce: self.nonce,
+            bits: self.bits,
+            target: self.target,
+            difficulty: self.difficulty,
+            chain_work: self.chain_work,
+            n_tx: self.n_tx,
+            previous_block_hash: self.previous_block_hash,
+            next_block_hash: self.next_block_hash,
+        };
+        let mut model = inner.into_model()?;
+        model.coinbase_tx = coinbase_tx;
+        Ok(model)
     }
 }
