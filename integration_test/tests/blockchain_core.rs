@@ -177,7 +177,6 @@ fn get_chain_tips_active_tip_matches_best() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_mempool_entry_height_and_no_parents() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -287,7 +286,6 @@ fn get_block_verbose_three_non_coinbase_has_prevouts() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_mempool_entry_spent_by_contains_child() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -313,7 +311,6 @@ fn get_raw_mempool_sequence_includes_tx() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_mempool_ancestors_verbose_keyed_by_parent_txid() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -412,7 +409,6 @@ fn get_block_stats_v25_actual_utxo_fields() {
     assert!(json.utxo_size_increase_actual.is_some());
 }
 
-#[cfg(feature = "v30_and_below")]
 fn create_child_spending_parent(node: &BitcoinD, parent: bitcoin::Txid) -> bitcoin::Txid {
     use bitcoind::{Input, Output};
     let inputs = vec![Input { txid: parent, vout: 0, sequence: None }];
