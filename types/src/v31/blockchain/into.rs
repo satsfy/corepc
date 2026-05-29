@@ -404,3 +404,69 @@ impl GetDeploymentInfo {
         Ok(model)
     }
 }
+
+impl GetTxSpendingPrevout {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(self) -> Result<model::GetTxSpendingPrevout, GetTxSpendingPrevoutError> {
+        let items =
+            self.0.into_iter().map(|item| item.into_model()).collect::<Result<Vec<_>, _>>()?;
+        Ok(model::GetTxSpendingPrevout(items))
+    }
+}
+
+impl GetTxSpendingPrevoutItem {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(self) -> Result<model::GetTxSpendingPrevoutItem, GetTxSpendingPrevoutError> {
+        use GetTxSpendingPrevoutError as E;
+
+        let txid = self.txid.parse::<Txid>().map_err(E::Txid)?;
+        let outpoint = OutPoint { txid, vout: self.vout };
+        let spending_txid =
+            self.spending_txid.map(|id| id.parse::<Txid>().map_err(E::SpendingTxid)).transpose()?;
+        let spending_tx = self
+            .spending_tx
+            .map(|hex| encode::deserialize_hex::<Transaction>(&hex).map_err(E::SpendingTx))
+            .transpose()?;
+        let block_hash =
+            self.block_hash.map(|h| h.parse::<BlockHash>().map_err(E::BlockHash)).transpose()?;
+
+        Ok(model::GetTxSpendingPrevoutItem { outpoint, spending_txid, spending_tx, block_hash })
+    }
+}
+
+/// Error when converting a `GetTxSpendingPrevout` type into the model type.
+#[derive(Debug)]
+pub enum GetTxSpendingPrevoutError {
+    /// Conversion of the `txid` field failed.
+    Txid(hex::HexToArrayError),
+    /// Conversion of the `spendingtxid` field failed.
+    SpendingTxid(hex::HexToArrayError),
+    /// Conversion of the `spendingtx` field failed.
+    SpendingTx(encode::FromHexError),
+    /// Conversion of the `blockhash` field failed.
+    BlockHash(hex::HexToArrayError),
+}
+
+impl fmt::Display for GetTxSpendingPrevoutError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Txid(e) => write!(f, "conversion of the `txid` field failed: {}", e),
+            Self::SpendingTxid(e) =>
+                write!(f, "conversion of the `spendingtxid` field failed: {}", e),
+            Self::SpendingTx(e) => write!(f, "conversion of the `spendingtx` field failed: {}", e),
+            Self::BlockHash(e) => write!(f, "conversion of the `blockhash` field failed: {}", e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for GetTxSpendingPrevoutError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Self::Txid(e) => Some(e),
+            Self::SpendingTxid(e) => Some(e),
+            Self::SpendingTx(e) => Some(e),
+            Self::BlockHash(e) => Some(e),
+        }
+    }
+}

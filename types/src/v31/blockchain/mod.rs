@@ -230,3 +230,28 @@ pub struct GetDeploymentInfo {
     /// Script verify flags for the block.
     pub script_flags: Vec<String>,
 }
+
+/// Result of JSON-RPC method `gettxspendingprevout`.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetTxSpendingPrevout(pub Vec<GetTxSpendingPrevoutItem>);
+
+/// A transaction item. Part of `gettxspendingprevout`.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetTxSpendingPrevoutItem {
+    /// The transaction id of the checked output.
+    pub txid: String,
+    /// The vout value of the checked output.
+    pub vout: u32,
+    /// The transaction id of the mempool transaction spending this output (omitted if unspent).
+    #[serde(rename = "spendingtxid", skip_serializing_if = "Option::is_none")]
+    pub spending_txid: Option<String>,
+    /// The transaction spending this output (only if `return_spending_tx` is set, omitted if
+    /// unspent).
+    #[serde(rename = "spendingtx", skip_serializing_if = "Option::is_none")]
+    pub spending_tx: Option<String>,
+    /// The hash of the spending block (omitted if unspent or the spending tx is not confirmed).
+    #[serde(rename = "blockhash", skip_serializing_if = "Option::is_none")]
+    pub block_hash: Option<String>,
+}
