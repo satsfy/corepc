@@ -432,6 +432,7 @@ impl MempoolEntry {
             .map_err(E::SpentBy)?;
 
         Ok(model::MempoolEntry {
+            chunk_weight: None,
             vsize: None,
             size,
             weight,
@@ -457,6 +458,7 @@ impl MempoolEntryFees {
         use MempoolEntryFeesError as E;
 
         Ok(model::MempoolEntryFees {
+            chunk: None,
             base: Amount::from_btc(self.base).map_err(E::Base)?,
             modified: Amount::from_btc(self.modified).map_err(E::Modified)?,
             ancestor: Amount::from_btc(self.ancestor).map_err(E::Ancestor)?,
@@ -476,6 +478,9 @@ impl GetMempoolInfo {
         let min_relay_tx_fee = crate::btc_per_kb(self.min_relay_tx_fee)?;
 
         Ok(model::GetMempoolInfo {
+            limit_cluster_count: None,
+            limit_cluster_size: None,
+            optimal: None,
             loaded: None,
             size,
             bytes,

@@ -135,6 +135,7 @@ impl MempoolEntry {
             .map_err(E::SpentBy)?;
 
         Ok(model::MempoolEntry {
+            chunk_weight: None,
             vsize,
             size,
             weight,
@@ -166,6 +167,9 @@ impl GetMempoolInfo {
         let unbroadcast_count = Some(crate::to_u32(self.unbroadcast_count, "unbroadcast_count")?);
 
         Ok(model::GetMempoolInfo {
+            limit_cluster_count: None,
+            limit_cluster_size: None,
+            optimal: None,
             loaded: Some(self.loaded),
             size,
             bytes,
