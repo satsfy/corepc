@@ -249,7 +249,21 @@ mod raw_transactions;
 
 #[doc(inline)]
 pub use self::{
+<<<<<<< Updated upstream
     blockchain::{Chunk, GetMempoolCluster},
+=======
+    blockchain::{
+        Chunk, CoinbaseTransaction, FeerateDiagramEntry, GetBlockVerboseOne, GetBlockVerboseThree,
+        GetBlockVerboseTwo, GetDeploymentInfo, GetMempoolAncestorsVerbose, GetMempoolCluster,
+        GetMempoolClusterError, GetMempoolDescendantsVerbose, GetMempoolEntry,
+        GetMempoolFeerateDiagram, GetMempoolFeerateDiagramError, GetMempoolInfo,
+        GetRawMempoolVerbose, GetTxSpendingPrevout, GetTxSpendingPrevoutError,
+        GetTxSpendingPrevoutItem, MapMempoolEntryError, MempoolEntry, MempoolEntryError,
+        MempoolEntryFees, MempoolEntryFeesError,
+    },
+    control::Logging,
+    network::{ConnectionType, GetPeerInfo, PeerInfo, TransportProtocolType},
+>>>>>>> Stashed changes
     raw_transactions::{
         AbortPrivateBroadcast, GetPrivateBroadcastInfo, PrivateBroadcastPeer,
         PrivateBroadcastTransaction, RemovedTransaction,
