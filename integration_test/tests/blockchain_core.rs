@@ -4,7 +4,6 @@
 //! rpc_txoutproof.py, rpc_scantxoutset.py, rpc_gettxspendingprevout.py,
 //! rpc_dumptxoutset.py and rpc_getblockstats.py
 
-#[cfg(feature = "v30_and_below")]
 use bitcoind::mtype;
 use bitcoind::vtype::*;
 use integration_test::{BitcoinD, BitcoinDExt as _, Wallet};
@@ -22,7 +21,6 @@ fn get_blockchain_info_pruned_node_has_prune_fields() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_chain_tx_stats_default_window_has_optional_fields() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     let addr = node.client.new_address().unwrap();
@@ -39,7 +37,6 @@ fn get_chain_tx_stats_default_window_has_optional_fields() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_chain_tx_stats_pinned_to_block1_has_no_window_fields() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     let addr = node.client.new_address().unwrap();
