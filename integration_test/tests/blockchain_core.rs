@@ -148,7 +148,6 @@ fn get_block_hash_at_tip_matches_best() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_block_verbose_one_tx_count_matches_n_tx() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -253,7 +252,6 @@ fn get_tx_spending_prevout_for_unspent_output() {
 
 #[test]
 #[cfg(not(feature = "v28_and_below"))]
-#[cfg(feature = "v30_and_below")]
 fn get_block_verbose_two_non_coinbase_has_fee() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -269,7 +267,6 @@ fn get_block_verbose_two_non_coinbase_has_fee() {
 
 #[test]
 #[cfg(not(feature = "v28_and_below"))]
-#[cfg(feature = "v30_and_below")]
 fn get_block_verbose_three_non_coinbase_has_prevouts() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -323,7 +320,6 @@ fn get_mempool_ancestors_verbose_keyed_by_parent_txid() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_block_verbose_one_stripped_size_le_size() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
@@ -337,7 +333,6 @@ fn get_block_verbose_one_stripped_size_le_size() {
 }
 
 #[test]
-#[cfg(feature = "v30_and_below")]
 fn get_block_verbose_one_next_block_hash_some_for_non_tip() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();
