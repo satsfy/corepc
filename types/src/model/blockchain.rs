@@ -42,6 +42,23 @@ pub struct GetBestBlockHash(pub BlockHash);
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct GetBlockVerboseZero(pub Block);
 
+/// The coinbase transaction of a block. Part of `getblock` at verbosity 1, 2 and 3.
+///
+/// Introduced in Bitcoin Core v31.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct CoinbaseTransaction {
+    /// The coinbase transaction version.
+    pub version: i32,
+    /// The coinbase transaction's locktime.
+    pub locktime: u32,
+    /// The coinbase input's sequence number (nSequence).
+    pub sequence: u32,
+    /// The coinbase input's script.
+    pub coinbase: String,
+    /// The coinbase input's first (and only) witness stack element, if present.
+    pub witness: Option<String>,
+}
+
 /// Models the result of JSON-RPC method `getblock` with verbosity set to 1.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct GetBlockVerboseOne {
@@ -63,6 +80,8 @@ pub struct GetBlockVerboseOne {
     pub merkle_root: TxMerkleNode,
     /// The transaction ids.
     pub tx: Vec<Txid>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.
@@ -106,6 +125,8 @@ pub struct GetBlockVerboseTwo {
     pub merkle_root: TxMerkleNode,
     /// The transactions.
     pub tx: Vec<GetBlockVerboseTwoTransaction>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.
@@ -158,6 +179,8 @@ pub struct GetBlockVerboseThree {
     pub merkle_root: TxMerkleNode,
     /// The transactions.
     pub tx: Vec<GetBlockVerboseThreeTransaction>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.

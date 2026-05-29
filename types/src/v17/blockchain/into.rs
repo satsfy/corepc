@@ -72,6 +72,7 @@ impl GetBlockVerboseOne {
             version,
             merkle_root,
             tx,
+            coinbase_tx: None,
             time: crate::to_u32(self.time, "time")?,
             median_time,
             nonce: crate::to_u32(self.nonce, "nonce")?,
