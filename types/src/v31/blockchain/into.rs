@@ -216,3 +216,19 @@ impl GetMempoolFeerateDiagram {
         Ok(model::GetMempoolFeerateDiagram(entries))
     }
 }
+
+impl GetDeploymentInfo {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetDeploymentInfo, crate::v23::GetDeploymentInfoError> {
+        let inner = crate::v23::GetDeploymentInfo {
+            hash: self.hash,
+            height: self.height,
+            deployments: self.deployments,
+        };
+        let mut model = inner.into_model()?;
+        model.script_flags = Some(self.script_flags);
+        Ok(model)
+    }
+}

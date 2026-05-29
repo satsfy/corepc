@@ -220,7 +220,6 @@ fn scan_tx_out_set_best_block_matches_tip() {
 
 #[test]
 #[cfg(not(feature = "v22_and_below"))]
-#[cfg(feature = "v30_and_below")]
 fn get_deployment_info_genesis_vs_tip() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     node.fund_wallet();

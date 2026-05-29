@@ -218,3 +218,17 @@ pub struct FeerateDiagramEntry {
     /// Cumulative fee.
     pub fee: f64,
 }
+
+/// Result of JSON-RPC method `getdeploymentinfo`.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetDeploymentInfo {
+    /// Requested block hash (or tip).
+    pub hash: String,
+    /// Requested block height (or tip).
+    pub height: u32,
+    /// Script verify flags for the block.
+    pub script_flags: Vec<String>,
+    /// Deployments info, keyed by deployment name.
+    pub deployments: BTreeMap<String, crate::v23::DeploymentInfo>,
+}
