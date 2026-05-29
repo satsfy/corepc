@@ -28,7 +28,7 @@
 //! |:-----------------------------------|:---------------:|:--------------------------------------:|
 //! | dumptxoutset                       | version + model |                                        |
 //! | getbestblockhash                   | version + model |                                        |
-//! | getblock                           | version + model | TODO: Fields have changed since v30    |
+//! | getblock                           | version + model | Includes 'coinbase_tx' object          |
 //! | getblockchaininfo                  | version + model |                                        |
 //! | getblockcount                      | version + model |                                        |
 //! | getblockfilter                     | version + model |                                        |
@@ -39,19 +39,19 @@
 //! | getchainstates                     | version + model |                                        |
 //! | getchaintips                       | version + model |                                        |
 //! | getchaintxstats                    | version + model |                                        |
-//! | getdeploymentinfo                  | version + model | TODO: Fields have changed since v30    |                                        |
+//! | getdeploymentinfo                  | version + model | Includes 'script_flags'                |
 //! | getdescriptoractivity              | version + model |                                        |
 //! | getdifficulty                      | version + model |                                        |
-//! | getmempoolancestors                | version + model | TODO: Fields have changed since v30    |
-//! | getmempoolcluster                  | version + model | TODO: New in v31                       |
-//! | getmempooldescendants              | version + model | TODO: Fields have changed since v30    |
-//! | getmempoolentry                    | version + model | TODO: Fields have changed since v30    |
-//! | getmempoolinfo                     | version + model | TODO: Fields have changed since v30    |
-//! | getrawmempool                      | version + model | TODO: Fields have changed since v30    |
+//! | getmempoolancestors                | version + model |                                        |
+//! | getmempoolcluster                  | version + model | New in v31                             |
+//! | getmempooldescendants              | version + model |                                        |
+//! | getmempoolentry                    | version + model | Includes chunk weight and chunk fee    |
+//! | getmempoolinfo                     | version + model | Includes cluster limits and optimal    |
+//! | getrawmempool                      | version + model |                                        |
 //! | gettxout                           | version + model |                                        |
 //! | gettxoutproof                      | returns string  |                                        |
 //! | gettxoutsetinfo                    | version + model |                                        |
-//! | gettxspendingprevout               | version + model |                                        |
+//! | gettxspendingprevout               | version + model | Includes 'spendingtx' and 'blockhash'  |
 //! | importmempool                      | returns nothing |                                        |
 //! | loadtxoutset                       | version + model | UNTESTED                               |
 //! | preciousblock                      | returns nothing |                                        |
@@ -75,7 +75,7 @@
 //! | getmemoryinfo                      | version         |                                        |
 //! | getrpcinfo                         | version         |                                        |
 //! | help                               | returns string  |                                        |
-//! | logging                            | version         | TODO: Fields have changed since v30    |
+//! | logging                            | version         | Includes 'kernel', 'privatebroadcast'  |
 //! | stop                               | returns string  |                                        |
 //! | uptime                             | returns numeric |                                        |
 //!
@@ -110,7 +110,7 @@
 //! | getnettotals                       | version         |                                        |
 //! | getnetworkinfo                     | version + model |                                        |
 //! | getnodeaddresses                   | version         |                                        |
-//! | getpeerinfo                        | version         | TODO: Fields have changed since v30    |
+//! | getpeerinfo                        | version         | Includes inv_to_send, last_inv_sequence|
 //! | listbanned                         | version         |                                        |
 //! | ping                               | returns nothing |                                        |
 //! | setban                             | returns nothing |                                        |
@@ -123,7 +123,7 @@
 //!
 //! | JSON-RPC Method Name               | Returns         | Notes                                  |
 //! |:-----------------------------------|:---------------:|:--------------------------------------:|
-//! | abortprivatebroadcast              | version + model | TODO: New in v31                       |
+//! | abortprivatebroadcast              | version + model | New in v31                             |
 //! | analyzepsbt                        | version + model |                                        |
 //! | combinepsbt                        | version + model |                                        |
 //! | combinerawtransaction              | version + model |                                        |
@@ -136,7 +136,7 @@
 //! | decodescript                       | version + model |                                        |
 //! | finalizepsbt                       | version + model |                                        |
 //! | fundrawtransaction                 | version + model |                                        |
-//! | getprivatebroadcastinfo            | version + model | TODO: New in v31                       |
+//! | getprivatebroadcastinfo            | version + model | New in v31                             |
 //! | getrawtransaction                  | version + model | Includes additional 'verbose' type     |
 //! | joinpsbts                          | version + model |                                        |
 //! | sendrawtransaction                 | version + model |                                        |
@@ -194,7 +194,7 @@
 //! | getreceivedbyaddress               | version + model |                                        |
 //! | getreceivedbylabel                 | version + model |                                        |
 //! | gettransaction                     | version + model |                                        |
-//! | getwalletinfo                      | version + model | Untested in v30, unchanged from v29    |
+//! | getwalletinfo                      | version + model | No longer returns 'paytxfee'           |
 //! | importdescriptors                  | version         |                                        |
 //! | importprunedfunds                  | returns nothing |                                        |
 //! | keypoolrefill                      | returns nothing |                                        |
@@ -245,13 +245,13 @@
 //! </details>
 
 mod blockchain;
+mod control;
+mod network;
 mod raw_transactions;
+mod wallet;
 
 #[doc(inline)]
 pub use self::{
-<<<<<<< Updated upstream
-    blockchain::{Chunk, GetMempoolCluster},
-=======
     blockchain::{
         Chunk, CoinbaseTransaction, FeerateDiagramEntry, GetBlockVerboseOne, GetBlockVerboseThree,
         GetBlockVerboseTwo, GetDeploymentInfo, GetMempoolAncestorsVerbose, GetMempoolCluster,
@@ -263,11 +263,11 @@ pub use self::{
     },
     control::Logging,
     network::{ConnectionType, GetPeerInfo, PeerInfo, TransportProtocolType},
->>>>>>> Stashed changes
     raw_transactions::{
         AbortPrivateBroadcast, GetPrivateBroadcastInfo, PrivateBroadcastPeer,
         PrivateBroadcastTransaction, RemovedTransaction,
     },
+    wallet::GetWalletInfo,
 };
 #[doc(inline)]
 pub use crate::{
@@ -292,7 +292,7 @@ pub use crate::{
         PartialSignatureError, PruneBlockchain, RawFeeDetail, RawFeeRange, RawTransactionError,
         RawTransactionInput, RawTransactionOutput, RescanBlockchain, ScanTxOutSetAbort,
         ScanTxOutSetError, ScanTxOutSetStatus, ScriptType, SendRawTransaction, SendToAddress,
-        SetNetworkActive, SetTxFee, SignFail, SignFailError, SignMessage, SignMessageWithPrivKey,
+        SetNetworkActive, SignFail, SignFailError, SignMessage, SignMessageWithPrivKey,
         SignRawTransaction, SignRawTransactionError, SignRawTransactionWithKey,
         SignRawTransactionWithWallet, TransactionCategory, UploadTarget, ValidateAddress,
         ValidateAddressError, VerifyChain, VerifyMessage, VerifyTxOutProof, WaitForBlock,
@@ -310,7 +310,6 @@ pub use crate::{
     v19::{
         Bip9SoftforkInfo, Bip9SoftforkStatistics, Bip9SoftforkStatus, GetBalancesMine,
         GetBalancesWatchOnly, GetBlockFilter, GetBlockFilterError, GetChainTxStats, GetRpcInfo,
-        MapMempoolEntryError, MempoolEntryError, MempoolEntryFees, MempoolEntryFeesError,
         SetWalletFlag, Softfork, SoftforkType,
     },
     v20::GenerateToDescriptor,
@@ -325,15 +324,11 @@ pub use crate::{
     },
     v23::{
         Bip9Info, Bip9Statistics, CreateMultisig, DecodeScript, DecodeScriptError,
-        DecodeScriptSegwit, DeploymentInfo, GetDeploymentInfo, GetDeploymentInfoError,
-        RestoreWallet, SaveMempool,
+        DecodeScriptSegwit, DeploymentInfo, GetDeploymentInfoError, RestoreWallet, SaveMempool,
     },
     v24::{
-        GetMempoolAncestors, GetMempoolAncestorsVerbose, GetMempoolDescendants,
-        GetMempoolDescendantsVerbose, GetMempoolEntry, GetRawMempoolVerbose, GetTransactionDetail,
-        GetTxSpendingPrevout, GetTxSpendingPrevoutError, GetTxSpendingPrevoutItem, ListUnspent,
-        ListUnspentItem, MempoolEntry, MigrateWallet, SendAll, SendAllError,
-        SimulateRawTransaction,
+        GetMempoolAncestors, GetMempoolDescendants, GetTransactionDetail, ListUnspent,
+        ListUnspentItem, MigrateWallet, SendAll, SendAllError, SimulateRawTransaction,
     },
     v25::{
         DescriptorInfo, GenerateBlock, GenerateBlockError, GetBlockStats, ListDescriptors,
@@ -343,25 +338,23 @@ pub use crate::{
     v26::{
         AddrManInfoNetwork, CreateWallet, DescriptorProcessPsbt, DescriptorProcessPsbtError,
         DumpTxOutSet, DumpTxOutSetError, GetAddrManInfo, GetBalances, GetBalancesError,
-        GetPeerInfo, GetTransactionError, GetTxOutSetInfo, GetTxOutSetInfoBlockInfo,
-        GetTxOutSetInfoError, GetTxOutSetInfoUnspendables, LoadTxOutSet, LoadTxOutSetError,
-        LoadWallet, PeerInfo, ScanBlocksStart, UnloadWallet, WalletProcessPsbt,
-        WalletProcessPsbtError,
+        GetTransactionError, GetTxOutSetInfo, GetTxOutSetInfoBlockInfo, GetTxOutSetInfoError,
+        GetTxOutSetInfoUnspendables, LoadTxOutSet, LoadTxOutSetError, LoadWallet, ScanBlocksStart,
+        UnloadWallet, WalletProcessPsbt, WalletProcessPsbtError,
     },
     v27::{GetPrioritisedTransactions, PrioritisedTransaction},
     v28::{
         CreateWalletDescriptor, GetAddressInfo, GetAddressInfoEmbedded, GetHdKeys, GetHdKeysError,
         GetNetworkInfo, GetRawAddrMan, GetTransaction, HdKey, HdKeyDescriptor, ListSinceBlock,
-        ListSinceBlockError, ListTransactions, Logging, RawAddrManEntry, ScanTxOutSetStart,
+        ListSinceBlockError, ListTransactions, RawAddrManEntry, ScanTxOutSetStart,
         ScanTxOutSetUnspent, SubmitPackage, SubmitPackageError, SubmitPackageTxResult,
         SubmitPackageTxResultError, SubmitPackageTxResultFees, SubmitPackageTxResultFeesError,
         TransactionItem, TransactionItemError,
     },
     v29::{
         ActivityEntry, ChainState, DeriveAddressesMultipath, GetBlockHeader, GetBlockHeaderError,
-        GetBlockHeaderVerbose, GetBlockHeaderVerboseError, GetBlockVerboseOne,
-        GetBlockVerboseOneError, GetBlockVerboseThree, GetBlockVerboseThreeError,
-        GetBlockVerboseThreePrevout, GetBlockVerboseThreeTransaction, GetBlockVerboseTwo,
+        GetBlockHeaderVerbose, GetBlockHeaderVerboseError, GetBlockVerboseOneError,
+        GetBlockVerboseThreeError, GetBlockVerboseThreePrevout, GetBlockVerboseThreeTransaction,
         GetBlockVerboseTwoError, GetBlockVerboseTwoTransaction, GetBlockchainInfo,
         GetBlockchainInfoError, GetChainStates, GetChainStatesError, GetDescriptorActivity,
         GetDescriptorActivityError, GetDescriptorInfo, GetOrphanTxsError,
@@ -371,14 +364,13 @@ pub use crate::{
         SpendActivity, TestMempoolAccept,
     },
     v30::{
-        ControlBlocksError, DecodePsbt, DecodePsbtError, GetMempoolInfo, GetMiningInfo,
-        GetMiningInfoError, GetOrphanTxs, GetOrphanTxsVerboseOne, GetOrphanTxsVerboseOneEntry,
-        GetOrphanTxsVerboseTwo, GetOrphanTxsVerboseTwoEntry, GetWalletInfo, GetWalletInfoError,
-        GetWalletInfoScanning, GlobalXpub, GlobalXpubError, LastProcessedBlock,
-        LastProcessedBlockError, ListWalletDir, ListWalletDirWallet, Musig2PartialSig,
-        Musig2ParticipantPubKeys, Musig2Pubnonce, Proprietary, PsbtInput, PsbtInputError,
-        PsbtOutput, PsbtOutputError, TaprootBip32Deriv, TaprootBip32DerivsError, TaprootLeaf,
-        TaprootLeafError, TaprootScript, TaprootScriptError, TaprootScriptPathSig,
-        TaprootScriptPathSigError,
+        ControlBlocksError, DecodePsbt, DecodePsbtError, GetMiningInfo, GetMiningInfoError,
+        GetOrphanTxs, GetOrphanTxsVerboseOne, GetOrphanTxsVerboseOneEntry, GetOrphanTxsVerboseTwo,
+        GetOrphanTxsVerboseTwoEntry, GetWalletInfoError, GetWalletInfoScanning, GlobalXpub,
+        GlobalXpubError, LastProcessedBlock, LastProcessedBlockError, ListWalletDir,
+        ListWalletDirWallet, Musig2PartialSig, Musig2ParticipantPubKeys, Musig2Pubnonce,
+        Proprietary, PsbtInput, PsbtInputError, PsbtOutput, PsbtOutputError, TaprootBip32Deriv,
+        TaprootBip32DerivsError, TaprootLeaf, TaprootLeafError, TaprootScript, TaprootScriptError,
+        TaprootScriptPathSig, TaprootScriptPathSigError,
     },
 };
