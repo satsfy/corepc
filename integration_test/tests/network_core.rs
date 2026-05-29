@@ -70,7 +70,6 @@ fn get_network_info_local_services_names_non_empty() {
 
 #[test]
 #[cfg(not(feature = "v20_and_below"))]
-#[cfg(feature = "v30_and_below")]
 fn get_network_info_connections_sum_matches_total() {
     let (node1, _node2, _node3) = integration_test::three_node_network();
 
