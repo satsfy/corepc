@@ -94,6 +94,7 @@ impl MempoolEntry {
             .map_err(E::SpentBy)?;
 
         Ok(model::MempoolEntry {
+            chunk_weight: None,
             vsize: None,
             size,
             weight,

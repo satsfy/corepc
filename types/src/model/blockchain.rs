@@ -11,7 +11,7 @@ use bitcoin::address::NetworkUnchecked;
 use bitcoin::hashes::sha256;
 use bitcoin::{
     block, Address, Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, ScriptBuf,
-    Target, TxMerkleNode, TxOut, Txid, Weight, Work, Wtxid,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, Work, Wtxid,
 };
 use serde::{Deserialize, Serialize};
 
@@ -42,6 +42,23 @@ pub struct GetBestBlockHash(pub BlockHash);
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct GetBlockVerboseZero(pub Block);
 
+/// The coinbase transaction of a block. Part of `getblock` at verbosity 1, 2 and 3.
+///
+/// Introduced in Bitcoin Core v31.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct CoinbaseTransaction {
+    /// The coinbase transaction version.
+    pub version: i32,
+    /// The coinbase transaction's locktime.
+    pub locktime: u32,
+    /// The coinbase input's sequence number (nSequence).
+    pub sequence: u32,
+    /// The coinbase input's script.
+    pub coinbase: String,
+    /// The coinbase input's first (and only) witness stack element, if present.
+    pub witness: Option<String>,
+}
+
 /// Models the result of JSON-RPC method `getblock` with verbosity set to 1.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct GetBlockVerboseOne {
@@ -63,6 +80,8 @@ pub struct GetBlockVerboseOne {
     pub merkle_root: TxMerkleNode,
     /// The transaction ids.
     pub tx: Vec<Txid>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.
@@ -106,6 +125,8 @@ pub struct GetBlockVerboseTwo {
     pub merkle_root: TxMerkleNode,
     /// The transactions.
     pub tx: Vec<GetBlockVerboseTwoTransaction>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.
@@ -158,6 +179,8 @@ pub struct GetBlockVerboseThree {
     pub merkle_root: TxMerkleNode,
     /// The transactions.
     pub tx: Vec<GetBlockVerboseThreeTransaction>,
+    /// Coinbase transaction metadata (v31 and later only).
+    pub coinbase_tx: Option<CoinbaseTransaction>,
     /// The block time expressed in UNIX epoch time.
     pub time: u32,
     /// The median block time expressed in UNIX epoch time.
@@ -551,13 +574,15 @@ pub struct GetDeploymentInfo {
     pub height: u32,
     /// Deployments info, keyed by deployment name.
     pub deployments: std::collections::BTreeMap<String, DeploymentInfo>,
+    /// Script verify flags for the block. v31 and later only.
+    pub script_flags: Option<Vec<String>>,
 }
 
 /// Deployment info. Part of `getdeploymentinfo`.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct DeploymentInfo {
     /// One of "buried", "bip9".
-    pub deployment_type: String,
+    pub deployment_type: SoftforkType,
     /// Height of the first block which the rules are or will be enforced (only for "buried" type, or "bip9" type with "active" status).
     pub height: Option<u32>,
     /// True if the rules are enforced for the mempool and the next block.
@@ -578,11 +603,11 @@ pub struct Bip9Info {
     /// Minimum height of blocks for which the rules may be enforced.
     pub min_activation_height: u32,
     /// Status of deployment at specified block (one of "defined", "started", "locked_in", "active", "failed").
-    pub status: String,
+    pub status: Bip9SoftforkStatus,
     /// Height of the first block to which the status applies.
     pub since: u32,
     /// Status of deployment at the next block.
-    pub status_next: String,
+    pub status_next: Bip9SoftforkStatus,
     /// Numeric statistics about signalling for a softfork (only for "started" and "locked_in" status).
     pub statistics: Option<Bip9Statistics>,
     /// Indicates blocks that signalled with a # and blocks that did not with a -.
@@ -719,6 +744,10 @@ pub struct MempoolEntry {
     /// This  was introduced with Bitcoin Core v0.19 and will hence be `None` for previous
     /// versions.
     pub weight: Option<u32>,
+    /// Sigops-adjusted weight of all transactions in this chunk.
+    ///
+    /// This was introduced with Bitcoin Core v31 and will hence be `None` for previous versions.
+    pub chunk_weight: Option<u32>,
     /// Local time transaction entered pool in seconds since 1 Jan 1970 GMT.
     pub time: u32,
     /// Block height when transaction entered pool.
@@ -757,6 +786,10 @@ pub struct MempoolEntryFees {
     pub ancestor: Amount,
     /// Modified fees (see above) of in-mempool descendants (including this one).
     pub descendant: Amount,
+    /// Transaction fees of chunk.
+    ///
+    /// This was introduced with Bitcoin Core v31 and will hence be `None` for previous versions.
+    pub chunk: Option<Amount>,
 }
 
 /// Models the result of JSON-RPC method `getmempoolinfo` with verbose set to true.
@@ -777,7 +810,7 @@ pub struct GetMempoolInfo {
     pub total_fee: Option<f64>,
     /// Maximum memory usage for the mempool.
     pub max_mempool: u32,
-    /// Minimum fee rate in BTC/kB for a transaction to be accepted.
+    /// Minimum fee rate in BTC/kvB for a transaction to be accepted.
     ///
     /// This is the maximum of `minrelaytxfee` and the minimum mempool fee.
     pub mempool_min_fee: Option<FeeRate>,
@@ -794,6 +827,12 @@ pub struct GetMempoolInfo {
     pub permit_bare_multisig: Option<bool>,
     /// Maximum number of bytes that can be used by OP_RETURN outputs in the mempool.
     pub max_data_carrier_size: Option<u64>,
+    /// Maximum number of transactions that can be in a cluster (configured by -limitclustercount). v31 and later only.
+    pub limit_cluster_count: Option<u32>,
+    /// Maximum size of a cluster in virtual bytes (configured by -limitclustersize). v31 and later only.
+    pub limit_cluster_size: Option<u32>,
+    /// True if the mempool is in a known-optimal transaction ordering.
+    pub optimal: Option<bool>,
 }
 
 /// Models the result of JSON-RPC method `getrawmempool` with verbose set to false.
@@ -811,6 +850,19 @@ pub struct GetRawMempoolSequence {
     pub txids: Vec<Txid>,
     /// The mempool sequence value.
     pub mempool_sequence: u64,
+}
+
+/// Models the result of JSON-RPC method `getmempoolfeeratediagram`.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+pub struct GetMempoolFeerateDiagram(pub Vec<FeerateDiagramEntry>);
+
+/// A point on the mempool feerate diagram. Part of `getmempoolfeeratediagram`.
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct FeerateDiagramEntry {
+    /// Cumulative sigops-adjusted weight.
+    pub weight: u64,
+    /// Cumulative fee.
+    pub fee: Amount,
 }
 
 /// Models the result of JSON-RPC method `gettxout`.
@@ -901,6 +953,12 @@ pub struct GetTxSpendingPrevoutItem {
     pub outpoint: OutPoint,
     /// The transaction id of the mempool transaction spending this output (omitted if unspent).
     pub spending_txid: Option<Txid>,
+    /// The transaction spending this output (only if `return_spending_tx` is set, omitted if
+    /// unspent). v31 and later only.
+    pub spending_tx: Option<Transaction>,
+    /// The hash of the spending block (omitted if unspent or the spending tx is not confirmed).
+    /// v31 and later only.
+    pub block_hash: Option<BlockHash>,
 }
 
 /// Models the result of JSON-RPC method `loadtxoutset`.

@@ -64,7 +64,7 @@ impl GetDeploymentInfo {
                 dep.into_model().map(|d| (name, d)).map_err(GetDeploymentInfoError::Deployment)
             })
             .collect::<Result<_, _>>()?;
-        Ok(model::GetDeploymentInfo { hash, height: self.height, deployments })
+        Ok(model::GetDeploymentInfo { hash, height: self.height, deployments, script_flags: None })
     }
 }
 
@@ -72,7 +72,7 @@ impl DeploymentInfo {
     /// Part of `getdeploymentinfo`.
     pub fn into_model(self) -> Result<model::DeploymentInfo, crate::NumericError> {
         Ok(model::DeploymentInfo {
-            deployment_type: self.deployment_type,
+            deployment_type: self.deployment_type.into_model(),
             height: self.height,
             active: self.active,
             bip9: self.bip9.map(|b| b.into_model()).transpose()?,
@@ -88,9 +88,9 @@ impl Bip9Info {
             start_time: self.start_time,
             timeout: self.timeout,
             min_activation_height: self.min_activation_height,
-            status: self.status,
+            status: self.status.into_model(),
             since: self.since,
-            status_next: self.status_next,
+            status_next: self.status_next.into_model(),
             statistics: self.statistics.map(|s| s.into_model()).transpose()?,
             signalling: self.signalling,
         })
@@ -193,6 +193,7 @@ impl MempoolEntry {
             .map_err(E::SpentBy)?;
 
         Ok(model::MempoolEntry {
+            chunk_weight: None,
             vsize,
             size,
             weight,

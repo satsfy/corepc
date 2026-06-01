@@ -10,10 +10,11 @@ use super::error::{
     MempoolEntryFeesError,
 };
 use super::{
-    GetBlockFilter, GetBlockchainInfo, GetChainTxStats, GetChainTxStatsError, GetMempoolAncestors,
-    GetMempoolAncestorsVerbose, GetMempoolDescendants, GetMempoolDescendantsVerbose,
-    GetMempoolEntry, GetMempoolInfo, GetMempoolInfoError, GetRawMempool, GetRawMempoolVerbose,
-    MempoolEntry, MempoolEntryFees, ScanTxOutSetError, ScanTxOutSetStart,
+    Bip9SoftforkStatus, GetBlockFilter, GetBlockchainInfo, GetChainTxStats, GetChainTxStatsError,
+    GetMempoolAncestors, GetMempoolAncestorsVerbose, GetMempoolDescendants,
+    GetMempoolDescendantsVerbose, GetMempoolEntry, GetMempoolInfo, GetMempoolInfoError,
+    GetRawMempool, GetRawMempoolVerbose, MempoolEntry, MempoolEntryFees, ScanTxOutSetError,
+    ScanTxOutSetStart, SoftforkType,
 };
 use crate::model;
 
@@ -178,6 +179,7 @@ impl MempoolEntry {
             .map_err(E::SpentBy)?;
 
         Ok(model::MempoolEntry {
+            chunk_weight: None,
             vsize,
             size,
             weight,
@@ -203,6 +205,7 @@ impl MempoolEntryFees {
         use MempoolEntryFeesError as E;
 
         Ok(model::MempoolEntryFees {
+            chunk: None,
             base: Amount::from_btc(self.base).map_err(E::Base)?,
             modified: Amount::from_btc(self.modified).map_err(E::Modified)?,
             ancestor: Amount::from_btc(self.ancestor).map_err(E::MempoolEntry)?,
@@ -222,6 +225,9 @@ impl GetMempoolInfo {
         let min_relay_tx_fee = crate::btc_per_kb(self.min_relay_tx_fee)?;
 
         Ok(model::GetMempoolInfo {
+            limit_cluster_count: None,
+            limit_cluster_size: None,
+            optimal: None,
             loaded: Some(self.loaded),
             size,
             bytes,
@@ -282,5 +288,28 @@ impl ScanTxOutSetStart {
             unspents,
             total_amount,
         })
+    }
+}
+
+impl SoftforkType {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(self) -> model::SoftforkType {
+        match self {
+            SoftforkType::Buried => model::SoftforkType::Buried,
+            SoftforkType::Bip9 => model::SoftforkType::Bip9,
+        }
+    }
+}
+
+impl Bip9SoftforkStatus {
+    /// Converts version specific type to a version nonspecific, more strongly typed type.
+    pub fn into_model(self) -> model::Bip9SoftforkStatus {
+        match self {
+            Bip9SoftforkStatus::Defined => model::Bip9SoftforkStatus::Defined,
+            Bip9SoftforkStatus::Started => model::Bip9SoftforkStatus::Started,
+            Bip9SoftforkStatus::LockedIn => model::Bip9SoftforkStatus::LockedIn,
+            Bip9SoftforkStatus::Active => model::Bip9SoftforkStatus::Active,
+            Bip9SoftforkStatus::Failed => model::Bip9SoftforkStatus::Failed,
+        }
     }
 }
