@@ -582,7 +582,7 @@ pub struct GetDeploymentInfo {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct DeploymentInfo {
     /// One of "buried", "bip9".
-    pub deployment_type: String,
+    pub deployment_type: SoftforkType,
     /// Height of the first block which the rules are or will be enforced (only for "buried" type, or "bip9" type with "active" status).
     pub height: Option<u32>,
     /// True if the rules are enforced for the mempool and the next block.
@@ -603,11 +603,11 @@ pub struct Bip9Info {
     /// Minimum height of blocks for which the rules may be enforced.
     pub min_activation_height: u32,
     /// Status of deployment at specified block (one of "defined", "started", "locked_in", "active", "failed").
-    pub status: String,
+    pub status: Bip9SoftforkStatus,
     /// Height of the first block to which the status applies.
     pub since: u32,
     /// Status of deployment at the next block.
-    pub status_next: String,
+    pub status_next: Bip9SoftforkStatus,
     /// Numeric statistics about signalling for a softfork (only for "started" and "locked_in" status).
     pub statistics: Option<Bip9Statistics>,
     /// Indicates blocks that signalled with a # and blocks that did not with a -.

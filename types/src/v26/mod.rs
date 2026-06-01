@@ -266,7 +266,7 @@ pub use self::{
     control::Logging,
     hidden::{GetRawAddrMan, RawAddrManEntry},
     mining::{GetPrioritisedTransactions, PrioritisedTransaction},
-    network::{AddrManInfoNetwork, GetAddrManInfo, GetPeerInfo, PeerInfo},
+    network::{AddrManInfoNetwork, GetAddrManInfo, GetPeerInfo, PeerInfo, PeerNetwork},
     raw_transactions::{
         DescriptorProcessPsbt, DescriptorProcessPsbtError, SubmitPackage, SubmitPackageError,
         SubmitPackageTxResult, SubmitPackageTxResultError, SubmitPackageTxResultFees,

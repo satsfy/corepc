@@ -54,7 +54,7 @@ pub struct PeerInfo {
     #[serde(rename = "addrlocal")]
     pub address_local: Option<String>,
     /// Network (ipv4, ipv6, onion, i2p, cjdns, not_publicly_routable) the peer connected through.
-    pub network: String,
+    pub network: PeerNetwork,
     /// Mapped AS (Autonomous System) number at the end of the BGP route to the peer, used for diversifying peer selection (only displayed if the -asmap config option is set).
     pub mapped_as: Option<u32>,
     /// The services offered.
@@ -154,4 +154,43 @@ pub struct PeerInfo {
     pub transport_protocol_type: String,
     /// The session ID for this connection, or "" if there is none ("v2" transport protocol only).
     pub session_id: String,
+}
+
+/// The network a peer is connected through. Part of `getpeerinfo`.
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PeerNetwork {
+    /// IPv4.
+    Ipv4,
+    /// IPv6.
+    Ipv6,
+    /// Tor v3 onion service.
+    Onion,
+    /// I2P.
+    I2p,
+    /// CJDNS.
+    Cjdns,
+    /// Not publicly routable.
+    NotPubliclyRoutable,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn peer_network_deserializes_core_strings() {
+        let cases = [
+            ("ipv4", PeerNetwork::Ipv4),
+            ("ipv6", PeerNetwork::Ipv6),
+            ("onion", PeerNetwork::Onion),
+            ("i2p", PeerNetwork::I2p),
+            ("cjdns", PeerNetwork::Cjdns),
+            ("not_publicly_routable", PeerNetwork::NotPubliclyRoutable),
+        ];
+        for (s, want) in cases {
+            let got: PeerNetwork = serde_json::from_str(&format!("\"{}\"", s)).unwrap();
+            assert_eq!(got, want);
+        }
+    }
 }

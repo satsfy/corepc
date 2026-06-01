@@ -8,6 +8,8 @@ use alloc::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
+use crate::v26::PeerNetwork;
+
 /// Result of JSON-RPC method `getpeerinfo`.
 ///
 /// > getpeerinfo
@@ -33,7 +35,7 @@ pub struct PeerInfo {
     #[serde(rename = "addrlocal")]
     pub address_local: Option<String>,
     /// Network (ipv4, ipv6, onion, i2p, cjdns, not_publicly_routable).
-    pub network: String,
+    pub network: PeerNetwork,
     /// Mapped AS (Autonomous System) number at the end of the BGP route to the peer, used for diversifying peer selection (only displayed if the -asmap config option is set).
     pub mapped_as: Option<u32>,
     /// The services offered.
