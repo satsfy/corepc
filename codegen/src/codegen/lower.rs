@@ -147,7 +147,9 @@ pub fn lower(spec: &Spec) -> Modules {
     for m in &spec.methods {
         let category = m.category.clone();
         let pascal = safe_type_name(&method_to_pascal(&m.name));
-
+        if pascal == "GetBlock" {
+            println!("[codegen] warning: method `{}` generates type `{}` which collides with the `GetBlock` RPC response type; consider renaming the method in the spec", m.name, pascal);
+        }
         let mut local: Vec<GenType> = Vec::new();
         if let Some(gt) = generate_return_type(m, &mut seen) {
             collect(gt, &mut local);
