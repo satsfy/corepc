@@ -147,12 +147,10 @@ macro_rules! impl_async_bridges {
                 Ok(*self.rt.block_on(self.inner.get_network_hash_ps()).map_err(Self::map_err)?)
             }
 
-            pub fn get_prioritised_transactions(&self) -> Result<GetPrioritisedTransactions> {
-                let res = self
-                    .rt
-                    .block_on(self.inner.get_prioritised_transactions())
-                    .map_err(Self::map_err)?;
-                Ok(serde_json::from_value(into_json(res)?)?)
+            pub fn get_prioritised_transactions(
+                &self,
+            ) -> Result<$crate::types::$v::generated::GetPrioritisedTransactions> {
+                self.rt.block_on(self.inner.get_prioritised_transactions()).map_err(Self::map_err)
             }
 
             pub fn prioritise_transaction(

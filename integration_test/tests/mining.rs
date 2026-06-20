@@ -75,7 +75,7 @@ fn mining__get_prioritised_transactions() {
 
     let json: GetPrioritisedTransactions =
         node.client.get_prioritised_transactions().expect("getprioritisedtransactions");
-    let model: Result<mtype::GetPrioritisedTransactions, bitcoin::hex::HexToArrayError> =
+    let model: Result<mtype::GetPrioritisedTransactions, GetPrioritisedTransactionsError> =
         json.into_model();
     let model = model.unwrap();
 
