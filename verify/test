@@ -1,0 +1,290 @@
+   Compiling integration-test v0.1.0 (/home/renato/Desktop/rust-bitcoin/corepc/integration_test)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.38s
+     Running unittests src/lib.rs (target/debug/deps/integration_test-f19035d2b983bafb)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/blockchain.rs (target/debug/deps/blockchain-9a34292475cd773d)
+
+running 42 tests
+test blockchain__get_block_hash__modelled ... ok
+test blockchain__get_block_header__modelled ... ok
+test blockchain__get_best_block_hash__modelled ... ok
+test blockchain__get_blockchain_info__modelled ... ok
+test blockchain__get_chain_tips__modelled ... ok
+test blockchain__get_block_count__modelled ... ok
+test blockchain__get_difficulty__modelled ... ok
+test blockchain__get_descriptor_activity__modelled ... ok
+test blockchain__get_block_filter__modelled ... ok
+test blockchain__get_block_from_peer ... ok
+test blockchain__get_block_stats__modelled ... ok
+test blockchain__get_mempool_ancestors__modelled ... ok
+test blockchain__get_chain_states__modelled ... ok
+test blockchain__get_block__modelled ... ok
+test blockchain__dump_tx_out_set__modelled ... ok
+test blockchain__get_mempool_cluster__modelled ... ok
+test blockchain__get_deployment_info__modelled ... ok
+test blockchain__get_chain_tx_stats__modelled ... ok
+test blockchain__get_mempool_ancestors_verbose__modelled ... ok
+test blockchain__get_mempool_descendants__modelled ... ok
+test blockchain__get_mempool_descendants_verbose__modelled ... ok
+test blockchain__precious_block ... ok
+test blockchain__load_tx_out_set__modelled ... ok
+test blockchain__get_mempool_entry__modelled ... ok
+test blockchain__prune_blockchain ... ok
+test blockchain__scan_blocks__modelled ... ok
+test blockchain__scan_tx_out_set__modelled ... ok
+test blockchain__verify_chain ... ok
+test blockchain__get_mempool_info__modelled ... ok
+test blockchain__get_mempool_feerate_diagram__modelled ... ok
+test blockchain__import_mempool ... ok
+test blockchain__get_raw_mempool__modelled ... ok
+test blockchain__get_tx_out_proof ... ok
+test blockchain__get_tx_spending_prevout__modelled ... ok
+test blockchain__get_tx_out__modelled ... ok
+test blockchain__get_tx_out_set_info__modelled ... ok
+test blockchain__get_tx_spending_prevout_spending_tx_and_block_hash__modelled ... ok
+test blockchain__save_mempool ... ok
+test blockchain__verify_tx_out_proof__modelled ... ok
+test blockchain__wait_for_block__modelled ... ok
+test blockchain__wait_for_block_height__modelled ... ok
+test blockchain__wait_for_new_block__modelled ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.95s
+
+     Running tests/blockchain_core.rs (target/debug/deps/blockchain_core-0bd971a8c5a785d9)
+
+running 27 tests
+test get_block_stats_genesis_utxo_fields ... ok
+test get_chain_tips_active_tip_matches_best ... ok
+test get_block_verbose_one_stripped_size_le_size ... ok
+test get_block_verbose_one_tx_count_matches_n_tx ... ok
+test get_block_hash_at_tip_matches_best ... ok
+test get_block_stats_v25_actual_utxo_fields ... ok
+test get_block_verbose_two_non_coinbase_has_fee ... ok
+test get_block_verbose_one_next_block_hash_some_for_non_tip ... ok
+test dump_tx_out_set_fields_consistent ... ok
+test get_blockchain_info_pruned_node_has_prune_fields ... ok
+test get_block_header_verbose_fields ... ok
+test get_block_verbose_three_non_coinbase_has_prevouts ... ok
+test get_chain_tips_after_invalidate_block_has_stale_tip ... ok
+test get_tx_out_set_info_after_mining ... ok
+test get_deployment_info_genesis_vs_tip ... ok
+test get_mempool_entry_spent_by_contains_child ... ok
+test get_tx_out_set_info_muhash ... ok
+test get_tx_out_coinbase_fields ... ok
+test get_raw_mempool_sequence_includes_tx ... ok
+test get_mempool_entry_height_and_no_parents ... ok
+test get_mempool_ancestors_verbose_keyed_by_parent_txid ... ok
+test get_tx_spending_prevout_for_unspent_output ... ok
+test get_chain_tx_stats_default_window_has_optional_fields ... ok
+test get_chain_tx_stats_pinned_to_block1_has_no_window_fields ... ok
+test get_tx_out_set_info_at_genesis ... ok
+test scan_tx_out_set_best_block_matches_tip ... ok
+test verify_tx_out_proof_round_trips_txid ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.63s
+
+     Running tests/control.rs (target/debug/deps/control-4f857934a7b86345)
+
+running 6 tests
+test control__get_rpc_info ... ok
+test control__get_memory_info ... ok
+test control__uptime ... ok
+test control__stop ... ok
+test control__logging ... ok
+test control__help ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+
+     Running tests/control_core.rs (target/debug/deps/control_core-0bd0d026ed5d4a52)
+
+running 3 tests
+test get_rpc_info_active_commands_contains_self ... ok
+test get_memory_info_has_locked_key ... ok
+test get_index_info_has_txindex ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.69s
+
+     Running tests/generating.rs (target/debug/deps/generating-99e50bbfc1888666)
+
+running 4 tests
+test generating__generate_to_address__modelled ... ok
+test generating__invalidate_block ... ok
+test generating__generate_to_descriptor__modelled ... ok
+test generating__generate_block__modelled ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.00s
+
+     Running tests/hidden.rs (target/debug/deps/hidden-deb4db5061ebf82b)
+
+running 7 tests
+test hidden__get_raw_addrman ... ok
+test hidden__mock_scheduler ... ok
+test hidden__add_connection ... ok
+test hidden__get_orphan_txs__modelled ... ok
+test hidden__sync_with_validation_interface_queue ... ok
+test hidden__reconsider_block ... ok
+test hidden__estimate_raw_fee__modelled ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.11s
+
+     Running tests/mining.rs (target/debug/deps/mining-1e371a59b2148225)
+
+running 6 tests
+test mining__get_block_template__modelled ... ok
+test mining__get_network_hash_ps ... ok
+test mining__submit_header ... ok
+test mining__prioritise_transaction ... ok
+test mining__get_mining_info__modelled ... ok
+test mining__get_prioritised_transactions__modelled ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.10s
+
+     Running tests/mining_core.rs (target/debug/deps/mining_core-0f30df1faf44af4b)
+
+running 5 tests
+test generate_to_address_hash_matches_best_block ... ok
+test generate_block_with_empty_tx_list ... ok
+test get_prioritised_transactions_round_trips_fee_delta ... ok
+test get_block_template_has_optional_fields ... ok
+test get_block_template_includes_mempool_tx ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.86s
+
+     Running tests/network.rs (target/debug/deps/network-779b1411628416b2)
+
+running 14 tests
+test network__get_net_totals ... ok
+test network__get_added_node_info ... ok
+test network__get_network_info__modelled ... ok
+test network__ping ... ok
+test network__get_connection_count ... ok
+test network__get_addr_man_info ... ok
+test network__get_node_addresses ... ok
+test network__clear_banned ... ok
+test network__list_banned ... ok
+test network__set_ban ... ok
+test network__set_network_active ... ok
+test network__disconnect_node ... ok
+test network__get_peer_info ... ok
+test network__add_node ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.23s
+
+     Running tests/network_core.rs (target/debug/deps/network_core-c06f70221ea70737)
+
+running 8 tests
+test get_network_info_local_services_names_non_empty ... ok
+test list_banned_duration_matches_until_minus_created ... ok
+test get_net_totals_time_millis_is_non_zero ... ok
+test get_added_node_info_round_trips_added_node ... ok
+test get_peer_info_synced_blocks_le_headers ... ok
+test get_peer_info_bytes_per_msg_non_empty ... ok
+test get_peer_info_has_connection_type ... ok
+test get_network_info_connections_sum_matches_total ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.48s
+
+     Running tests/raw_transactions.rs (target/debug/deps/raw_transactions-45ba1c190689b9a8)
+
+running 20 tests
+test raw_transactions__decode_script__modelled ... ok
+test raw_transactions__get_private_broadcast_info__modelled ... ok
+test raw_transactions__decode_raw_transaction__modelled ... ok
+test raw_transactions__combine_raw_transaction__modelled ... ok
+test raw_transactions__decode_psbt__modelled ... ok
+test raw_transactions__create_psbt__modelled ... ok
+test raw_transactions__analyze_psbt__modelled ... ok
+test raw_transactions__convert_to_psbt__modelled ... ok
+test raw_transactions__abort_private_broadcast__modelled ... ok
+test raw_transactions__combine_psbt__modelled ... ok
+test raw_transactions__fund_raw_transaction__modelled ... ok
+test raw_transactions__finalize_psbt__modelled ... ok
+test raw_transactions__create_raw_transaction__modelled ... ok
+test raw_transactions__get_raw_transaction__modelled ... ok
+test raw_transactions__utxo_update_psbt__modelled ... ok
+test raw_transactions__join_psbts__modelled ... ok
+test raw_transactions__test_mempool_accept__modelled ... ok
+test raw_transactions__submit_package__modelled ... ok
+test raw_transactions__sign_raw_transaction__modelled ... ok
+test raw_transactions__send_raw_transaction__modelled ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 14.51s
+
+     Running tests/raw_transactions_core.rs (target/debug/deps/raw_transactions_core-b53166e6619ff501)
+
+running 11 tests
+test decode_script_multisig_has_descriptor ... ok
+test decode_script_multisig_has_segwit_and_p2sh_segwit ... ok
+test decode_psbt_input_bip32_derivs_for_unfinalized_psbt ... ok
+test test_mempool_accept_rejected_has_reason ... ok
+test decode_psbt_has_witness_utxo_after_utxo_update ... ok
+test get_raw_transaction_verbose_mined_has_block_hash ... ok
+test get_raw_transaction_verbose_with_blockhash_is_in_active_chain ... ok
+test test_mempool_accept_allowed_has_optional_fields ... ok
+test decode_psbt_input_final_witness_after_signing ... ok
+test get_raw_transaction_verbose_mined_has_time_fields ... ok
+test analyze_psbt_has_estimates_after_wallet_process ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.15s
+
+     Running tests/signer.rs (target/debug/deps/signer-1fbf074644964f13)
+
+running 2 tests
+test signer__enumerate_signers ... ok
+test signer__wallet_display_address__modelled ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running tests/util.rs (target/debug/deps/util-98d0757810f891e4)
+
+running 9 tests
+test util__verify_message ... ok
+test util__get_descriptor_info ... ok
+test util__create_multisig__modelled ... ok
+test util__derive_addresses__modelled ... ok
+test util__get_index_info ... ok
+test util__sign_message_with_priv_key__modelled ... ok
+test util__estimate_smart_fee_with_mode__modelled ... ok
+test util__estimate_smart_fee__modelled ... ok
+test util__validate_address__modelled ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.69s
+
+     Running tests/util_core.rs (target/debug/deps/util_core-85231ad8e29dee7e)
+
+running 3 tests
+test get_descriptor_info_multipath_returns_expansion ... ok
+test sign_and_verify_message_round_trip ... ok
+test validate_address_witness_fields_present_for_bech32 ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+
+     Running tests/wallet.rs (target/debug/deps/wallet-745db00c826b1834)
+
+running 52 tests
+test wallet__create_wallet__modelled ... ok
+test wallet__get_hd_keys__modelled ... ok
+test wallet__get_addresses_by_label__modelled ... ok
+test wallet__abort_rescan ... ok
+test wallet__create_wallet_descriptor ... ok
+test wallet__get_address_info__modelled ... ok
+test wallet__get_new_address__modelled ... ok
+test wallet__get_raw_change_address__modelled ... ok
+test wallet__encrypt_wallet ... ok
+test wallet__backup_wallet ... ok
+test wallet__get_wallet_info__modelled ... ok
+test wallet__keypool_refill ... ok
+test wallet__list_descriptors ... ok
+test wallet__list_labels__modelled ... ok
+test wallet__get_balance__modelled ... ok
+test wallet__bump_fee__modelled ... ok
+test wallet__get_balances__modelled ... ok
+test wallet__get_received_by_address__modelled ... ok
+test wallet__get_received_by_label__modelled ... ok
+test wallet__get_transaction__modelled ... ok
+test wallet__list_wallet_dir ... ok
+test wallet__import_pruned_funds ... ok
