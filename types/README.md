@@ -13,6 +13,9 @@ The crate supports **all** documented Core RPC methods.
 
 (Note there are a bunch of undocumented methods that are not yet supported, coming soon.)
 
+
+asd sa dsada sd sa dsa
+
 ## Known issues
 
 The types include docs from Core however the docs used are from the _first_ Core version in which
