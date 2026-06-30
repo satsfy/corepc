@@ -35,6 +35,23 @@ const BRIDGED_METHODS: &[&str] = &[
     "prioritise_transaction",
     "submit_block",
     "submit_header",
+    // Network
+    "add_node",
+    "clear_banned",
+    "disconnect_node",
+    "get_added_node_info",
+    "get_addr_man_info",
+    "get_connection_count",
+    "get_net_totals",
+    "get_network_info",
+    "get_node_addresses",
+    "get_peer_info",
+    "list_banned",
+    "ping",
+    "set_ban",
+    "set_network_active",
+    // Hidden RPC used by the network tests (no generated wrapper; bridged via raw `self.call`).
+    "add_peer_address",
 ];
 
 /// Emit `blocking.rs` for `version`, reusing the sync client's macro surface taken from
@@ -90,7 +107,10 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
              // returns that variant, so alias it to the name the test uses.\n    \
              pub use crate::types::v{version}::generated::{{\n        \
                  GetBlockTemplateVariant2 as GetBlockTemplate, GetBlockTemplateError,\n    \
-             }};\n\
+             }};\n    \
+             // `getnetworkinfo` is bridged through the generated wrapper; expose the generated\n    \
+             // response type and its error so the test's `into_model()` is the generated one.\n    \
+             pub use crate::types::v{version}::generated::{{GetNetworkInfo, GetNetworkInfoError}};\n\
          }}\n\n\
          /// A blocking JSON-RPC client that drives the async `v{version}` production client.\n\
          pub struct Client {{\n    \

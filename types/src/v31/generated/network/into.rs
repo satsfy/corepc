@@ -43,15 +43,15 @@ impl GetNetworkInfo {
                 value: self.version,
                 field: "version".to_owned(),
             })?,
-            subversion: self.sub_version,
+            subversion: self.subversion,
             protocol_version: usize::try_from(self.protocol_version).map_err(|_| {
                 crate::NumericError::Overflow {
                     value: self.protocol_version,
                     field: "protocol_version".to_owned(),
                 }
             })?,
-            local_services: self.localservices,
-            local_services_names: Some(self.localservices_names),
+            local_services: self.local_services,
+            local_services_names: None, // no raw field; canonical is optional
             local_relay: self.local_relay,
             time_offset: isize::try_from(self.time_offset).map_err(|_| {
                 crate::NumericError::Overflow {

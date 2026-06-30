@@ -795,6 +795,11 @@ const RAW_FIELD_RENAME: &[(&str, &str, &str)] = &[
     ("GetBlockTemplateVariant2", "coinbaseaux", "coinbase_aux"),
     ("GetBlockTemplateVariant2", "noncerange", "nonce_range"),
     ("GetBlockTemplateVariant2", "curtime", "current_time"),
+    // `getnetworkinfo`: match the curated raw struct field-for-field (tests read these raw fields).
+    // `subversion` stays one word (curated does not split it), so map it to itself.
+    ("GetNetworkInfo", "localservices", "local_services"),
+    ("GetNetworkInfo", "localservicesnames", "local_services_names"),
+    ("GetNetworkInfo", "subversion", "subversion"),
 ];
 
 /// The rust field-name override for a `(struct, wire field)`, if any.

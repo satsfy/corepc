@@ -137,10 +137,11 @@ pub struct GetNetworkInfo {
     #[serde(rename = "localrelay")]
     pub local_relay: bool,
     /// the services we offer to the network
-    pub localservices: String,
+    #[serde(rename = "localservices")]
+    pub local_services: String,
     /// the services we offer to the network, in human-readable form
     #[serde(rename = "localservicesnames")]
-    pub localservices_names: Vec<String>,
+    pub local_services_names: Vec<String>,
     /// whether p2p networking is enabled
     #[serde(rename = "networkactive")]
     pub network_active: bool,
@@ -153,8 +154,7 @@ pub struct GetNetworkInfo {
     #[serde(rename = "relayfee")]
     pub relay_fee: f64,
     /// the server subversion string
-    #[serde(rename = "subversion")]
-    pub sub_version: String,
+    pub subversion: String,
     /// the time offset
     #[serde(rename = "timeoffset")]
     pub time_offset: i64,

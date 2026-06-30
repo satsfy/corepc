@@ -82,6 +82,7 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("GetBlockStats", "segwit_txs", "swtxs"),
     ("GetBlockStats", "utxo_size_increase", "utxo_size_inc"),
     ("GetBlockStats", "utxo_size_increase_actual", "utxo_size_inc_actual"),
+    ("GetNetworkInfo", "local_services_names", "localservices_names"),
 ];
 
 /// A `(canonical type, field)` whose canonical Rust type is buggy: codegen routes it through a

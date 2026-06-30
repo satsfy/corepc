@@ -146,7 +146,7 @@ macro_rules! impl_async_bridges {
             // `get_mining_info` returns the GENERATED response type directly (no JSON round-trip):
             // the facade's `vtype` shim re-exports the generated `GetMiningInfo`/`GetMiningInfoError`
             // for these names, so the unchanged test's `json.into_model()` runs the GENERATED
-            // `into_model`, not the curated one. This is the explicit path; the other struct methods
+            // `into_model`, pnot the curated one. This is the explicit path; the other struct methods
             // still round-trip to the curated type (their generated `into_model` is missing or their
             // test pins the curated error type).
             pub fn get_mining_info(&self) -> Result<$crate::types::$v::generated::GetMiningInfo> {
@@ -187,6 +187,100 @@ macro_rules! impl_async_bridges {
             pub fn submit_header(&self, header: &bitcoin::block::Header) -> Result<()> {
                 let hexdata = bitcoin::consensus::encode::serialize_hex(header);
                 self.rt.block_on(self.inner.submit_header(hexdata)).map_err(Self::map_err)
+            }
+        }
+
+        // == Network ==
+        // Every method routes through the generated async wrapper on `self.inner`, isolated from the
+        // sync macros. `get_network_info` returns the GENERATED response type (the facade's `vtype`
+        // aliases it) so the test's `into_model()` runs the GENERATED conversion. The raw-accessed
+        // responses round-trip generated -> curated through JSON so the tests' field access compiles
+        // unchanged; unit/primitive methods extract from the wrapper. `add_peer_address` is a hidden
+        // RPC with no generated wrapper, so it owns a raw `self.call` (still off the sync macro).
+        impl Client {
+            pub fn add_node(&self, node: &str, command: AddNodeCommand) -> Result<()> {
+                let command = serde_json::from_value::<String>(into_json(command)?)?;
+                self.rt.block_on(self.inner.add_node(node.to_owned(), command)).map_err(Self::map_err)
+            }
+
+            pub fn clear_banned(&self) -> Result<()> {
+                self.rt.block_on(self.inner.clear_banned()).map_err(Self::map_err)
+            }
+
+            pub fn disconnect_node(&self, address: &str) -> Result<()> {
+                let opts = $crate::client_async::$v::network::DisconnectNodeOptions {
+                    address: Some(address.to_owned()),
+                    nodeid: None,
+                };
+                self.rt.block_on(self.inner.disconnect_node_with(opts)).map_err(Self::map_err)
+            }
+
+            pub fn get_added_node_info(&self) -> Result<GetAddedNodeInfo> {
+                let res = self.rt.block_on(self.inner.get_added_node_info()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn get_addr_man_info(&self) -> Result<GetAddrManInfo> {
+                let res = self.rt.block_on(self.inner.get_addr_man_info()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn get_connection_count(&self) -> Result<GetConnectionCount> {
+                let res =
+                    self.rt.block_on(self.inner.get_connection_count()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn get_net_totals(&self) -> Result<GetNetTotals> {
+                let res = self.rt.block_on(self.inner.get_net_totals()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            /// Server version field of `getnetworkinfo`; `check_expected_server_version` calls this
+            /// (the sync `get_network_info` macro that normally defines it is skipped here).
+            pub fn server_version(&self) -> Result<usize> {
+                let res = self.rt.block_on(self.inner.get_network_info()).map_err(Self::map_err)?;
+                usize::try_from(res.version).map_err(|e| Error::Returned(e.to_string()))
+            }
+
+            pub fn get_network_info(&self) -> Result<$crate::types::$v::generated::GetNetworkInfo> {
+                self.rt.block_on(self.inner.get_network_info()).map_err(Self::map_err)
+            }
+
+            pub fn get_node_addresses(&self) -> Result<GetNodeAddresses> {
+                let res = self.rt.block_on(self.inner.get_node_addresses()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn add_peer_address(&self, address: &str, port: u16) -> Result<AddPeerAddress> {
+                self.call("addpeeraddress", &[address.into(), port.into()])
+            }
+
+            pub fn get_peer_info(&self) -> Result<GetPeerInfo> {
+                let res = self.rt.block_on(self.inner.get_peer_info()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn list_banned(&self) -> Result<ListBanned> {
+                let res = self.rt.block_on(self.inner.list_banned()).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
+            }
+
+            pub fn ping(&self) -> Result<()> {
+                self.rt.block_on(self.inner.ping()).map_err(Self::map_err)
+            }
+
+            pub fn set_ban(&self, subnet: &str, command: SetBanCommand) -> Result<()> {
+                let command = serde_json::from_value::<String>(into_json(command)?)?;
+                self.rt
+                    .block_on(self.inner.set_ban(subnet.to_owned(), command))
+                    .map_err(Self::map_err)
+            }
+
+            pub fn set_network_active(&self, state: bool) -> Result<SetNetworkActive> {
+                let res =
+                    self.rt.block_on(self.inner.set_network_active(state)).map_err(Self::map_err)?;
+                Ok(serde_json::from_value(into_json(res)?)?)
             }
         }
     };

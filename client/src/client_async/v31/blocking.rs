@@ -63,6 +63,9 @@ pub mod vtype {
         GetMiningInfo, GetMiningInfoError, GetPrioritisedTransactions,
         GetPrioritisedTransactionsError,
     };
+    // `getnetworkinfo` is bridged through the generated wrapper; expose the generated
+    // response type and its error so the test's `into_model()` is the generated one.
+    pub use crate::types::v31::generated::{GetNetworkInfo, GetNetworkInfoError};
     pub use crate::types::v31::*;
 }
 
@@ -188,7 +191,7 @@ crate::impl_client_v17__uptime!();
 
 // == Hidden ==
 crate::impl_client_v27__add_connection!();
-crate::impl_client_v21__add_peer_address!();
+// add_peer_address: bridged by `impl_async_bridges!` (see above).
 crate::impl_client_v29__get_orphan_txs!();
 crate::impl_client_v29__get_orphan_txs_verbosity_1!();
 crate::impl_client_v29__get_orphan_txs_verbosity_2!();
@@ -207,20 +210,19 @@ crate::impl_client_v17__sync_with_validation_interface_queue!();
 // submit_header: bridged by `impl_async_bridges!` (see above).
 
 // == Network ==
-crate::impl_client_v17__add_node!();
-crate::impl_client_v17__clear_banned!();
-crate::impl_client_v17__disconnect_node!();
-crate::impl_client_v17__get_added_node_info!();
-crate::impl_client_v26__get_addr_man_info!();
-crate::impl_client_v17__get_connection_count!();
-crate::impl_client_v17__get_net_totals!();
-crate::impl_client_v17__get_network_info!();
-crate::impl_client_v18__get_node_addresses!();
-crate::impl_client_v17__get_peer_info!();
-crate::impl_client_v17__list_banned!();
-crate::impl_client_v17__ping!();
-crate::impl_client_v17__set_ban!();
-crate::impl_client_v17__set_network_active!();
+// clear_banned: bridged by `impl_async_bridges!` (see above).
+// disconnect_node: bridged by `impl_async_bridges!` (see above).
+// get_added_node_info: bridged by `impl_async_bridges!` (see above).
+// get_addr_man_info: bridged by `impl_async_bridges!` (see above).
+// get_connection_count: bridged by `impl_async_bridges!` (see above).
+// get_net_totals: bridged by `impl_async_bridges!` (see above).
+// get_network_info: bridged by `impl_async_bridges!` (see above).
+// get_node_addresses: bridged by `impl_async_bridges!` (see above).
+// get_peer_info: bridged by `impl_async_bridges!` (see above).
+// list_banned: bridged by `impl_async_bridges!` (see above).
+// ping: bridged by `impl_async_bridges!` (see above).
+// set_ban: bridged by `impl_async_bridges!` (see above).
+// set_network_active: bridged by `impl_async_bridges!` (see above).
 
 // == Rawtransactions ==
 crate::impl_client_v31__abort_private_broadcast!();
