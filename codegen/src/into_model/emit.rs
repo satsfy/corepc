@@ -29,9 +29,12 @@ fn parse_canonical(model_dir: &Path, name: &str) -> Option<CanonShape> {
     let enum_decl = format!("pub enum {name} {{");
     for entry in fs::read_dir(model_dir).ok()?.flatten() {
         let path = entry.path();
-        if path.extension().and_then(|e| e.to_str()) != Some("rs") {
-            continue;
-        }
+        // TODO (@satsfy) remove if not triggered
+        // if path.extension().and_then(|e| e.to_str()) != Some("rs") {
+        //     println!("wow!!");
+        //     println!("skipping non-rs file {:?}", path);
+        //     continue;
+        // }
         let src = fs::read_to_string(&path).ok()?;
         if let Some(start) = src.find(&tuple) {
             let rest = &src[start + tuple.len()..];
@@ -384,22 +387,31 @@ pub fn generate_category(
 
     // Generate every response type that has a `crate::model` counterpart. A raw type whose canonical
     // name has no model (control RPCs, `EnumerateSigners`, ...) simply has nothing to convert into.
-    let mut queue: VecDeque<(String, String)> = all
-        .iter()
-        .filter(|i| {
-            let canon = model_typename(&i.raw_name);
-            match parse_canonical(model_dir, &canon) {
-                None => false,
-                // A raw oneOf-union enum (e.g. `GetTxOut { Null, Object(..) }`) maps to a
-                // struct/newtype model through its variant alias, not as itself; seed a raw enum
-                // root only when the canonical is itself an enum (a real data union like
-                // `ActivityEntry`). Such union enums are bridged via their aliased variant type.
-                Some(c) =>
-                    !matches!(i.shape, RawShape::Enum(_)) || matches!(c, CanonShape::Enum(_)),
+    let mut queue: VecDeque<(String, String)> = VecDeque::new();
+    for i in all.iter() {
+        let canon = model_typename(&i.raw_name);
+        let Some(c) = parse_canonical(model_dir, &canon) else {
+            continue; // No `crate::model` counterpart (control RPCs, `EnumerateSigners`, ...).
+        };
+        match (&i.shape, &c) {
+            // A real data union: the canonical is itself an enum (`GetRawMempoolResult`,
+            // `ActivityEntry`). Seed the enum root; `emit_type` bridges each arm.
+            (RawShape::Enum(_), CanonShape::Enum(_)) => queue.push_back((i.raw_name.clone(), canon)),
+            // A oneOf union onto a struct/newtype model (the `Null`/`Object` shape, e.g.
+            // `GetBlockTemplate`, `GetTxOut`): the enum has no structural `into_model` of its own, so
+            // seed each struct-bearing variant's inner type mapped to the canonical. That emits
+            // `<Variant>::into_model() -> model::<Canon>` for every such union, generically.
+            (RawShape::Enum(variants), _) => {
+                for (_v, inner) in variants {
+                    if ctx.raw.contains_key(inner) {
+                        queue.push_back((inner.clone(), canon.clone()));
+                    }
+                }
             }
-        })
-        .map(|i| (i.raw_name.clone(), model_typename(&i.raw_name)))
-        .collect();
+            // A plain struct/newtype response: seed it directly.
+            _ => queue.push_back((i.raw_name.clone(), canon)),
+        }
+    }
     let has_roots = !queue.is_empty();
 
     let mut seen: BTreeSet<String> = BTreeSet::new();

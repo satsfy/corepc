@@ -784,12 +784,35 @@ fn emit_struct_override(ov: &StructOverride) -> GenType {
 /// rather than the wire-derived default, so integration tests that read the field directly stay
 /// unchanged when the type migrates to the generated path. `(struct, wire name, rust name)`; a
 /// `#[serde(rename = "<wire>")]` is emitted automatically because the rust name then differs.
-const RAW_FIELD_RENAME: &[(&str, &str, &str)] =
-    &[("GetAddressInfo", "parent_desc", "parent_descriptor")];
+const RAW_FIELD_RENAME: &[(&str, &str, &str)] = &[
+    ("GetAddressInfo", "parent_desc", "parent_descriptor"),
+    // `getblocktemplate`: spell the wire abbreviations out so the generated raw struct matches the
+    // curated one field-for-field (tests read these raw fields on either backend). `(struct, wire,
+    // rust)`; the `#[serde(rename)]` back to the wire name is emitted automatically.
+    ("GetBlockTemplateVariant2", "vbavailable", "version_bits_available"),
+    ("GetBlockTemplateVariant2", "vbrequired", "version_bits_required"),
+    ("GetBlockTemplateVariant2", "longpollid", "long_poll_id"),
+    ("GetBlockTemplateVariant2", "coinbaseaux", "coinbase_aux"),
+    ("GetBlockTemplateVariant2", "noncerange", "nonce_range"),
+    ("GetBlockTemplateVariant2", "curtime", "current_time"),
+];
 
 /// The rust field-name override for a `(struct, wire field)`, if any.
 fn raw_field_rename(struct_name: &str, wire: &str) -> Option<&'static str> {
     RAW_FIELD_RENAME.iter().find(|(s, w, _)| *s == struct_name && *w == wire).map(|(_, _, r)| *r)
+}
+
+/// Force a `(struct, wire field)`'s optionality, overriding the OpenRPC `required` set, where it
+/// disagrees with how Core actually behaves / the curated type. `(struct, wire, optional)`.
+const RAW_FIELD_OPTIONAL: &[(&str, &str, bool)] = &[
+    // `getblocktemplate`: the curated raw type makes `longpollid` an `Option` (matching how tests
+    // read it); the OpenRPC `required` set disagrees. Match the curated shape.
+    ("GetBlockTemplateVariant2", "longpollid", true),
+];
+
+/// The optionality override for a `(struct, wire field)`, if any.
+fn raw_field_optional(struct_name: &str, wire: &str) -> Option<bool> {
+    RAW_FIELD_OPTIONAL.iter().find(|(s, w, _)| *s == struct_name && *w == wire).map(|(_, _, o)| *o)
 }
 
 /// Emit a `pub struct` from an object schema.
@@ -830,9 +853,11 @@ fn struct_type(
         let Ok(field_schema) = serde_json::from_value::<Schema>(v.clone()) else {
             continue;
         };
-        let optional = !required.contains(k.as_str())
-            || field_schema.bitcoin_optional
-            || desc_marks_optional(field_schema.description.as_deref());
+        let optional = raw_field_optional(name, k).unwrap_or_else(|| {
+            !required.contains(k.as_str())
+                || field_schema.bitcoin_optional
+                || desc_marks_optional(field_schema.description.as_deref())
+        });
         let (ty, nested_ty) = schema_to_type(&field_schema, name, k, seen);
         nested.extend(nested_ty);
         let rust_name = match raw_field_rename(name, k) {
