@@ -5,8 +5,8 @@
 //! Usage:
 //!
 //! ```text
-//! btc-codegen <version>      # For example, `30`, regenerates one version
-//! btc-codegen all            # Regenerates every spec under specs/
+//! corepc-codegen <version>      # For example, `30`, regenerates one version
+//! corepc-codegen all            # Regenerates every spec under specs/
 //! ```
 //!
 //! Output is split across the two sibling crates: the response types and their model
@@ -16,13 +16,13 @@
 use std::path::{Path, PathBuf};
 use std::{env, fs, process};
 
-use btc_codegen::generate;
+use corepc_codegen::generate;
 
 /// Parse the version argument and regenerate the bindings for each selected version.
 fn main() {
     let mut args = env::args().skip(1);
     let version = args.next().unwrap_or_else(|| {
-        eprintln!("usage: btc-codegen <version|all>");
+        eprintln!("usage: corepc-codegen <version|all>");
         process::exit(2)
     });
 

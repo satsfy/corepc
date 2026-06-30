@@ -2,7 +2,7 @@
 
 //! Blocking, sync-API facade over the async production client.
 //!
-//! This is a thin version dispatcher. The actual facade is generated per version by `btc-codegen`
+//! This is a thin version dispatcher. The actual facade is generated per version by `corepc-codegen`
 //! into `client_async/v{N}/blocking.rs`: it reuses that version's sync-client method macros
 //! (`impl_client_*`) over the async transport, so there is no second method surface to
 //! hand-maintain. Exactly one version is active (the highest enabled wins), matching the rest of

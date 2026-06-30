@@ -1,5 +1,5 @@
 [package]
-name = "btc-codegen"
+name = "corepc-codegen"
 version = "0.1.0"
 authors = ["Renato Britto <renatobritto@protonmail.com>"]
 edition = "2021"
@@ -9,7 +9,7 @@ description = "Generate Rust bindings for the Bitcoin Core JSON-RPC API from an 
 license = "CC0-1.0"
 
 [[bin]]
-name = "btc-codegen"
+name = "corepc-codegen"
 path = "src/main.rs"
 
 [dependencies]

@@ -1,15 +1,15 @@
-# Thin wrapper over the `btc-codegen` crate beside this file.
+# Thin wrapper over the `corepc-codegen` crate beside this file.
 
 default:
     @just --list
 
 # Generate bindings for one Core version (`just codegen 30`), or `clean` to remove them.
 codegen version:
-    if [ "{{version}}" = "clean" ]; then just -f "{{justfile()}}" clean; else cargo run --bin btc-codegen --release --quiet -- {{version}}; fi
+    if [ "{{version}}" = "clean" ]; then just -f "{{justfile()}}" clean; else cargo run --bin corepc-codegen --release --quiet -- {{version}}; fi
 
 # Generate bindings for every spec in specs/.
 codegen-all:
-    cargo run --bin btc-codegen --release --quiet -- all
+    cargo run --bin corepc-codegen --release --quiet -- all
 
 # Delete the generator-owned trees (types/src/v*/generated/ and generated client dirs).
 # Hand-written files are left untouched.
