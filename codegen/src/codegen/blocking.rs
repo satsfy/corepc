@@ -84,6 +84,12 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
              pub use crate::types::v{version}::generated::{{\n        \
                  GetMiningInfo, GetMiningInfoError, GetPrioritisedTransactions,\n        \
                  GetPrioritisedTransactionsError,\n    \
+             }};\n    \
+             // `getblocktemplate` is an untagged `Null/Text/Object` enum; only the `Object` variant\n    \
+             // (`GetBlockTemplateVariant2`) carries the template and has an `into_model`. The bridge\n    \
+             // returns that variant, so alias it to the name the test uses.\n    \
+             pub use crate::types::v{version}::generated::{{\n        \
+                 GetBlockTemplateVariant2 as GetBlockTemplate, GetBlockTemplateError,\n    \
              }};\n\
          }}\n\n\
          /// A blocking JSON-RPC client that drives the async `v{version}` production client.\n\

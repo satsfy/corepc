@@ -122,15 +122,25 @@ macro_rules! impl_async_bridges {
         // type differs from the curated type the explicit tests consume, the response is converted
         // back through JSON (both sides serialize to Core's shape).
         impl Client {
-            pub fn get_block_template(&self, request: &TemplateRequest) -> Result<GetBlockTemplate> {
+            // Returns the GENERATED `Object` variant (`GetBlockTemplateVariant2`), which now has its
+            // own `into_model`; the facade's `vtype` aliases it to `GetBlockTemplate` so the test's
+            // `into_model()` runs the generated conversion. `Null`/`Text` (proposal-mode replies) are
+            // not templates, so they are an error here.
+            pub fn get_block_template(
+                &self,
+                request: &TemplateRequest,
+            ) -> Result<$crate::types::$v::generated::GetBlockTemplateVariant2> {
                 // Curated `TemplateRequest` -> the wrapper's own request struct (`rules` is
                 // `Vec<TemplateRules>` here, `Vec<String>` there; both serialize to Core's shape).
                 let req: $crate::client_async::$v::mining::GetBlockTemplateTemplateRequest =
                     serde_json::from_value(into_json(request)?)?;
-                let res = self.rt.block_on(self.inner.get_block_template(req)).map_err(Self::map_err)?;
-                // Generated `GetBlockTemplate` is an untagged Null/Text/Object enum with no
-                // `into_model`; the test consumes the curated struct, so convert back through JSON.
-                Ok(serde_json::from_value(into_json(res)?)?)
+                match self.rt.block_on(self.inner.get_block_template(req)).map_err(Self::map_err)? {
+                    $crate::types::$v::generated::GetBlockTemplate::Object(v) => Ok(v),
+                    $crate::types::$v::generated::GetBlockTemplate::Null(()) =>
+                        Err(Error::Returned("getblocktemplate returned null".to_owned())),
+                    $crate::types::$v::generated::GetBlockTemplate::Text(s) =>
+                        Err(Error::Returned(format!("getblocktemplate returned: {s}"))),
+                }
             }
 
             // `get_mining_info` returns the GENERATED response type directly (no JSON round-trip):

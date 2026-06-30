@@ -50,6 +50,12 @@ fn into_json<T: Serialize>(val: T) -> Result<Value> { Ok(serde_json::to_value(va
 /// GENERATED `into_model` re-export the generated response type for that name (an explicit
 /// `pub use` shadows the glob), so the unchanged test runs the generated `into_model`.
 pub mod vtype {
+    // `getblocktemplate` is an untagged `Null/Text/Object` enum; only the `Object` variant
+    // (`GetBlockTemplateVariant2`) carries the template and has an `into_model`. The bridge
+    // returns that variant, so alias it to the name the test uses.
+    pub use crate::types::v31::generated::{
+        GetBlockTemplateError, GetBlockTemplateVariant2 as GetBlockTemplate,
+    };
     // Methods bridged through the async client's generated wrapper return the generated
     // response type; expose it (and its `into_model` error) here so the unchanged test's
     // `into_model()` is the generated one. An explicit `pub use` shadows the glob above.

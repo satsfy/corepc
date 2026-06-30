@@ -13,8 +13,8 @@ mod into;
 use serde::{Deserialize, Serialize};
 
 pub use self::into::{
-    GetMiningInfoError, GetPrioritisedTransactionsError, NextBlockInfoError,
-    PrioritisedTransactionError,
+    BlockTemplateTransactionError, GetBlockTemplateError, GetMiningInfoError,
+    GetPrioritisedTransactionsError, NextBlockInfoError, PrioritisedTransactionError,
 };
 
 /// Result of the JSON-RPC method `getblocktemplate`.
@@ -44,27 +44,30 @@ pub struct GetBlockTemplateVariant2 {
     pub bits: String,
     pub capabilities: Vec<String>,
     /// data that should be included in the coinbase's scriptSig content
-    pub coinbaseaux: std::collections::BTreeMap<String, String>,
+    #[serde(rename = "coinbaseaux")]
+    pub coinbase_aux: std::collections::BTreeMap<String, String>,
     /// maximum allowable input to coinbase transaction, including the generation award and transaction fees (in satoshis)
     #[serde(rename = "coinbasevalue")]
     pub coinbase_value: i64,
     /// current timestamp in UNIX epoch time. Adjusted for the proposed BIP94 timewarp rule.
     #[serde(rename = "curtime")]
-    pub cur_time: i64,
+    pub current_time: i64,
     /// a valid witness commitment for the unmodified block template
     #[serde(skip_serializing_if = "Option::is_none")]
     pub default_witness_commitment: Option<String>,
     /// The height of the next block
     pub height: i64,
     /// an id to include with a request to longpoll on an update to this template
-    pub longpollid: String,
+    #[serde(rename = "longpollid", skip_serializing_if = "Option::is_none")]
+    pub long_poll_id: Option<String>,
     /// The minimum timestamp appropriate for the next block time, expressed in UNIX epoch time. Adjusted for the proposed BIP94 timewarp rule.
     #[serde(rename = "mintime")]
     pub min_time: i64,
     /// list of ways the block template may be changed
     pub mutable: Vec<String>,
     /// A range of valid nonces
-    pub noncerange: String,
+    #[serde(rename = "noncerange")]
+    pub nonce_range: String,
     /// The hash of current highest block
     #[serde(rename = "previousblockhash")]
     pub previous_block_hash: String,
@@ -84,10 +87,11 @@ pub struct GetBlockTemplateVariant2 {
     /// contents of non-coinbase transactions that should be included in the next block
     pub transactions: Vec<GetBlockTemplateVariant2TransactionsItem>,
     /// set of pending, supported versionbit (BIP 9) softfork deployments
-    pub vbavailable: std::collections::BTreeMap<String, i64>,
+    #[serde(rename = "vbavailable")]
+    pub version_bits_available: std::collections::BTreeMap<String, i64>,
     /// bit mask of versionbits the server requires set in submissions
     #[serde(rename = "vbrequired")]
-    pub vb_required: i64,
+    pub version_bits_required: i64,
     /// The preferred block version
     pub version: i64,
     /// limit of block weight

@@ -33,6 +33,169 @@ use crate::error::write_err;
 use crate::model;
 use crate::v31::generated::compatibility;
 
+impl GetBlockTemplateVariant2 {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::GetBlockTemplate, GetBlockTemplateError> {
+        use GetBlockTemplateError as E;
+
+        Ok(model::GetBlockTemplate {
+            version: block::Version::from_consensus(self.version as i32),
+            rules: self.rules,
+            version_bits_available: self
+                .version_bits_available
+                .into_iter()
+                .map(|(k, v)| Ok::<_, E>((k, crate::to_u32(v, "version_bits_available")?)))
+                .collect::<Result<std::collections::BTreeMap<_, _>, _>>()?,
+            capabilities: self.capabilities,
+            version_bits_required: crate::to_u32(
+                self.version_bits_required,
+                "version_bits_required",
+            )?,
+            previous_block_hash: self
+                .previous_block_hash
+                .parse::<BlockHash>()
+                .map_err(E::PreviousBlockHash)?,
+            transactions: self
+                .transactions
+                .into_iter()
+                .map(|x| x.into_model().map_err(E::Transactions))
+                .collect::<Result<Vec<_>, _>>()?,
+            coinbase_aux: self
+                .coinbase_aux
+                .into_iter()
+                .map(|(k, v)| Ok::<_, E>((k, v)))
+                .collect::<Result<std::collections::BTreeMap<_, _>, _>>()?,
+            coinbase_value: SignedAmount::from_sat(self.coinbase_value),
+            long_poll_id: self.long_poll_id,
+            target: Vec::<u8>::from_hex(&self.target).map_err(E::Target)?,
+            min_time: crate::to_u32(self.min_time, "min_time")?,
+            mutable: self.mutable,
+            nonce_range: self.nonce_range,
+            sigop_limit: crate::to_u32(self.sigop_limit, "sigop_limit")?,
+            size_limit: crate::to_u32(self.size_limit, "size_limit")?,
+            weight_limit: self
+                .weight_limit
+                .map(|x| crate::to_u32(x, "weight_limit"))
+                .transpose()?
+                .unwrap_or_default(),
+            current_time: crate::to_u64(self.current_time, "current_time")?,
+            bits: CompactTarget::from_unprefixed_hex(&self.bits).map_err(E::Bits)?,
+            height: crate::to_u32(self.height, "height")?,
+            signet_challenge: self.signet_challenge,
+            default_witness_commitment: self.default_witness_commitment,
+        })
+    }
+}
+
+/// Error when converting a `GetBlockTemplate` type into the model type.
+#[derive(Debug)]
+pub enum GetBlockTemplateError {
+    /// Conversion of the `PreviousBlockHash` field failed.
+    PreviousBlockHash(hex::HexToArrayError),
+    /// Conversion of the `Transactions` field failed.
+    Transactions(BlockTemplateTransactionError),
+    /// Conversion of the `Target` field failed.
+    Target(hex::HexToBytesError),
+    /// Conversion of the `Bits` field failed.
+    Bits(UnprefixedHexError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for GetBlockTemplateError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::PreviousBlockHash(ref e) =>
+                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e),
+            Self::Transactions(ref e) =>
+                write_err!(f, "conversion of the `Transactions` field failed"; e),
+            Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
+            Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for GetBlockTemplateError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::PreviousBlockHash(ref e) => Some(e),
+            Self::Transactions(ref e) => Some(e),
+            Self::Target(ref e) => Some(e),
+            Self::Bits(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for GetBlockTemplateError {
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+}
+
+impl GetBlockTemplateVariant2TransactionsItem {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::BlockTemplateTransaction, BlockTemplateTransactionError> {
+        use BlockTemplateTransactionError as E;
+
+        Ok(model::BlockTemplateTransaction {
+            data: encode::deserialize_hex::<Transaction>(&self.data).map_err(E::Data)?,
+            txid: self.txid.parse::<Txid>().map_err(E::Txid)?,
+            wtxid: self.hash.parse::<Wtxid>().map_err(E::Wtxid)?,
+            depends: self
+                .depends
+                .into_iter()
+                .map(|x| crate::to_u32(x, "depends"))
+                .collect::<Result<Vec<_>, _>>()?,
+            fee: SignedAmount::from_sat(self.fee),
+            sigops: crate::to_u32(self.sigops, "sigops")?,
+            weight: Weight::from_wu(self.weight as u64),
+        })
+    }
+}
+
+/// Error when converting a `BlockTemplateTransaction` type into the model type.
+#[derive(Debug)]
+pub enum BlockTemplateTransactionError {
+    /// Conversion of the `Data` field failed.
+    Data(encode::FromHexError),
+    /// Conversion of the `Txid` field failed.
+    Txid(hex::HexToArrayError),
+    /// Conversion of the `Wtxid` field failed.
+    Wtxid(hex::HexToArrayError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for BlockTemplateTransactionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Data(ref e) => write_err!(f, "conversion of the `Data` field failed"; e),
+            Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
+            Self::Wtxid(ref e) => write_err!(f, "conversion of the `Wtxid` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for BlockTemplateTransactionError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Data(ref e) => Some(e),
+            Self::Txid(ref e) => Some(e),
+            Self::Wtxid(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for BlockTemplateTransactionError {
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+}
+
 impl GetMiningInfo {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::GetMiningInfo, GetMiningInfoError> {

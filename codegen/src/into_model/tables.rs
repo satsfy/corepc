@@ -57,6 +57,10 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("*", "descriptor", "desc"),
     ("*", "parent_descriptors", "parent_descs"),
     ("*", "parent_descriptor", "parent_desc"),
+    // Mining: the block-template transaction's segwit txid is Core's `hash`. (The `GetBlockTemplate`
+    // field renames live in `RAW_FIELD_RENAME` instead, so the raw struct already matches the model
+    // field names and needs no alias here.)
+    ("BlockTemplateTransaction", "wtxid", "hash"),
     // Blockchain.
     ("ChainTips", "branch_length", "branchlen"),
     // `getdescriptoractivity` spend entry: Core's wire field is `spend_vin` (the input index); the
