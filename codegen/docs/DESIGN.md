@@ -11,7 +11,7 @@ A small compiler: `src/spec.rs` (front end) deserializes the OpenRPC subset used
 (middle) converts it to generator-owned data (the `Modules` IR, in `codegen/mod.rs`); `codegen/emit.rs`
 (back end, `Modules::write()`) emits the files. `src/into_model/` generates the `into_model`
 conversions (tables, the conversion engine, emission). `src/names.rs` handles identifier splitting,
-`main.rs` is the CLI. `btc-codegen` is a private workspace member depending only on `serde` +
+`main.rs` is the CLI. `corepc-codegen` is a private workspace member depending only on `serde` +
 `serde_json`. Specs live in `specs/` (one per release v17..v31, from a Core patch adding
 `getopenrpcinfo`).
 

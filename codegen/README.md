@@ -1,11 +1,18 @@
-# codegen
+# corepc-codegen
 
-A self-contained Rust tool that generates Rust bindings for the Bitcoin Core JSON-RPC API from
-Bitcoin Core's own OpenRPC export.
+A self-contained Rust tool that generates bindings for the Bitcoin Core JSON-RPC API from
+Bitcoin Core's own OpenRPC json export. A bridge enables running corepc integration tests against the outputs produced by this crate.
 
-The generated files are committed in the sibling `corepc-types` and `corepc-client` crates. The
-tool runs only when a maintainer regenerates bindings. The crate is `btc-codegen`, a non-published
-member of the corepc workspace; it is not built or depended on by the consumer crates.
+The generated files are committed in the `corepc-types` and `corepc-client` crates. The
+tool generates code manually with `just codegen all` in corepc root folder. Model conversions (`.into_model()`) are supported without manual intervention when generating.
+
+## Development Process and Maintenance
+
+This crate was developed using an iterative process of Claude Opus 4.8 + human review. It is suggested that you use AI's help to modify this crate due to its complexity, because the criteria of quality (successfully passing integration tests) can be leveraged by the model to evaluate whether it has produced valid code. Human review consists of checking code quality, excessive comments, cleanness of the solution and testing if any code branches are useless or overcomplicated.
+
+## How does it work
+
+It works as a compiler of OpenRPC into Rust types and clients. It has an intermediary representation (IR) that parses OpenRPC and writes rust codegen strings automatically.
 
 ## What it produces
 
