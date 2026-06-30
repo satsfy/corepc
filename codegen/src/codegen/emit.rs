@@ -117,6 +117,7 @@ impl Modules {
 
     /// Emit one category's response types into a `corepc-types` module file.
     fn emit_types_category(&self, version: &str, category: &str) -> String {
+        // TODO (@satsfy) why do we specificy capcty here?
         let mut s = String::with_capacity(32 * 1024);
         s.push_str(&format!(
             "// SPDX-License-Identifier: CC0-1.0\n\n\
