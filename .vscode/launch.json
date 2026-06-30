@@ -65,17 +65,17 @@
             }
         },
         {
-            "name": "Debug 'btc-codegen' (prompt for version)",
+            "name": "Debug 'corepc-codegen' (prompt for version)",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=btc-codegen",
-                    "--package=btc-codegen"
+                    "--bin=corepc-codegen",
+                    "--package=corepc-codegen"
                 ],
                 "filter": {
-                    "name": "btc-codegen",
+                    "name": "corepc-codegen",
                     "kind": "bin"
                 }
             },
@@ -85,17 +85,17 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "name": "Debug 'btc-codegen' (all)",
+            "name": "Debug 'corepc-codegen' (all)",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=btc-codegen",
-                    "--package=btc-codegen"
+                    "--bin=corepc-codegen",
+                    "--package=corepc-codegen"
                 ],
                 "filter": {
-                    "name": "btc-codegen",
+                    "name": "corepc-codegen",
                     "kind": "bin"
                 }
             },
