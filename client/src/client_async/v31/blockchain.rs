@@ -17,11 +17,10 @@ use types::v31::generated::{
     GetBlockVerbose1, GetBlockVerbose2, GetBlockVerbose3, GetBlockchainInfo, GetChainStates,
     GetChainTips, GetChainTxStats, GetDeploymentInfo, GetDescriptorActivity, GetDifficulty,
     GetMempoolAncestorsVerbose0, GetMempoolAncestorsVerbose1, GetMempoolCluster,
-    GetMempoolDescendantsVerbose0, GetMempoolDescendantsVerbose1, GetMempoolEntry,
-    GetMempoolFeeRateDiagram, GetMempoolInfo, GetRawMempool, GetTxOut, GetTxOutProof,
-    GetTxOutSetInfo, GetTxSpendingPrevout, ImportMempool, LoadTxOutSet, PruneBlockchain,
-    SaveMempool, ScanBlocks, ScanTxOutSet, VerifyChain, VerifyTxOutProof, WaitForBlock,
-    WaitForBlockHeight, WaitForNewBlock,
+    GetMempoolDescendantsVerbose0, GetMempoolDescendantsVerbose1, GetMempoolEntry, GetMempoolInfo,
+    GetRawMempool, GetTxOut, GetTxOutProof, GetTxOutSetInfo, GetTxSpendingPrevout, ImportMempool,
+    LoadTxOutSet, PruneBlockchain, SaveMempool, ScanBlocks, ScanTxOutSet, VerifyChain,
+    VerifyTxOutProof, WaitForBlock, WaitForBlockHeight, WaitForNewBlock,
 };
 
 use crate::client_async::error::Result;
@@ -679,13 +678,6 @@ impl Client {
     /// Returns mempool data for given transaction
     pub async fn get_mempool_entry(&self, txid: String) -> Result<GetMempoolEntry> {
         self.call_raw("getmempoolentry", &[json!(txid)]).await
-    }
-
-    /// `getmempoolfeeratediagram` with required arguments only.
-    ///
-    /// Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.
-    pub async fn get_mempool_fee_rate_diagram(&self) -> Result<GetMempoolFeeRateDiagram> {
-        self.call_raw("getmempoolfeeratediagram", &[(); 0] as &[()]).await
     }
 
     /// `getmempoolinfo` with required arguments only.

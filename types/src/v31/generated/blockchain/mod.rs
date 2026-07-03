@@ -15,16 +15,16 @@ use serde::{Deserialize, Serialize};
 pub use self::into::{
     ActivityEntryError, Bip9InfoError, Bip9StatisticsError, ChainStateError, ChainTipsError,
     ChunkError, CoinbaseTransactionError, DeploymentInfoError, DumpTxOutSetError,
-    FeerateDiagramEntryError, GetBestBlockHashError, GetBlockCountError, GetBlockFilterError,
-    GetBlockHashError, GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockStatsError,
-    GetBlockVerboseOneError, GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
+    GetBestBlockHashError, GetBlockCountError, GetBlockFilterError, GetBlockHashError,
+    GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockStatsError, GetBlockVerboseOneError,
+    GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
     GetBlockVerboseThreeTransactionError, GetBlockVerboseTwoError,
     GetBlockVerboseTwoTransactionError, GetBlockVerboseZeroError, GetBlockchainInfoError,
     GetChainStatesError, GetChainTipsError, GetChainTxStatsError, GetDeploymentInfoError,
     GetDescriptorActivityError, GetDifficultyError, GetMempoolAncestorsError,
     GetMempoolAncestorsVerboseError, GetMempoolClusterError, GetMempoolDescendantsError,
-    GetMempoolDescendantsVerboseError, GetMempoolEntryError, GetMempoolFeerateDiagramError,
-    GetMempoolInfoError, GetRawMempoolResultError, GetRawMempoolSequenceError, GetTxOutError,
+    GetMempoolDescendantsVerboseError, GetMempoolEntryError, GetMempoolInfoError,
+    GetRawMempoolResultError, GetRawMempoolSequenceError, GetTxOutError,
     GetTxOutSetInfoBlockInfoError, GetTxOutSetInfoError, GetTxOutSetInfoUnspendablesError,
     GetTxSpendingPrevoutError, GetTxSpendingPrevoutItemError, LoadTxOutSetError, MempoolEntryError,
     MempoolEntryFeesError, ReceiveActivityError, ScanBlocksStartError, ScanTxOutSetStartError,
@@ -123,6 +123,13 @@ impl std::ops::Deref for GetBlockHash {
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
+impl GetBlockHash {
+    /// Converts json straight to a `bitcoin::BlockHash`.
+    pub fn block_hash(&self) -> Result<bitcoin::BlockHash, bitcoin::hex::HexToArrayError> {
+        self.0.parse()
+    }
+}
+
 /// If verbose is false, returns a string that is serialized, hex-encoded data for blockheader 'hash'.
 /// If verbose is true, returns an Object with information about blockheader \<hash\>.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -132,6 +139,15 @@ pub struct GetBlockHeaderVerbose0(pub String);
 impl std::ops::Deref for GetBlockHeaderVerbose0 {
     type Target = String;
     fn deref(&self) -> &Self::Target { &self.0 }
+}
+
+impl GetBlockHeaderVerbose0 {
+    /// Converts json straight to a `bitcoin::block::Header`.
+    pub fn block_header(
+        &self,
+    ) -> Result<bitcoin::block::Header, bitcoin::consensus::encode::FromHexError> {
+        bitcoin::consensus::encode::deserialize_hex(&self.0)
+    }
 }
 
 /// If verbose is false, returns a string that is serialized, hex-encoded data for blockheader 'hash'.
@@ -1130,24 +1146,6 @@ pub struct GetMempoolEntryFees {
     pub descendant: f64,
     /// transaction fee with fee deltas used for mining priority, denominated in BTC
     pub modified: f64,
-}
-
-/// Result of the JSON-RPC method `getmempoolfeeratediagram`.
-///
-/// > getmempoolfeeratediagram
-/// >
-/// > Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetMempoolFeeRateDiagram(pub Vec<GetMempoolFeeRateDiagramItem>);
-
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetMempoolFeeRateDiagramItem {
-    /// cumulative fee in BTC
-    pub fee: f64,
-    /// cumulative sigops-adjusted weight
-    pub weight: i64,
 }
 
 /// Returns details on the active state of the TX memory pool.

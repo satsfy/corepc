@@ -45,7 +45,7 @@ macro_rules! impl_client_v29__get_block {
             /// Gets a block by blockhash. Kept for compatibility; uses verbose set to 0.
             pub fn get_block(&self, hash: BlockHash) -> Result<Block> {
                 let json = self.get_block_verbose_zero(hash)?;
-                bitcoin::consensus::encode::deserialize_hex(&json.0).map_err(|e| Error::Returned(e.to_string()))
+                Ok(bitcoin::consensus::encode::deserialize_hex(&json.0)?)
             }
 
             /// Gets a block by blockhash with verbose set to 0.

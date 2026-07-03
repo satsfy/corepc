@@ -7,7 +7,6 @@
 
 pub mod blockchain;
 pub mod control;
-pub mod generating;
 pub mod mining;
 pub mod network;
 pub mod raw_transactions;
@@ -21,7 +20,6 @@ pub mod compatibility;
 
 pub use self::blockchain::*;
 pub use self::control::*;
-pub use self::generating::*;
 pub use self::mining::*;
 pub use self::network::*;
 pub use self::raw_transactions::*;

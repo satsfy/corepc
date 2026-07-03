@@ -20,17 +20,18 @@ use crate::model;
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct DeriveAddressesMultipath(pub Vec<DeriveAddresses>);
 
-impl DeriveAddressesMultipath {
-    /// Converts version specific type to a version nonspecific, more strongly typed type.
-    pub fn into_model(self) -> Result<model::DeriveAddressesMultipath, address::ParseError> {
-        let derive_addresses = self
-            .0
-            .into_iter()
-            .map(|derive_addresses| derive_addresses.into_model())
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(model::DeriveAddressesMultipath { addresses: derive_addresses })
-    }
-}
+// Curated into_model conversions are disabled (see into.rs.md); only generated ones are used.
+// impl DeriveAddressesMultipath {
+//     /// Converts version specific type to a version nonspecific, more strongly typed type.
+//     pub fn into_model(self) -> Result<model::DeriveAddressesMultipath, address::ParseError> {
+//         let derive_addresses = self
+//             .0
+//             .into_iter()
+//             .map(|derive_addresses| derive_addresses.into_model())
+//             .collect::<Result<Vec<_>, _>>()?;
+//         Ok(model::DeriveAddressesMultipath { addresses: derive_addresses })
+//     }
+// }
 
 /// Result of JSON-RPC method `getdescriptorinfo`.
 ///

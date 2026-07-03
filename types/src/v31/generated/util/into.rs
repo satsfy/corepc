@@ -76,46 +76,6 @@ impl std::error::Error for CreateMultisigError {
     }
 }
 
-impl DeriveAddresses {
-    /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::DeriveAddresses, DeriveAddressesError> {
-        use DeriveAddressesError as E;
-
-        Ok(model::DeriveAddresses {
-            addresses: self
-                .0
-                .into_iter()
-                .map(|x| x.parse::<Address<NetworkUnchecked>>().map_err(E::Addresses))
-                .collect::<Result<Vec<_>, _>>()?,
-        })
-    }
-}
-
-/// Error when converting a `DeriveAddresses` type into the model type.
-#[derive(Debug)]
-pub enum DeriveAddressesError {
-    /// Conversion of the `Addresses` field failed.
-    Addresses(address::ParseError),
-}
-
-impl fmt::Display for DeriveAddressesError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Addresses(ref e) =>
-                write_err!(f, "conversion of the `Addresses` field failed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for DeriveAddressesError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::Addresses(ref e) => Some(e),
-        }
-    }
-}
-
 impl EstimateSmartFee {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::EstimateSmartFee, EstimateSmartFeeError> {

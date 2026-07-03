@@ -10,6 +10,36 @@ use std::path::Path;
 use super::*;
 use crate::spec::{Method, Param};
 
+
+/// Convenience accessors the curated types provide; emitted verbatim on the matching generated
+/// type so callers (tests, helpers) compile unchanged against either type. `(type, impl body)`.
+const CONVENIENCE_ACCESSORS: &[(&str, &str)] = &[
+    (
+        "GetBlockHash",
+        "impl GetBlockHash {\n    /// Converts json straight to a `bitcoin::BlockHash`.\n    pub fn block_hash(&self) -> Result<bitcoin::BlockHash, bitcoin::hex::HexToArrayError> {\n        self.0.parse()\n    }\n}\n",
+    ),
+    (
+        "GetBlockHeaderVerbose0",
+        "impl GetBlockHeaderVerbose0 {\n    /// Converts json straight to a `bitcoin::block::Header`.\n    pub fn block_header(\n        &self,\n    ) -> Result<bitcoin::block::Header, bitcoin::consensus::encode::FromHexError> {\n        bitcoin::consensus::encode::deserialize_hex(&self.0)\n    }\n}\n",
+    ),
+    (
+        "CreateRawTransaction",
+        "impl CreateRawTransaction {\n    /// Converts json straight to a `bitcoin::Transaction`.\n    pub fn transaction(\n        &self,\n    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {\n        bitcoin::consensus::encode::deserialize_hex(&self.0)\n    }\n}\n",
+    ),
+    (
+        "GetRawTransactionVerbose0",
+        "impl GetRawTransactionVerbose0 {\n    /// Converts json straight to a `bitcoin::Transaction`.\n    pub fn transaction(\n        &self,\n    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {\n        bitcoin::consensus::encode::deserialize_hex(&self.0)\n    }\n}\n",
+    ),
+    (
+        "FundRawTransaction",
+        "impl FundRawTransaction {\n    /// Converts json straight to a `bitcoin::Transaction`.\n    pub fn transaction(\n        &self,\n    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {\n        bitcoin::consensus::encode::deserialize_hex(&self.hex)\n    }\n}\n",
+    ),
+    (
+        "SendToAddressVerbose0",
+        "impl SendToAddressVerbose0 {\n    /// Converts json straight to a `bitcoin::Txid`.\n    pub fn txid(&self) -> Result<bitcoin::Txid, bitcoin::hex::HexToArrayError> {\n        self.0.parse()\n    }\n}\n",
+    ),
+];
+
 impl Modules {
     /// Write all generated files across both crates, split into per-category modules.
     ///
@@ -139,6 +169,12 @@ impl Modules {
         for ty in sorted {
             s.push_str(&ty.body);
             s.push('\n');
+            if let Some((_, accessors)) =
+                CONVENIENCE_ACCESSORS.iter().find(|(name, _)| *name == ty.name)
+            {
+                s.push_str(accessors);
+                s.push('\n');
+            }
         }
         s
     }

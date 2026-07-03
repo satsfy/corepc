@@ -1289,6 +1289,11 @@ impl std::ops::Deref for SendToAddressVerbose0 {
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
+impl SendToAddressVerbose0 {
+    /// Converts json straight to a `bitcoin::Txid`.
+    pub fn txid(&self) -> Result<bitcoin::Txid, bitcoin::hex::HexToArrayError> { self.0.parse() }
+}
+
 /// Send an amount to a given address.
 /// Requires wallet passphrase to be set with walletpassphrase call if wallet is encrypted.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]

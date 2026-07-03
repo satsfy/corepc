@@ -13,8 +13,7 @@ mod into;
 use serde::{Deserialize, Serialize};
 
 pub use self::into::{
-    CreateMultisigError, DeriveAddressesError, EstimateSmartFeeError, SignMessageWithPrivKeyError,
-    ValidateAddressError,
+    CreateMultisigError, EstimateSmartFeeError, SignMessageWithPrivKeyError, ValidateAddressError,
 };
 
 /// Creates a multi-signature address with n signatures of m keys required.
@@ -50,8 +49,11 @@ pub struct CreateMultisig {
 /// > or more path elements separated by "/", where "h" represents a hardened child key.
 /// > For more information on output descriptors, see the documentation in the doc/descriptors.md file.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct DeriveAddresses(pub Vec<String>);
+#[serde(untagged)]
+pub enum DeriveAddresses {
+    List(Vec<String>),
+    List2(Vec<Vec<String>>),
+}
 
 /// Estimates the approximate fee per kilobyte needed for a transaction to begin
 /// confirmation within conf_target blocks if possible and return the number of blocks

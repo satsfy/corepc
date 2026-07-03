@@ -2,6 +2,10 @@
 
 //! Tests for methods that are `== Hidden ==` and not in the API docs of Bitcoin Core.
 
+// Hidden RPCs are absent from Core's OpenRPC spec, so they have no generated types or
+// `into_model`; with the curated conversions retired these tests only exist for the sync
+// client, which is itself disabled in the async migration.
+#![cfg(not(feature = "test-async"))]
 #![allow(non_snake_case)] // Test names intentionally use double underscore.
 
 #[cfg(not(feature = "v28_and_below"))]

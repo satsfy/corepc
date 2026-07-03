@@ -122,7 +122,7 @@ fn get_block_header_verbose_fields() {
 
     let best = node.client.best_block_hash().unwrap();
     let height = node.client.get_block_count().unwrap().0;
-    let prev = node.client.get_block_hash(height - 1).unwrap().block_hash().unwrap();
+    let prev = node.client.get_block_hash((height - 1) as u64).unwrap().block_hash().unwrap();
 
     let json: GetBlockHeaderVerbose = node.client.get_block_header_verbose(&best).unwrap();
 
@@ -139,7 +139,7 @@ fn get_block_hash_at_tip_matches_best() {
 
     let best = node.client.best_block_hash().unwrap();
     let height = node.client.get_block_count().unwrap().0;
-    let at_height = node.client.get_block_hash(height).unwrap().block_hash().unwrap();
+    let at_height = node.client.get_block_hash(height as u64).unwrap().block_hash().unwrap();
 
     assert_eq!(at_height, best);
 }
@@ -166,7 +166,7 @@ fn get_chain_tips_active_tip_matches_best() {
     let height = node.client.get_block_count().unwrap().0;
     let json: GetChainTips = node.client.get_chain_tips().unwrap();
 
-    let tip = json.0.iter().find(|t| t.status == ChainTipsStatus::Active).unwrap();
+    let tip = json.0.iter().find(|t| t.status == "active").unwrap();
     assert_eq!(tip.hash, best.to_string());
     assert_eq!(tip.height, height as i64);
     assert_eq!(tip.branch_length, 0);
@@ -181,8 +181,8 @@ fn get_mempool_entry_height_and_no_parents() {
     let height = node.client.get_block_count().unwrap().0;
     let json: GetMempoolEntry = node.client.get_mempool_entry(txid).unwrap();
 
-    assert_eq!(json.0.height, height as i64);
-    assert!(json.0.depends.is_empty());
+    assert_eq!(json.height, height as i64);
+    assert!(json.depends.is_empty());
 }
 
 #[test]
@@ -261,7 +261,7 @@ fn get_block_verbose_two_non_coinbase_has_fee() {
     let json: GetBlockVerboseTwo = node.client.get_block_verbose_two(hash).unwrap();
 
     let mined_id = mined.compute_txid().to_string();
-    let entry = json.tx.iter().find(|t| t.transaction.txid == mined_id).unwrap();
+    let entry = json.tx.iter().find(|t| t.extra.get("txid").and_then(|v| v.as_str()) == Some(mined_id.as_str())).unwrap();
     assert!(entry.fee.is_some());
 }
 
@@ -276,9 +276,9 @@ fn get_block_verbose_three_non_coinbase_has_prevouts() {
     let json: GetBlockVerboseThree = node.client.get_block_verbose_three(hash).unwrap();
 
     let mined_id = mined.compute_txid().to_string();
-    let entry = json.tx.iter().find(|t| t.transaction.txid == mined_id).unwrap();
+    let entry = json.tx.iter().find(|t| t.extra.get("txid").and_then(|v| v.as_str()) == Some(mined_id.as_str())).unwrap();
 
-    assert!(entry.transaction.inputs.iter().any(|v| v.prevout.is_some()));
+    assert!(entry.vin.iter().any(|v| v.prevout.is_some()));
 }
 
 #[test]
@@ -290,7 +290,7 @@ fn get_mempool_entry_spent_by_contains_child() {
 
     let json: GetMempoolEntry = node.client.get_mempool_entry(parent).unwrap();
 
-    assert!(json.0.spent_by.iter().any(|t| *t == child.to_string()));
+    assert!(json.spent_by.iter().any(|t| *t == child.to_string()));
 }
 
 #[test]
@@ -302,8 +302,12 @@ fn get_raw_mempool_sequence_includes_tx() {
 
     let json: GetRawMempoolSequence = node.client.get_raw_mempool_sequence().unwrap();
 
-    assert!(json.txids.iter().any(|t| *t == txid.to_string()));
-    assert!(json.mempool_sequence > 0);
+    let seq = match json {
+        GetRawMempoolSequence::Object2(seq) => seq,
+        other => panic!("expected sequence object, got {:?}", other),
+    };
+    assert!(seq.txids.iter().any(|t| *t == txid.to_string()));
+    assert!(seq.mempool_sequence > 0);
 }
 
 #[test]
@@ -354,7 +358,7 @@ fn get_chain_tips_after_invalidate_block_has_stale_tip() {
 
     let json: GetChainTips = node.client.get_chain_tips().unwrap();
 
-    let stale = json.0.iter().find(|t| t.status == ChainTipsStatus::Invalid).unwrap();
+    let stale = json.0.iter().find(|t| t.status == "invalid").unwrap();
     assert_eq!(stale.branch_length, 1);
 }
 

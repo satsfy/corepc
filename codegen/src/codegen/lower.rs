@@ -124,6 +124,7 @@ pub static INTEGER_PARAM_NAMES: &[&str] = &[
     "skip",
     "nodeid",
     "peer_id",
+    "timestamp",
     "id",
     "uid",
     "nrequired",

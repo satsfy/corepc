@@ -29,7 +29,7 @@ macro_rules! impl_client_v17__get_best_block_hash {
             /// Gets the blockhash of the current chain tip.
             pub fn best_block_hash(&self) -> Result<bitcoin::BlockHash> {
                 let json = self.get_best_block_hash()?;
-                json.0.parse::<bitcoin::BlockHash>().map_err(|e| Error::Returned(e.to_string()))
+                Ok(json.0.parse::<bitcoin::BlockHash>()?)
             }
 
             pub fn get_best_block_hash(&self) -> Result<GetBestBlockHash> {
@@ -47,7 +47,7 @@ macro_rules! impl_client_v17__get_block {
             /// Gets a block by blockhash.
             pub fn get_block(&self, hash: BlockHash) -> Result<Block> {
                 let json = self.get_block_verbose_zero(hash)?;
-                bitcoin::consensus::encode::deserialize_hex(&json.0).map_err(|e| Error::Returned(e.to_string()))
+                Ok(bitcoin::consensus::encode::deserialize_hex(&json.0)?)
             }
 
             /// Gets a block by blockhash with verbose set to 0.

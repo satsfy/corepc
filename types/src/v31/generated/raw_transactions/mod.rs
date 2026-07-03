@@ -177,6 +177,15 @@ impl std::ops::Deref for CreateRawTransaction {
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
+impl CreateRawTransaction {
+    /// Converts json straight to a `bitcoin::Transaction`.
+    pub fn transaction(
+        &self,
+    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {
+        bitcoin::consensus::encode::deserialize_hex(&self.0)
+    }
+}
+
 /// Return a JSON object representing the serialized, base64-encoded partially signed Bitcoin transaction.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
@@ -742,6 +751,15 @@ pub struct FundRawTransaction {
     pub hex: String,
 }
 
+impl FundRawTransaction {
+    /// Converts json straight to a `bitcoin::Transaction`.
+    pub fn transaction(
+        &self,
+    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {
+        bitcoin::consensus::encode::deserialize_hex(&self.hex)
+    }
+}
+
 /// Returns information about transactions that are currently being privately broadcast.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
@@ -791,6 +809,15 @@ pub struct GetRawTransactionVerbose0(pub String);
 impl std::ops::Deref for GetRawTransactionVerbose0 {
     type Target = String;
     fn deref(&self) -> &Self::Target { &self.0 }
+}
+
+impl GetRawTransactionVerbose0 {
+    /// Converts json straight to a `bitcoin::Transaction`.
+    pub fn transaction(
+        &self,
+    ) -> Result<bitcoin::Transaction, bitcoin::consensus::encode::FromHexError> {
+        bitcoin::consensus::encode::deserialize_hex(&self.0)
+    }
 }
 
 /// By default, this call only returns a transaction if it is in the mempool. If -txindex is enabled

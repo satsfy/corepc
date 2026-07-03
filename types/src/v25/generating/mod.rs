@@ -5,7 +5,7 @@
 //! Types for methods found under the `== Generating ==` section of the API docs.
 
 mod error;
-// mod into; // curated into_model disabled: renamed to into.rs.md, keep only generated/
+// mod into;
 
 use serde::{Deserialize, Serialize};
 
