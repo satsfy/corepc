@@ -4,7 +4,7 @@
 //!
 //! Types for methods that are excluded from the API docs by default.
 
-mod into;
+// mod into; // curated into_model disabled: renamed to into.rs.md, keep only generated/
 
 use serde::{Deserialize, Serialize};
 

@@ -5,7 +5,7 @@
 //! Types for methods found under the `== Util ==` section of the API docs.
 
 mod error;
-mod into;
+// mod into; // curated into_model disabled: renamed to into.rs.md, keep only generated/
 
 use serde::{Deserialize, Serialize};
 

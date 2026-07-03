@@ -6,7 +6,7 @@
 use serde::{Deserialize, Serialize};
 
 mod error;
-mod into;
+// mod into; // curated into_model disabled: renamed to into.rs.md, keep only generated/
 
 pub use self::error::{
     GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockVerboseOneError,
