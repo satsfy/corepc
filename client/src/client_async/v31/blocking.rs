@@ -44,29 +44,59 @@ pub use crate::client_sync::{
 fn into_json<T: Serialize>(val: T) -> Result<Value> { Ok(serde_json::to_value(val)?) }
 
 /// The version-specific response-type namespace the integration tests import under
-/// `test-async`. Mirrors `crate::types::v31` (the curated types the facade's macro
-/// methods return) so `bitcoind::vtype` resolves the same names whether `node.client` is
-/// the sync client or this facade. The exception: methods bridged through the async client's
-/// GENERATED `into_model` re-export the generated response type for that name (an explicit
-/// `pub use` shadows the glob), so the unchanged test runs the generated `into_model`.
+/// `test-async`. GENERATED types only: every response type (and its `into_model` error)
+/// comes from `crate::types::v31::generated`, so every test `into_model()` runs the
+/// generated conversion. Explicit aliases map union-variant / verbose-level names onto the
+/// names the tests use (an explicit `pub use` shadows the glob). The trailing curated
+/// imports are the few types with NO generated counterpart (RPCs absent from the OpenRPC
+/// spec, or response shapes the tests read raw without `into_model`).
 pub mod vtype {
-    // `getblocktemplate` is an untagged `Null/Text/Object` enum; only the `Object` variant
-    // (`GetBlockTemplateVariant2`) carries the template and has an `into_model`. The bridge
-    // returns that variant, so alias it to the name the test uses.
+    pub use crate::types::v31::generated::*;
+
+    // Union-variant and verbose-level aliases onto the names the tests use.
+    #[rustfmt::skip]
     pub use crate::types::v31::generated::{
-        GetBlockTemplateError, GetBlockTemplateVariant2 as GetBlockTemplate,
+        GetBlockTemplateVariant2 as GetBlockTemplate,
+        GetTxOutVariant1 as GetTxOut,
+        GetPeerInfoItem as PeerInfo,
+        GetMempoolFeeRateDiagram as GetMempoolFeerateDiagram,
+        ScanTxOutSetVariant0 as ScanTxOutSetStart,
+        ScanBlocksVariant1 as ScanBlocksStart,
+        GetBlockVerbose0 as GetBlockVerboseZero,
+        GetBlockVerbose1 as GetBlockVerboseOne,
+        GetBlockVerbose2 as GetBlockVerboseTwo,
+        GetBlockVerbose3 as GetBlockVerboseThree,
+        GetBlockHeaderVerbose0 as GetBlockHeader,
+        GetBlockHeaderVerbose1 as GetBlockHeaderVerbose,
+        GetMempoolAncestorsVerbose0 as GetMempoolAncestors,
+        GetMempoolAncestorsVerbose1 as GetMempoolAncestorsVerbose,
+        GetMempoolDescendantsVerbose0 as GetMempoolDescendants,
+        GetMempoolDescendantsVerbose1 as GetMempoolDescendantsVerbose,
+        GetRawMempool as GetRawMempoolVerbose,
+        GetRawMempool as GetRawMempoolSequence,
+        GetRawTransactionVerbose0 as GetRawTransaction,
+        GetRawTransactionVerbose1 as GetRawTransactionVerbose,
+        SendManyVerbose0 as SendMany,
+        SendManyVerbose1 as SendManyVerbose,
+        SendToAddressVerbose0 as SendToAddress,
+        SendResult as Send,
+        SignRawTransactionWithWallet as SignRawTransaction,
+        GetChainTipsError as ChainTipsError,
+        GetMempoolEntryError as MempoolEntryError,
+        ScanTxOutSetStartError as ScanTxOutSetError,
     };
-    // Methods bridged through the async client's generated wrapper return the generated
-    // response type; expose it (and its `into_model` error) here so the unchanged test's
-    // `into_model()` is the generated one. An explicit `pub use` shadows the glob above.
-    pub use crate::types::v31::generated::{
-        GetMiningInfo, GetMiningInfoError, GetPrioritisedTransactions,
-        GetPrioritisedTransactionsError,
+
+    // Curated types with no generated counterpart: hidden/no-spec RPC responses and
+    // shapes the tests read raw (no `into_model`). `Logging` shadows the generated one
+    // (the generated response is a plain map; tests read named bool fields).
+    #[rustfmt::skip]
+    pub use crate::types::v31::{
+        Logging, GetZmqNotifications, ScanBlocksStatus, ScanBlocksAbort,
+        TransactionCategory,
+        ScanTxOutSetStatus, ScanTxOutSetAbort, AddPeerAddress,
     };
-    // `getnetworkinfo` is bridged through the generated wrapper; expose the generated
-    // response type and its error so the test's `into_model()` is the generated one.
-    pub use crate::types::v31::generated::{GetNetworkInfo, GetNetworkInfoError};
-    pub use crate::types::v31::*;
+    pub use crate::types::v17::GetMemoryInfoStats;
+    pub use crate::types::NumericError;
 }
 
 /// A blocking JSON-RPC client that drives the async `v31` production client.
@@ -133,190 +163,9 @@ crate::impl_async_bridges!(v31);
 
 crate::impl_client_check_expected_server_version!({ [310000] });
 
-// == Blockchain ==
-crate::impl_client_v29__dump_tx_out_set!();
-crate::impl_client_v17__get_best_block_hash!();
-crate::impl_client_v29__get_block!();
-crate::impl_client_v17__get_blockchain_info!();
-crate::impl_client_v17__get_block_count!();
-crate::impl_client_v19__get_block_filter!();
-crate::impl_client_v23__get_block_from_peer!();
-crate::impl_client_v17__get_block_hash!();
-crate::impl_client_v17__get_block_header!();
-crate::impl_client_v17__get_block_stats!();
-crate::impl_client_v26__get_chain_states!();
-crate::impl_client_v17__get_chain_tips!();
-crate::impl_client_v17__get_chain_tx_stats!();
-crate::impl_client_v23__get_deployment_info!();
-crate::impl_client_v30__get_descriptor_activity!();
-crate::impl_client_v17__get_difficulty!();
-crate::impl_client_v17__get_mempool_ancestors!();
-crate::impl_client_v31__get_mempool_cluster!();
-crate::impl_client_v31__get_mempool_feerate_diagram!();
-crate::impl_client_v17__get_mempool_descendants!();
-crate::impl_client_v17__get_mempool_entry!();
-crate::impl_client_v17__get_mempool_info!();
-crate::impl_client_v21__get_raw_mempool!();
-crate::impl_client_v17__get_tx_out!();
-crate::impl_client_v17__get_tx_out_proof!();
-crate::impl_client_v26__get_tx_out_set_info!();
-crate::impl_client_v31__get_tx_spending_prevout!();
-crate::impl_client_v26__import_mempool!();
-crate::impl_client_v26__load_tx_out_set!();
-crate::impl_client_v17__precious_block!();
-crate::impl_client_v17__prune_blockchain!();
-crate::impl_client_v23__save_mempool!();
-crate::impl_client_v25__scan_blocks!();
-crate::impl_client_v17__scan_tx_out_set!();
-crate::impl_client_v17__verify_chain!();
-crate::impl_client_v17__verify_tx_out_proof!();
-crate::impl_client_v17__estimate_raw_fee!();
-crate::impl_client_v17__wait_for_block!();
-crate::impl_client_v17__wait_for_block_height!();
-crate::impl_client_v17__wait_for_new_block!();
-
-// == Control ==
-crate::impl_client_v17__get_memory_info!();
-crate::impl_client_v18__get_rpc_info!();
-crate::impl_client_v17__help!();
-crate::impl_client_v17__logging!();
-crate::impl_client_v17__stop!();
-crate::impl_client_v17__uptime!();
-
-// == Generating ==
-// generate_block: bridged by `impl_async_bridges!` (see above).
-// generate_to_address: bridged by `impl_async_bridges!` (see above).
-// generate_to_descriptor: bridged by `impl_async_bridges!` (see above).
-// invalidate_block: bridged by `impl_async_bridges!` (see above).
-
-// == Hidden ==
-crate::impl_client_v27__add_connection!();
-// add_peer_address: bridged by `impl_async_bridges!` (see above).
-crate::impl_client_v29__get_orphan_txs!();
-crate::impl_client_v29__get_orphan_txs_verbosity_1!();
-crate::impl_client_v29__get_orphan_txs_verbosity_2!();
-crate::impl_client_v26__get_raw_addrman!();
-crate::impl_client_v20__mock_scheduler!();
-crate::impl_client_v17__reconsider_block!();
-crate::impl_client_v17__sync_with_validation_interface_queue!();
-
-// == Mining ==
-// get_block_template: bridged by `impl_async_bridges!` (see above).
-// get_mining_info: bridged by `impl_async_bridges!` (see above).
-// get_network_hashes_per_second: bridged by `impl_async_bridges!` (see above).
-// get_prioritised_transactions: bridged by `impl_async_bridges!` (see above).
-// prioritise_transaction: bridged by `impl_async_bridges!` (see above).
-// submit_block: bridged by `impl_async_bridges!` (see above).
-// submit_header: bridged by `impl_async_bridges!` (see above).
-
 // == Network ==
-// clear_banned: bridged by `impl_async_bridges!` (see above).
-// disconnect_node: bridged by `impl_async_bridges!` (see above).
-// get_added_node_info: bridged by `impl_async_bridges!` (see above).
-// get_addr_man_info: bridged by `impl_async_bridges!` (see above).
-// get_connection_count: bridged by `impl_async_bridges!` (see above).
-// get_net_totals: bridged by `impl_async_bridges!` (see above).
 // get_network_info: bridged by `impl_async_bridges!` (see above).
 // get_node_addresses: bridged by `impl_async_bridges!` (see above).
 // get_peer_info: bridged by `impl_async_bridges!` (see above).
 // list_banned: bridged by `impl_async_bridges!` (see above).
 // ping: bridged by `impl_async_bridges!` (see above).
-// set_ban: bridged by `impl_async_bridges!` (see above).
-// set_network_active: bridged by `impl_async_bridges!` (see above).
-
-// == Rawtransactions ==
-crate::impl_client_v31__abort_private_broadcast!();
-crate::impl_client_v18__analyze_psbt!();
-crate::impl_client_v17__combine_psbt!();
-crate::impl_client_v17__combine_raw_transaction!();
-crate::impl_client_v17__convert_to_psbt!();
-crate::impl_client_v17__create_psbt!();
-crate::impl_client_v17__create_raw_transaction!();
-crate::impl_client_v17__decode_psbt!();
-crate::impl_client_v17__decode_raw_transaction!();
-crate::impl_client_v17__decode_script!();
-crate::impl_client_v17__finalize_psbt!();
-crate::impl_client_v17__fund_raw_transaction!();
-crate::impl_client_v31__get_private_broadcast_info!();
-crate::impl_client_v17__get_raw_transaction!();
-crate::impl_client_v18__join_psbts!();
-crate::impl_client_v17__send_raw_transaction!();
-crate::impl_client_v17__sign_raw_transaction!();
-crate::impl_client_v17__sign_raw_transaction_with_key!();
-crate::impl_client_v28__submit_package!();
-crate::impl_client_v17__test_mempool_accept!();
-crate::impl_client_v18__utxo_update_psbt!();
-
-// == Signer ==
-crate::impl_client_v22__enumerate_signers!();
-
-// == Util ==
-crate::impl_client_v17__create_multisig!();
-crate::impl_client_v29__derive_addresses!();
-crate::impl_client_v17__estimate_smart_fee!();
-crate::impl_client_v18__get_descriptor_info!();
-crate::impl_client_v21__get_index_info!();
-crate::impl_client_v17__sign_message_with_priv_key!();
-crate::impl_client_v17__validate_address!();
-crate::impl_client_v17__verify_message!();
-
-// == Wallet ==
-crate::impl_client_v17__abandon_transaction!();
-crate::impl_client_v17__abort_rescan!();
-crate::impl_client_v17__backup_wallet!();
-crate::impl_client_v17__bump_fee!();
-crate::impl_client_v22__create_wallet!();
-crate::impl_client_v23__create_wallet!();
-crate::impl_client_v28__create_wallet_descriptor!();
-crate::impl_client_v17__encrypt_wallet!();
-crate::impl_client_v17__get_addresses_by_label!();
-crate::impl_client_v17__get_address_info!();
-crate::impl_client_v17__get_balance!();
-crate::impl_client_v19__get_balances!();
-crate::impl_client_v28__get_hd_keys!();
-crate::impl_client_v18__get_received_by_label!();
-// get_new_address: bridged by `impl_async_bridges!` (see above).
-crate::impl_client_v17__get_raw_change_address!();
-crate::impl_client_v17__get_received_by_address!();
-crate::impl_client_v17__get_transaction!();
-crate::impl_client_v17__get_wallet_info!();
-crate::impl_client_v21__import_descriptors!();
-crate::impl_client_v17__import_pruned_funds!();
-crate::impl_client_v17__key_pool_refill!();
-crate::impl_client_v17__list_address_groupings!();
-crate::impl_client_v22__list_descriptors!();
-crate::impl_client_v18__list_received_by_label!();
-crate::impl_client_v17__list_labels!();
-crate::impl_client_v17__list_lock_unspent!();
-crate::impl_client_v17__list_received_by_address!();
-crate::impl_client_v17__list_since_block!();
-crate::impl_client_v17__list_transactions!();
-crate::impl_client_v17__list_unspent!();
-crate::impl_client_v18__list_wallet_dir!();
-crate::impl_client_v17__list_wallets!();
-crate::impl_client_v22__load_wallet!();
-crate::impl_client_v17__lock_unspent!();
-crate::impl_client_v24__migrate_wallet!();
-crate::impl_client_v21__psbt_bump_fee!();
-crate::impl_client_v17__remove_pruned_funds!();
-crate::impl_client_v17__rescan_blockchain!();
-crate::impl_client_v23__restore_wallet!();
-crate::impl_client_v21__send!();
-crate::impl_client_v24__send_all!();
-crate::impl_client_v17__send_many!();
-crate::impl_client_v21__send_many_verbose!();
-crate::impl_client_v17__send_to_address!();
-crate::impl_client_v19__set_wallet_flag!();
-crate::impl_client_v17__sign_message!();
-crate::impl_client_v17__sign_raw_transaction_with_wallet!();
-crate::impl_client_v24__simulate_raw_transaction!();
-crate::impl_client_v21__unload_wallet!();
-crate::impl_client_v17__wallet_create_funded_psbt!();
-crate::impl_client_v22__wallet_display_address!();
-crate::impl_client_v17__wallet_lock!();
-crate::impl_client_v17__wallet_passphrase!();
-crate::impl_client_v17__wallet_passphrase_change!();
-crate::impl_client_v17__wallet_process_psbt!();
-
-// == Zmq ==
-crate::impl_client_v17__get_zmq_notifications!();

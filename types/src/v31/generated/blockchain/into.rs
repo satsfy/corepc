@@ -438,7 +438,7 @@ impl GetBlockStats {
                 })
                 .transpose()?,
             utxo_size_increase: self
-                .utxo_size_inc
+                .utxo_size_increase
                 .map(|x| {
                     i32::try_from(x).map_err(|_| crate::NumericError::Overflow {
                         value: x,
@@ -456,7 +456,7 @@ impl GetBlockStats {
                 })
                 .transpose()?,
             utxo_size_increase_actual: self
-                .utxo_size_inc_actual
+                .utxo_size_increase_actual
                 .map(|x| {
                     i32::try_from(x).map_err(|_| crate::NumericError::Overflow {
                         value: x,
@@ -546,12 +546,15 @@ impl GetBlockVerbose1 {
                 value: self.size as i64,
                 field: "size".to_owned(),
             })?,
-            stripped_size: Some(u32::try_from(self.stripped_size).map_err(|_| {
-                crate::NumericError::Overflow {
-                    value: self.stripped_size as i64,
-                    field: "stripped_size".to_owned(),
-                }
-            })?),
+            stripped_size: self
+                .stripped_size
+                .map(|x| {
+                    u32::try_from(x).map_err(|_| crate::NumericError::Overflow {
+                        value: x as i64,
+                        field: "stripped_size".to_owned(),
+                    })
+                })
+                .transpose()?,
             weight: Weight::from_wu(self.weight as u64),
             coinbase_tx: Some(self.coinbase_tx.into_model().map_err(E::CoinbaseTx)?),
             height: crate::to_u32(self.height, "height")?,
@@ -1453,7 +1456,7 @@ impl GetChainTipsItem {
         Ok(model::ChainTips {
             height: crate::to_u32(self.height, "height")?,
             hash: self.hash.parse::<BlockHash>().map_err(E::Hash)?,
-            branch_length: crate::to_u32(self.branchlen, "branch_length")?,
+            branch_length: crate::to_u32(self.branch_length, "branch_length")?,
             status: serde_json::from_value::<model::ChainTipsStatus>(serde_json::Value::String(
                 self.status,
             ))
@@ -2679,6 +2682,90 @@ impl std::error::Error for MempoolEntryFeesError {
     }
 }
 
+impl GetMempoolFeeRateDiagram {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetMempoolFeerateDiagram, GetMempoolFeerateDiagramError> {
+        use GetMempoolFeerateDiagramError as E;
+
+        Ok(model::GetMempoolFeerateDiagram(
+            self.0
+                .into_iter()
+                .map(|x| x.into_model().map_err(E::Inner))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
+}
+
+/// Error when converting a `GetMempoolFeerateDiagram` type into the model type.
+#[derive(Debug)]
+pub enum GetMempoolFeerateDiagramError {
+    /// Conversion of the `Inner` field failed.
+    Inner(FeerateDiagramEntryError),
+}
+
+impl fmt::Display for GetMempoolFeerateDiagramError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Inner(ref e) => write_err!(f, "conversion of the `Inner` field failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for GetMempoolFeerateDiagramError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Inner(ref e) => Some(e),
+        }
+    }
+}
+
+impl GetMempoolFeeRateDiagramItem {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::FeerateDiagramEntry, FeerateDiagramEntryError> {
+        use FeerateDiagramEntryError as E;
+
+        Ok(model::FeerateDiagramEntry {
+            weight: crate::to_u64(self.weight, "weight")?,
+            fee: Amount::from_btc(self.fee).map_err(E::Fee)?,
+        })
+    }
+}
+
+/// Error when converting a `FeerateDiagramEntry` type into the model type.
+#[derive(Debug)]
+pub enum FeerateDiagramEntryError {
+    /// Conversion of the `Fee` field failed.
+    Fee(amount::ParseAmountError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for FeerateDiagramEntryError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for FeerateDiagramEntryError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Fee(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for FeerateDiagramEntryError {
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+}
+
 impl GetMempoolInfo {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::GetMempoolInfo, GetMempoolInfoError> {
@@ -2979,7 +3066,7 @@ impl GetTxOutSetInfo {
                 })
                 .transpose()?,
             total_amount: Amount::from_btc(self.total_amount).map_err(E::TotalAmount)?,
-            muhash: self.mu_hash,
+            muhash: self.muhash,
             total_unspendable_amount: self
                 .total_unspendable_amount
                 .map(Amount::from_btc)
@@ -3392,6 +3479,57 @@ impl std::error::Error for LoadTxOutSetError {
 }
 
 impl From<crate::NumericError> for LoadTxOutSetError {
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+}
+
+impl ScanBlocksVariant1 {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::ScanBlocksStart, ScanBlocksStartError> {
+        use ScanBlocksStartError as E;
+
+        Ok(model::ScanBlocksStart {
+            from_height: crate::to_u32(self.from_height, "from_height")?,
+            to_height: crate::to_u32(self.to_height, "to_height")?,
+            relevant_blocks: self
+                .relevant_blocks
+                .into_iter()
+                .map(|x| x.parse::<BlockHash>().map_err(E::RelevantBlocks))
+                .collect::<Result<Vec<_>, _>>()?,
+            completed: Some(self.completed),
+        })
+    }
+}
+
+/// Error when converting a `ScanBlocksStart` type into the model type.
+#[derive(Debug)]
+pub enum ScanBlocksStartError {
+    /// Conversion of the `RelevantBlocks` field failed.
+    RelevantBlocks(hex::HexToArrayError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for ScanBlocksStartError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::RelevantBlocks(ref e) =>
+                write_err!(f, "conversion of the `RelevantBlocks` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for ScanBlocksStartError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::RelevantBlocks(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for ScanBlocksStartError {
     fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 

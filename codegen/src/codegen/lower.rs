@@ -123,6 +123,7 @@ pub static INTEGER_PARAM_NAMES: &[&str] = &[
     "vout",
     "skip",
     "nodeid",
+    "peer_id",
     "id",
     "uid",
     "nrequired",
@@ -615,7 +616,14 @@ pub(crate) fn enum_type(
             && arm.bitcoin_type.is_none()
             && arm.primary_kind() == Some("number");
         let (ty, n) = if is_plain_number {
-            ("f64".to_owned(), vec![])
+            // A `<hash> or <height>` selector's number arm is a block height; Core rejects a
+            // float (`101.0` -> "JSON integer out of range").
+            let ty = if name.ends_with("HashOrHeight") || name.ends_with("Timestamp") {
+                "i64"
+            } else {
+                "f64"
+            };
+            (ty.to_owned(), vec![])
         } else {
             inner_type(&format!("{name}Variant{i}"), arm, seen)
         };
@@ -800,6 +808,26 @@ const RAW_FIELD_RENAME: &[(&str, &str, &str)] = &[
     ("GetNetworkInfo", "localservices", "local_services"),
     ("GetNetworkInfo", "localservicesnames", "local_services_names"),
     ("GetNetworkInfo", "subversion", "subversion"),
+    // `savemempool`: tests read `.filename`; keep the wire word unsplit.
+    ("SaveMempool", "filename", "filename"),
+    // `getpeerinfo` / `getnettotals` / `gettxoutsetinfo`: match the curated field names the tests read.
+    ("GetPeerInfoItem", "addr", "address"),
+    ("GetPeerInfoItem", "bytessent_per_msg", "bytes_sent_per_message"),
+    ("GetPeerInfoItem", "bytesrecv_per_msg", "bytes_received_per_message"),
+    ("GetNetTotals", "timemillis", "time_millis"),
+    ("GetTxOutSetInfo", "muhash", "muhash"),
+    ("GetBlockStats", "utxo_size_inc", "utxo_size_increase"),
+    ("GetBlockStats", "utxo_size_inc_actual", "utxo_size_increase_actual"),
+    ("GetRawTransactionVerbose1", "time", "transaction_time"),
+    ("DecodeScript", "desc", "descriptor"),
+    ("CreateWalletDescriptor", "descs", "descriptors"),
+    ("ListDescriptorsDescriptorsItem", "desc", "descriptor"),
+    ("ListUnspentItem", "desc", "descriptor"),
+    ("GetWalletInfo", "birthtime", "birthtime"),
+    ("GetHdKeysItem", "xprv", "xpriv"),
+    ("BumpFee", "origfee", "original_fee"),
+    ("GetTransactionDetailsItem", "parent_descs", "parent_descriptors"),
+    ("GetChainTipsItem", "branchlen", "branch_length"),
 ];
 
 /// The rust field-name override for a `(struct, wire field)`, if any.
@@ -813,6 +841,21 @@ const RAW_FIELD_OPTIONAL: &[(&str, &str, bool)] = &[
     // `getblocktemplate`: the curated raw type makes `longpollid` an `Option` (matching how tests
     // read it); the OpenRPC `required` set disagrees. Match the curated shape.
     ("GetBlockTemplateVariant2", "longpollid", true),
+    // `getpeerinfo`: the tests (and the curated type) treat these as optional per peer state.
+    ("GetPeerInfoItem", "connection_type", true),
+    ("GetPeerInfoItem", "synced_headers", true),
+    ("GetPeerInfoItem", "synced_blocks", true),
+    ("GetPeerInfoItem", "starting_height", true),
+    // Shapes the tests read as Option (absent on genesis / feature-dependent)...
+    ("GetBlockHeaderVerbose1", "previousblockhash", true),
+    ("GetBlockVerbose1", "strippedsize", true),
+    ("GetWalletInfo", "lastprocessedblock", true),
+    ("GetBalances", "lastprocessedblock", true),
+    ("DecodeScript", "desc", true),
+    ("DecodeScriptSegwit", "p2sh-segwit", true),
+    // ...and fields Core always returns that the tests read as plain values.
+    ("TestMempoolAcceptItem", "allowed", false),
+    ("ValidateAddress", "iswitness", false),
 ];
 
 /// The optionality override for a `(struct, wire field)`, if any.

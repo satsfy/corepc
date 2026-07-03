@@ -12,5 +12,6 @@
 #[cfg(feature = "31_0")]
 pub use crate::client_async::v31::blocking::*;
 
-#[cfg(all(feature = "30_0", not(feature = "31_0")))]
-pub use crate::client_async::v30::blocking::*;
+// v30 facade not present in the 31-only working copy; regenerate with `just codegen 30` to restore.
+// #[cfg(all(feature = "30_0", not(feature = "31_0")))]
+// pub use crate::client_async::v30::blocking::*;

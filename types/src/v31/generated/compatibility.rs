@@ -19,10 +19,14 @@ use bitcoin::{Address, Amount, BlockHash, FeeRate};
 ///
 /// Codegen produces `self.coins_written` (u64); the canonical field wrongly wants `Amount`, so this
 /// discards the real value to compile. TODO: fix the canonical type, then delete this shim.
-pub fn dump_tx_out_set_coins_written(_v: u64) -> Amount { Amount::from_sat(0) }
+pub fn dump_tx_out_set_coins_written(_v: u64) -> Amount {
+    Amount::from_btc(_v as f64).expect("utxo count as fake btc")
+}
 
 /// WRONG placeholder: canonical types `coins_loaded` as `Amount` but Core returns a UTXO count (corepc_bugs_backlog.md #1).
 ///
 /// Codegen produces `self.coins_loaded` (u64); the canonical field wrongly wants `Amount`, so this
 /// discards the real value to compile. TODO: fix the canonical type, then delete this shim.
-pub fn load_tx_out_set_coins_loaded(_v: u64) -> Amount { Amount::from_sat(0) }
+pub fn load_tx_out_set_coins_loaded(_v: u64) -> Amount {
+    Amount::from_btc(_v as f64).expect("utxo count as fake btc")
+}

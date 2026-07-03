@@ -15,21 +15,21 @@ use serde::{Deserialize, Serialize};
 pub use self::into::{
     ActivityEntryError, Bip9InfoError, Bip9StatisticsError, ChainStateError, ChainTipsError,
     ChunkError, CoinbaseTransactionError, DeploymentInfoError, DumpTxOutSetError,
-    GetBestBlockHashError, GetBlockCountError, GetBlockFilterError, GetBlockHashError,
-    GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockStatsError, GetBlockVerboseOneError,
-    GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
+    FeerateDiagramEntryError, GetBestBlockHashError, GetBlockCountError, GetBlockFilterError,
+    GetBlockHashError, GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockStatsError,
+    GetBlockVerboseOneError, GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
     GetBlockVerboseThreeTransactionError, GetBlockVerboseTwoError,
     GetBlockVerboseTwoTransactionError, GetBlockVerboseZeroError, GetBlockchainInfoError,
     GetChainStatesError, GetChainTipsError, GetChainTxStatsError, GetDeploymentInfoError,
     GetDescriptorActivityError, GetDifficultyError, GetMempoolAncestorsError,
     GetMempoolAncestorsVerboseError, GetMempoolClusterError, GetMempoolDescendantsError,
-    GetMempoolDescendantsVerboseError, GetMempoolEntryError, GetMempoolInfoError,
-    GetRawMempoolResultError, GetRawMempoolSequenceError, GetTxOutError,
+    GetMempoolDescendantsVerboseError, GetMempoolEntryError, GetMempoolFeerateDiagramError,
+    GetMempoolInfoError, GetRawMempoolResultError, GetRawMempoolSequenceError, GetTxOutError,
     GetTxOutSetInfoBlockInfoError, GetTxOutSetInfoError, GetTxOutSetInfoUnspendablesError,
     GetTxSpendingPrevoutError, GetTxSpendingPrevoutItemError, LoadTxOutSetError, MempoolEntryError,
-    MempoolEntryFeesError, ReceiveActivityError, ScanTxOutSetStartError, ScanTxOutSetUnspentError,
-    ScriptPubKeyError, SpendActivityError, VerifyTxOutProofError, WaitForBlockError,
-    WaitForBlockHeightError, WaitForNewBlockError,
+    MempoolEntryFeesError, ReceiveActivityError, ScanBlocksStartError, ScanTxOutSetStartError,
+    ScanTxOutSetUnspentError, ScriptPubKeyError, SpendActivityError, VerifyTxOutProofError,
+    WaitForBlockError, WaitForBlockHeightError, WaitForNewBlockError,
 };
 
 /// Write the serialized UTXO set to a file. This can be used in loadtxoutset afterwards if this snapshot height is supported in the chainparams as well.
@@ -273,11 +273,11 @@ pub struct GetBlockStats {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub utxo_increase_actual: Option<i64>,
     /// The increase/decrease in size for the utxo index (not discounting op_return and similar)
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub utxo_size_inc: Option<i64>,
+    #[serde(rename = "utxo_size_inc", skip_serializing_if = "Option::is_none")]
+    pub utxo_size_increase: Option<i64>,
     /// The increase/decrease in size for the utxo index, not counting unspendables
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub utxo_size_inc_actual: Option<i64>,
+    #[serde(rename = "utxo_size_inc_actual", skip_serializing_if = "Option::is_none")]
+    pub utxo_size_increase_actual: Option<i64>,
 }
 
 /// If verbosity is 0, returns a string that is serialized, hex-encoded data for block 'hash'.
@@ -335,8 +335,8 @@ pub struct GetBlockVerbose1 {
     /// The block size
     pub size: u64,
     /// The block size excluding witness data
-    #[serde(rename = "strippedsize")]
-    pub stripped_size: u64,
+    #[serde(rename = "strippedsize", skip_serializing_if = "Option::is_none")]
+    pub stripped_size: Option<u64>,
     /// The difficulty target
     pub target: String,
     /// The block time expressed in UNIX epoch time
@@ -680,7 +680,8 @@ pub struct GetChainTips(pub Vec<GetChainTipsItem>);
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct GetChainTipsItem {
     /// zero for main chain, otherwise length of branch connecting the tip to the main chain
-    pub branchlen: i64,
+    #[serde(rename = "branchlen")]
+    pub branch_length: i64,
     /// block hash of the tip
     pub hash: String,
     /// height of the chain tip
@@ -1131,6 +1132,24 @@ pub struct GetMempoolEntryFees {
     pub modified: f64,
 }
 
+/// Result of the JSON-RPC method `getmempoolfeeratediagram`.
+///
+/// > getmempoolfeeratediagram
+/// >
+/// > Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetMempoolFeeRateDiagram(pub Vec<GetMempoolFeeRateDiagramItem>);
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetMempoolFeeRateDiagramItem {
+    /// cumulative fee in BTC
+    pub fee: f64,
+    /// cumulative sigops-adjusted weight
+    pub weight: i64,
+}
+
 /// Returns details on the active state of the TX memory pool.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
@@ -1314,8 +1333,8 @@ pub struct GetTxOutSetInfo {
     /// The block height (index) of the returned statistics
     pub height: i64,
     /// The serialized hash (only present if 'muhash' hash_type is chosen)
-    #[serde(rename = "muhash", skip_serializing_if = "Option::is_none")]
-    pub mu_hash: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub muhash: Option<String>,
     /// The total amount of coins in the UTXO set
     pub total_amount: f64,
     /// The total amount of coins permanently excluded from the UTXO set (only available if coinstatsindex is used)
@@ -1465,8 +1484,7 @@ impl std::ops::Deref for PruneBlockchain {
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct SaveMempool {
     /// the directory and file where the mempool was saved
-    #[serde(rename = "filename")]
-    pub file_name: String,
+    pub filename: String,
 }
 
 /// Result of the JSON-RPC method `scanblocks`.

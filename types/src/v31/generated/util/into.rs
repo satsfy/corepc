@@ -76,6 +76,46 @@ impl std::error::Error for CreateMultisigError {
     }
 }
 
+impl DeriveAddresses {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::DeriveAddresses, DeriveAddressesError> {
+        use DeriveAddressesError as E;
+
+        Ok(model::DeriveAddresses {
+            addresses: self
+                .0
+                .into_iter()
+                .map(|x| x.parse::<Address<NetworkUnchecked>>().map_err(E::Addresses))
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+}
+
+/// Error when converting a `DeriveAddresses` type into the model type.
+#[derive(Debug)]
+pub enum DeriveAddressesError {
+    /// Conversion of the `Addresses` field failed.
+    Addresses(address::ParseError),
+}
+
+impl fmt::Display for DeriveAddressesError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Addresses(ref e) =>
+                write_err!(f, "conversion of the `Addresses` field failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DeriveAddressesError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Addresses(ref e) => Some(e),
+        }
+    }
+}
+
 impl EstimateSmartFee {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::EstimateSmartFee, EstimateSmartFeeError> {
@@ -180,7 +220,7 @@ impl ValidateAddress {
                 .map_err(E::ScriptPubkey)?
                 .ok_or(E::ScriptPubkeyMissing(crate::MissingField { field: "script_pubkey" }))?,
             is_script: self.is_script.unwrap_or_default(),
-            is_witness: self.is_witness.unwrap_or_default(),
+            is_witness: self.is_witness,
             witness_version: match (self.witness_version, self.witness_program.as_ref()) {
                 (Some(v), Some(_)) => Some(
                     WitnessVersion::try_from(u8::try_from(v).map_err(|_| {

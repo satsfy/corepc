@@ -21,8 +21,9 @@ pub mod error;
 
 // Exactly one version module is compiled (its methods hang off the single `Client`). When several
 // version features are enabled (e.g. docs.rs `all-features`), the highest version wins.
-#[cfg(all(feature = "30_0", not(feature = "31_0")))]
-pub mod v30;
+// v30 generated client not present in the 31-only working copy; `just codegen 30` restores it.
+// #[cfg(all(feature = "30_0", not(feature = "31_0")))]
+// pub mod v30;
 #[cfg(feature = "31_0")]
 pub mod v31;
 

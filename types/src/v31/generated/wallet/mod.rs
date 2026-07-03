@@ -23,8 +23,8 @@ pub use self::into::{
     ListReceivedByLabelError, ListReceivedByLabelItemError, ListSinceBlockError,
     ListTransactionsError, ListUnspentError, ListUnspentItemError, ListWalletsError,
     LoadWalletError, PsbtBumpFeeError, RescanBlockchainError, SendAllError, SendError,
-    SendManyError, SendManyVerboseError, SendToAddressError, SignMessageError,
-    SimulateRawTransactionError, TransactionItemError, UnloadWalletError,
+    SendManyError, SendManyVerboseError, SendToAddressError, SignFailError, SignMessageError,
+    SignRawTransactionError, SimulateRawTransactionError, TransactionItemError, UnloadWalletError,
     WalletCreateFundedPsbtError, WalletDisplayAddressError, WalletProcessPsbtError,
 };
 
@@ -64,7 +64,7 @@ pub struct BumpFee {
     pub fee: f64,
     /// The fee of the replaced transaction.
     #[serde(rename = "origfee")]
-    pub orig_fee: f64,
+    pub original_fee: f64,
     /// The id of the new transaction.
     pub txid: String,
 }
@@ -86,7 +86,8 @@ pub struct CreateWallet {
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct CreateWalletDescriptor {
     /// The public descriptors that were added to the wallet
-    pub descs: Vec<String>,
+    #[serde(rename = "descs")]
+    pub descriptors: Vec<String>,
 }
 
 /// Result of the JSON-RPC method `encryptwallet`.
@@ -284,8 +285,8 @@ impl std::ops::Deref for GetBalance {
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct GetBalances {
     /// hash and height of the block this information was generated on
-    #[serde(rename = "lastprocessedblock")]
-    pub last_processed_block: GetBalancesLastProcessedBlock,
+    #[serde(rename = "lastprocessedblock", skip_serializing_if = "Option::is_none")]
+    pub last_processed_block: Option<GetBalancesLastProcessedBlock>,
     /// balances from outputs that the wallet can sign
     pub mine: GetBalancesMine,
 }
@@ -332,8 +333,8 @@ pub struct GetHdKeysItem {
     /// Whether the wallet has the private key for this xpub
     pub has_private: bool,
     /// The extended private key if "private" is true
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub xprv: Option<String>,
+    #[serde(rename = "xprv", skip_serializing_if = "Option::is_none")]
+    pub xpriv: Option<String>,
     /// The extended public key
     pub xpub: String,
 }
@@ -592,8 +593,8 @@ pub struct GetTransactionDetailsItem {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
     /// Only if 'category' is 'received'. List of parent descriptors for the output script of this coin.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub parent_descs: Option<Vec<String>>,
+    #[serde(rename = "parent_descs", skip_serializing_if = "Option::is_none")]
+    pub parent_descriptors: Option<Vec<String>>,
     /// the vout value
     pub vout: i64,
 }
@@ -615,8 +616,8 @@ pub struct GetWalletInfo {
     /// whether this wallet tracks clean/dirty coins in terms of reuse
     pub avoid_reuse: bool,
     /// The start time for blocks scanning. It could be modified by (re)importing any descriptor with an earlier timestamp.
-    #[serde(rename = "birthtime", skip_serializing_if = "Option::is_none")]
-    pub birth_time: Option<i64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub birthtime: Option<i64>,
     /// Whether this wallet intentionally does not contain any keys, scripts, or descriptors
     pub blank: bool,
     /// whether this wallet uses descriptors for output script management
@@ -634,8 +635,8 @@ pub struct GetWalletInfo {
     #[serde(rename = "keypoolsize_hd_internal", skip_serializing_if = "Option::is_none")]
     pub keypool_size_hd_internal: Option<u64>,
     /// hash and height of the block this information was generated on
-    #[serde(rename = "lastprocessedblock")]
-    pub last_processed_block: GetWalletInfoLastProcessedBlock,
+    #[serde(rename = "lastprocessedblock", skip_serializing_if = "Option::is_none")]
+    pub last_processed_block: Option<GetWalletInfoLastProcessedBlock>,
     /// false if privatekeys are disabled for this wallet (enforced watch-only wallet)
     pub private_keys_enabled: bool,
     /// current scanning details, or false if no scan is in progress
@@ -721,7 +722,8 @@ pub struct ListDescriptorsDescriptorsItem {
     /// Whether this descriptor is currently used to generate new addresses
     pub active: bool,
     /// Descriptor string representation
-    pub desc: String,
+    #[serde(rename = "desc")]
+    pub descriptor: String,
     /// True if this descriptor is used to generate change addresses. False if this descriptor is used to generate receiving addresses; defined only for active descriptors
     #[serde(skip_serializing_if = "Option::is_none")]
     pub internal: Option<bool>,
@@ -1040,8 +1042,8 @@ pub struct ListUnspentItem {
     /// The number of confirmations
     pub confirmations: i64,
     /// (only when solvable) A descriptor for spending this output
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub desc: Option<String>,
+    #[serde(rename = "desc", skip_serializing_if = "Option::is_none")]
+    pub descriptor: Option<String>,
     /// The associated label, or "" for the default label
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,

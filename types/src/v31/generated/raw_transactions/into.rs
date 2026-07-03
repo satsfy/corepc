@@ -509,7 +509,7 @@ impl DecodeScript {
 
         Ok(model::DecodeScript {
             script_pubkey: None, // no raw field; canonical is optional
-            descriptor: Some(self.desc),
+            descriptor: self.descriptor,
             type_: self.type_,
             address: self
                 .address
@@ -785,7 +785,7 @@ impl GetRawTransactionVerbose1 {
                 .map(|x| crate::to_u64(x, "confirmations"))
                 .transpose()?,
             transaction_time: self
-                .time
+                .transaction_time
                 .map(|x| crate::to_u64(x, "transaction_time"))
                 .transpose()?,
             block_time: self.block_time.map(|x| crate::to_u64(x, "block_time")).transpose()?,
@@ -1222,7 +1222,7 @@ impl TestMempoolAcceptItem {
         Ok(model::MempoolAcceptance {
             txid: self.txid.parse::<Txid>().map_err(E::Txid)?,
             wtxid: Some(self.wtxid.parse::<Wtxid>().map_err(E::Wtxid)?),
-            allowed: self.allowed.unwrap_or_default(),
+            allowed: self.allowed,
             vsize: self.vsize.map(|x| crate::to_u32(x, "vsize")).transpose()?,
             fees: self.fees.map(|x| x.into_model()).transpose().map_err(E::Fees)?,
             reject_reason: self.reject_reason,

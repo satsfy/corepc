@@ -13,6 +13,7 @@ pub(crate) const TYPE_ALIAS: &[(&str, &str)] = &[
     ("GetRawTransactionVerbose0", "GetRawTransaction"),
     ("GetRawTransactionVerbose1", "GetRawTransactionVerbose"),
     ("SignRawTransactionWithKey", "SignRawTransaction"),
+    ("SignRawTransactionWithWallet", "SignRawTransaction"),
     // Blockchain: verbose levels / action variants whose canonical name drops the suffix.
     ("GetBlockHeaderVerbose0", "GetBlockHeader"),
     ("GetBlockHeaderVerbose1", "GetBlockHeaderVerbose"),
@@ -21,7 +22,13 @@ pub(crate) const TYPE_ALIAS: &[(&str, &str)] = &[
     ("GetMempoolDescendantsVerbose0", "GetMempoolDescendants"),
     ("GetMempoolDescendantsVerbose1", "GetMempoolDescendantsVerbose"),
     ("ScanTxOutSetVariant0", "ScanTxOutSetStart"),
+    // `scanblocks` action union: the start-result object variant maps onto the canonical start
+    // type (the status/abort shapes are read raw by the tests, no model conversion).
+    ("ScanBlocksVariant1", "ScanBlocksStart"),
     ("GetTxOutVariant1", "GetTxOut"),
+    // The splitter renders `feerate` as `FeeRate`; the model spells it `Feerate`.
+    ("GetMempoolFeeRateDiagram", "GetMempoolFeerateDiagram"),
+    ("GetMempoolFeeRateDiagramItem", "FeerateDiagramEntry"),
     // `getrawmempool` is one untagged enum covering all three response shapes; it maps to the model
     // union `GetRawMempoolResult` (bridged by the `ENUM_RECONSTRUCT` arm).
     ("GetRawMempool", "GetRawMempoolResult"),
@@ -42,14 +49,12 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("FundRawTransaction", "tx", "hex"),
     ("SignRawTransaction", "tx", "hex"),
     ("GetRawTransactionVerbose", "transaction", "hex"),
-    ("GetRawTransactionVerbose", "transaction_time", "time"),
     // Spelled-out / pluralized names the splitter can't reach from the wire name.
     ("FundRawTransaction", "change_position", "changepos"),
     ("SubmitPackageTxResultFees", "base_fee", "base"),
     ("DeploymentInfo", "deployment_type", "type_"),
     // Wallet.
     ("GetTransaction", "tx", "hex"),
-    ("BumpFee", "original_fee", "orig_fee"),
     ("PsbtBumpFee", "original_fee", "orig_fee"),
     ("WalletCreateFundedPsbt", "change_position", "changepos"),
     // Core-wide field renames (any type): the canonical `descriptor`/`parent_descriptors` are
@@ -62,7 +67,6 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     // field names and needs no alias here.)
     ("BlockTemplateTransaction", "wtxid", "hash"),
     // Blockchain.
-    ("ChainTips", "branch_length", "branchlen"),
     // `getdescriptoractivity` spend entry: Core's wire field is `spend_vin` (the input index); the
     // canonical model names it `spend_vout`.
     ("SpendActivity", "spend_vout", "spend_vin"),
@@ -80,8 +84,6 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("GetBlockStats", "segwit_total_size", "sw_total_size"),
     ("GetBlockStats", "segwit_total_weight", "sw_total_weight"),
     ("GetBlockStats", "segwit_txs", "swtxs"),
-    ("GetBlockStats", "utxo_size_increase", "utxo_size_inc"),
-    ("GetBlockStats", "utxo_size_increase_actual", "utxo_size_inc_actual"),
     ("GetNetworkInfo", "local_services_names", "localservices_names"),
 ];
 
@@ -105,7 +107,7 @@ pub(crate) const COMPAT: &[CompatRule] = &[
         shim: "dump_tx_out_set_coins_written",
         input: "u64",
         returns: "Amount",
-        placeholder: "Amount::from_sat(0)",
+        placeholder: "Amount::from_btc(_v as f64).expect(\"utxo count as fake btc\")",
         correct: "self.coins_written",
         reason: "canonical types `coins_written` as `Amount` but Core returns a UTXO count \
                  (corepc_bugs_backlog.md #1)",
@@ -116,7 +118,7 @@ pub(crate) const COMPAT: &[CompatRule] = &[
         shim: "load_tx_out_set_coins_loaded",
         input: "u64",
         returns: "Amount",
-        placeholder: "Amount::from_sat(0)",
+        placeholder: "Amount::from_btc(_v as f64).expect(\"utxo count as fake btc\")",
         correct: "self.coins_loaded",
         reason: "canonical types `coins_loaded` as `Amount` but Core returns a UTXO count \
                  (corepc_bugs_backlog.md #1)",

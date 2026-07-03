@@ -100,7 +100,7 @@ pub enum ImportDescriptorsRequestsRange {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ImportDescriptorsRequestsTimestamp {
-    Number(f64),
+    Number(i64),
     Text(String),
 }
 

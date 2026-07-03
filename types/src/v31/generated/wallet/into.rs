@@ -40,7 +40,7 @@ impl BumpFee {
 
         Ok(model::BumpFee {
             txid: self.txid.parse::<Txid>().map_err(E::Txid)?,
-            original_fee: Amount::from_btc(self.orig_fee).map_err(E::OriginalFee)?,
+            original_fee: Amount::from_btc(self.original_fee).map_err(E::OriginalFee)?,
             fee: Amount::from_btc(self.fee).map_err(E::Fee)?,
             errors: self.errors,
         })
@@ -534,9 +534,11 @@ impl GetBalances {
         Ok(model::GetBalances {
             mine: self.mine.into_model().map_err(E::Mine)?,
             watch_only: None, // no raw field; canonical is optional
-            last_processed_block: Some(
-                self.last_processed_block.into_model().map_err(E::LastProcessedBlock)?,
-            ),
+            last_processed_block: self
+                .last_processed_block
+                .map(|x| x.into_model())
+                .transpose()
+                .map_err(E::LastProcessedBlock)?,
         })
     }
 }
@@ -712,7 +714,7 @@ impl GetHdKeysItem {
         Ok(model::HdKey {
             xpub: self.xpub.parse::<Xpub>().map_err(E::Xpub)?,
             has_private: self.has_private,
-            xpriv: None, // no raw field; canonical is optional
+            xpriv: self.xpriv.map(|x| x.parse::<Xpriv>()).transpose().map_err(E::Xpriv)?,
             descriptors: self
                 .descriptors
                 .into_iter()
@@ -727,6 +729,8 @@ impl GetHdKeysItem {
 pub enum HdKeyError {
     /// Conversion of the `Xpub` field failed.
     Xpub(bip32::Error),
+    /// Conversion of the `Xpriv` field failed.
+    Xpriv(bip32::Error),
     /// Conversion of the `Descriptors` field failed.
     Descriptors(HdKeyDescriptorError),
 }
@@ -735,6 +739,7 @@ impl fmt::Display for HdKeyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Xpub(ref e) => write_err!(f, "conversion of the `Xpub` field failed"; e),
+            Self::Xpriv(ref e) => write_err!(f, "conversion of the `Xpriv` field failed"; e),
             Self::Descriptors(ref e) =>
                 write_err!(f, "conversion of the `Descriptors` field failed"; e),
         }
@@ -746,6 +751,7 @@ impl std::error::Error for HdKeyError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
             Self::Xpub(ref e) => Some(e),
+            Self::Xpriv(ref e) => Some(e),
             Self::Descriptors(ref e) => Some(e),
         }
     }
@@ -1092,7 +1098,7 @@ impl GetTransactionDetailsItem {
             vout: crate::to_u32(self.vout, "vout")?,
             fee: self.fee.map(SignedAmount::from_btc).transpose().map_err(E::Fee)?,
             abandoned: Some(self.abandoned),
-            parent_descriptors: self.parent_descs,
+            parent_descriptors: self.parent_descriptors,
         })
     }
 }
@@ -1201,11 +1207,13 @@ impl GetWalletInfo {
             descriptors: Some(self.descriptors),
             external_signer: Some(self.external_signer),
             blank: Some(self.blank),
-            birthtime: self.birth_time.map(|x| crate::to_u32(x, "birthtime")).transpose()?,
+            birthtime: self.birthtime.map(|x| crate::to_u32(x, "birthtime")).transpose()?,
             flags: Some(self.flags),
-            last_processed_block: Some(
-                self.last_processed_block.into_model().map_err(E::LastProcessedBlock)?,
-            ),
+            last_processed_block: self
+                .last_processed_block
+                .map(|x| x.into_model())
+                .transpose()
+                .map_err(E::LastProcessedBlock)?,
         })
     }
 }
@@ -1992,7 +2000,7 @@ impl ListUnspentItem {
                 .map_err(E::RedeemScript)?,
             spendable: self.spendable,
             solvable: self.solvable,
-            descriptor: self.desc,
+            descriptor: self.descriptor,
             safe: self.safe,
             parent_descriptors: Some(self.parent_descs),
         })
@@ -2413,6 +2421,104 @@ impl std::error::Error for SignMessageError {
             Self::Inner(ref e) => Some(e),
         }
     }
+}
+
+impl SignRawTransactionWithWallet {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::SignRawTransaction, SignRawTransactionError> {
+        use SignRawTransactionError as E;
+
+        Ok(model::SignRawTransaction {
+            tx: encode::deserialize_hex::<Transaction>(&self.hex).map_err(E::Tx)?,
+            complete: self.complete,
+            errors: self
+                .errors
+                .unwrap_or_default()
+                .into_iter()
+                .map(|x| x.into_model().map_err(E::Errors))
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+}
+
+/// Error when converting a `SignRawTransaction` type into the model type.
+#[derive(Debug)]
+pub enum SignRawTransactionError {
+    /// Conversion of the `Tx` field failed.
+    Tx(encode::FromHexError),
+    /// Conversion of the `Errors` field failed.
+    Errors(SignFailError),
+}
+
+impl fmt::Display for SignRawTransactionError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Tx(ref e) => write_err!(f, "conversion of the `Tx` field failed"; e),
+            Self::Errors(ref e) => write_err!(f, "conversion of the `Errors` field failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for SignRawTransactionError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Tx(ref e) => Some(e),
+            Self::Errors(ref e) => Some(e),
+        }
+    }
+}
+
+impl SignRawTransactionWithWalletErrorsItem {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::SignFail, SignFailError> {
+        use SignFailError as E;
+
+        Ok(model::SignFail {
+            txid: self.txid.parse::<Txid>().map_err(E::Txid)?,
+            vout: crate::to_u64(self.vout, "vout")?,
+            script_sig: ScriptBuf::from_hex(&self.script_sig).map_err(E::ScriptSig)?,
+            sequence: Sequence::from_consensus(self.sequence as u32),
+            error: self.error,
+        })
+    }
+}
+
+/// Error when converting a `SignFail` type into the model type.
+#[derive(Debug)]
+pub enum SignFailError {
+    /// Conversion of the `Txid` field failed.
+    Txid(hex::HexToArrayError),
+    /// Conversion of the `ScriptSig` field failed.
+    ScriptSig(hex::HexToBytesError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for SignFailError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
+            Self::ScriptSig(ref e) =>
+                write_err!(f, "conversion of the `ScriptSig` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for SignFailError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Txid(ref e) => Some(e),
+            Self::ScriptSig(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for SignFailError {
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SimulateRawTransaction {

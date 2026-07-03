@@ -27,7 +27,7 @@ client-sync = ["jsonrpc"]
 #
 # Pulls in `jsonrpc` with its async `bitreq` HTTP transport and the `corepc-types`
 # raw types for the active version feature (e.g. `30_0`, default).
-client-async = ["jsonrpc", "jsonrpc/bitreq_http_async", "30_0"]
+client-async = ["jsonrpc", "jsonrpc/bitreq_http_async", "31_0"]
 # A blocking, sync-API facade over the async client (drives it on a single-thread runtime). It
 # reuses the shared `impl_client_*` method macros and request types (which compile alongside under
 # `client-async`, see `lib.rs`), so the integration tests run unchanged against the async transport.

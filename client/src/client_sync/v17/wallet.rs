@@ -179,15 +179,15 @@ macro_rules! impl_client_v17__get_new_address {
             /// Gets a new address from `bitcoind` and parses it assuming its correct.
             pub fn new_address(&self) -> Result<bitcoin::Address> {
                 let json = self.get_new_address(None, None)?;
-                let model = json.into_model().unwrap();
-                Ok(model.0.assume_checked())
+                let address = json.0.parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>().unwrap();
+                Ok(address.assume_checked())
             }
 
             /// Gets a new address from `bitcoind` and parses it assuming its correct.
             pub fn new_address_with_type(&self, ty: AddressType) -> Result<bitcoin::Address> {
                 let json = self.get_new_address(None, Some(ty))?;
-                let model = json.into_model().unwrap();
-                Ok(model.0.assume_checked())
+                let address = json.0.parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>().unwrap();
+                Ok(address.assume_checked())
             }
 
             /// Gets a new address with label from `bitcoind` and parses it assuming its correct.
@@ -197,8 +197,7 @@ macro_rules! impl_client_v17__get_new_address {
                 label: &str,
             ) -> Result<bitcoin::Address<bitcoin::address::NetworkUnchecked>> {
                 let json = self.get_new_address(Some(label), None)?;
-                let model = json.into_model().unwrap();
-                Ok(model.0)
+                Ok(json.0.parse::<bitcoin::Address<bitcoin::address::NetworkUnchecked>>().unwrap())
             }
 
             /// Gets a new address - low level RPC call.

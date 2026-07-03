@@ -88,29 +88,59 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
          /// `impl_client_*` macros call.\n\
          fn into_json<T: Serialize>(val: T) -> Result<Value> {{ Ok(serde_json::to_value(val)?) }}\n\n\
          /// The version-specific response-type namespace the integration tests import under\n\
-         /// `test-async`. Mirrors `crate::types::v{version}` (the curated types the facade's macro\n\
-         /// methods return) so `bitcoind::vtype` resolves the same names whether `node.client` is\n\
-         /// the sync client or this facade. The exception: methods bridged through the async client's\n\
-         /// GENERATED `into_model` re-export the generated response type for that name (an explicit\n\
-         /// `pub use` shadows the glob), so the unchanged test runs the generated `into_model`.\n\
+         /// `test-async`. GENERATED types only: every response type (and its `into_model` error)\n\
+         /// comes from `crate::types::v{version}::generated`, so every test `into_model()` runs the\n\
+         /// generated conversion. Explicit aliases map union-variant / verbose-level names onto the\n\
+         /// names the tests use (an explicit `pub use` shadows the glob). The trailing curated\n\
+         /// imports are the few types with NO generated counterpart (RPCs absent from the OpenRPC\n\
+         /// spec, or response shapes the tests read raw without `into_model`).\n\
          pub mod vtype {{\n    \
-             pub use crate::types::v{version}::*;\n    \
-             // Methods bridged through the async client's generated wrapper return the generated\n    \
-             // response type; expose it (and its `into_model` error) here so the unchanged test's\n    \
-             // `into_model()` is the generated one. An explicit `pub use` shadows the glob above.\n    \
+             pub use crate::types::v{version}::generated::*;\n\n    \
+             // Union-variant and verbose-level aliases onto the names the tests use.\n    \
+             #[rustfmt::skip]\n    \
              pub use crate::types::v{version}::generated::{{\n        \
-                 GetMiningInfo, GetMiningInfoError, GetPrioritisedTransactions,\n        \
-                 GetPrioritisedTransactionsError,\n    \
-             }};\n    \
-             // `getblocktemplate` is an untagged `Null/Text/Object` enum; only the `Object` variant\n    \
-             // (`GetBlockTemplateVariant2`) carries the template and has an `into_model`. The bridge\n    \
-             // returns that variant, so alias it to the name the test uses.\n    \
-             pub use crate::types::v{version}::generated::{{\n        \
-                 GetBlockTemplateVariant2 as GetBlockTemplate, GetBlockTemplateError,\n    \
-             }};\n    \
-             // `getnetworkinfo` is bridged through the generated wrapper; expose the generated\n    \
-             // response type and its error so the test's `into_model()` is the generated one.\n    \
-             pub use crate::types::v{version}::generated::{{GetNetworkInfo, GetNetworkInfoError}};\n\
+                 GetBlockTemplateVariant2 as GetBlockTemplate,\n        \
+                 GetTxOutVariant1 as GetTxOut,\n        \
+                 GetPeerInfoItem as PeerInfo,\n        \
+                 GetMempoolFeeRateDiagram as GetMempoolFeerateDiagram,\n        \
+                 ScanTxOutSetVariant0 as ScanTxOutSetStart,\n        \
+                 ScanBlocksVariant1 as ScanBlocksStart,\n        \
+                 GetBlockVerbose0 as GetBlockVerboseZero,\n        \
+                 GetBlockVerbose1 as GetBlockVerboseOne,\n        \
+                 GetBlockVerbose2 as GetBlockVerboseTwo,\n        \
+                 GetBlockVerbose3 as GetBlockVerboseThree,\n        \
+                 GetBlockHeaderVerbose0 as GetBlockHeader,\n        \
+                 GetBlockHeaderVerbose1 as GetBlockHeaderVerbose,\n        \
+                 GetMempoolAncestorsVerbose0 as GetMempoolAncestors,\n        \
+                 GetMempoolAncestorsVerbose1 as GetMempoolAncestorsVerbose,\n        \
+                 GetMempoolDescendantsVerbose0 as GetMempoolDescendants,\n        \
+                 GetMempoolDescendantsVerbose1 as GetMempoolDescendantsVerbose,\n        \
+                 GetRawMempool as GetRawMempoolVerbose,\n        \
+                 GetRawMempool as GetRawMempoolSequence,\n        \
+                 GetRawTransactionVerbose0 as GetRawTransaction,\n        \
+                 GetRawTransactionVerbose1 as GetRawTransactionVerbose,\n        \
+                 SendManyVerbose0 as SendMany,\n        \
+                 SendManyVerbose1 as SendManyVerbose,\n        \
+                 SendToAddressVerbose0 as SendToAddress,\n        \
+                 SendResult as Send,\n        \
+                 SignRawTransactionWithWallet as SignRawTransaction,\n        \
+                 GetChainTipsError as ChainTipsError,\n        \
+                 GetMempoolEntryError as MempoolEntryError,\n        \
+                 ScanTxOutSetStartError as ScanTxOutSetError,\n    \
+             }};\n\n    \
+             // Curated types with no generated counterpart: hidden/no-spec RPC responses and\n    \
+             // shapes the tests read raw (no `into_model`). `Logging` shadows the generated one\n    \
+             // (the generated response is a plain map; tests read named bool fields).\n    \
+             #[rustfmt::skip]\n    \
+             pub use crate::types::v{version}::{{\n        \
+                 Logging, GetZmqNotifications, ScanBlocksStatus, ScanBlocksAbort,\n        \
+                 TransactionCategory,\n        \
+                 ScanTxOutSetStatus, ScanTxOutSetAbort, AddPeerAddress,\n    \
+
+                 }};\n    \
+
+             pub use crate::types::v17::GetMemoryInfoStats;\n    \
+             pub use crate::types::NumericError;\n\
          }}\n\n\
          /// A blocking JSON-RPC client that drives the async `v{version}` production client.\n\
          pub struct Client {{\n    \

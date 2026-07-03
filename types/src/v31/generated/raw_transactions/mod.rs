@@ -652,7 +652,8 @@ pub struct DecodeScript {
     /// Disassembly of the script
     pub asm: String,
     /// Inferred descriptor for the script
-    pub desc: String,
+    #[serde(rename = "desc", skip_serializing_if = "Option::is_none")]
+    pub descriptor: Option<String>,
     /// address of P2SH script wrapping this redeem script (not returned for types that should not be wrapped)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub p2sh: Option<String>,
@@ -678,8 +679,8 @@ pub struct DecodeScriptSegwit {
     /// The raw output script bytes, hex-encoded
     pub hex: String,
     /// address of the P2SH script wrapping this witness redeem script
-    #[serde(rename = "p2sh-segwit")]
-    pub p2sh_segwit: String,
+    #[serde(rename = "p2sh-segwit", skip_serializing_if = "Option::is_none")]
+    pub p2sh_segwit: Option<String>,
     /// The type of the output script (e.g. witness_v0_keyhash or witness_v0_scripthash)
     #[serde(rename = "type")]
     pub type_: String,
@@ -826,8 +827,8 @@ pub struct GetRawTransactionVerbose1 {
     /// The serialized transaction size
     pub size: i64,
     /// Same as "blocktime"
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub time: Option<i64>,
+    #[serde(rename = "time", skip_serializing_if = "Option::is_none")]
+    pub transaction_time: Option<i64>,
     /// The transaction id (same as provided)
     pub txid: String,
     /// The version
@@ -1169,8 +1170,7 @@ pub struct TestMempoolAccept(pub Vec<TestMempoolAcceptItem>);
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct TestMempoolAcceptItem {
     /// Whether this tx would be accepted to the mempool and pass client-specified maxfeerate. If not present, the tx was not fully validated due to a failure in another tx in the list.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub allowed: Option<bool>,
+    pub allowed: bool,
     /// Transaction fees (only present if 'allowed' is true)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fees: Option<TestMempoolAcceptItemFees>,

@@ -89,7 +89,8 @@ impl std::ops::Deref for GetConnectionCount {
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct GetNetTotals {
     /// Current system UNIX epoch time in milliseconds
-    pub timemillis: i64,
+    #[serde(rename = "timemillis")]
+    pub time_millis: i64,
     /// Total bytes received
     #[serde(rename = "totalbytesrecv")]
     pub total_bytesrecv: u64,
@@ -229,7 +230,8 @@ pub struct GetPeerInfo(pub Vec<GetPeerInfoItem>);
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct GetPeerInfoItem {
     /// (host:port) The IP address/hostname optionally followed by :port of the peer
-    pub addr: String,
+    #[serde(rename = "addr")]
+    pub address: String,
     /// The total number of addresses processed, excluding those dropped due to rate limiting
     pub addr_processed: u64,
     /// The total number of addresses dropped due to rate limiting
@@ -248,10 +250,12 @@ pub struct GetPeerInfoItem {
     pub bip152_hb_to: bool,
     /// The total bytes received
     pub bytesrecv: u64,
-    pub bytesrecv_per_msg: std::collections::BTreeMap<String, u64>,
+    #[serde(rename = "bytesrecv_per_msg")]
+    pub bytes_received_per_message: std::collections::BTreeMap<String, u64>,
     /// The total bytes sent
     pub bytessent: u64,
-    pub bytessent_per_msg: std::collections::BTreeMap<String, u64>,
+    #[serde(rename = "bytessent_per_msg")]
+    pub bytes_sent_per_message: std::collections::BTreeMap<String, u64>,
     /// Type of connection:
     /// outbound-full-relay (default automatic connections),
     /// block-relay-only (does not relay transactions or addresses),
@@ -262,7 +266,8 @@ pub struct GetPeerInfoItem {
     /// private-broadcast (short-lived automatic connection for broadcasting privacy-sensitive transactions).
     /// Please note this output is unlikely to be stable in upcoming releases as we iterate to
     /// best capture connection behaviors.
-    pub connection_type: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub connection_type: Option<String>,
     /// The UNIX epoch time of the connection
     #[serde(rename = "conntime")]
     pub conn_time: i64,
@@ -323,9 +328,11 @@ pub struct GetPeerInfoItem {
     /// The string version
     pub subver: String,
     /// The last block we have in common with this peer
-    pub synced_blocks: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub synced_blocks: Option<i64>,
     /// The last header we have in common with this peer
-    pub synced_headers: i64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub synced_headers: Option<i64>,
     /// The time offset in seconds
     #[serde(rename = "timeoffset")]
     pub time_offset: i64,
