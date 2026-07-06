@@ -63,41 +63,46 @@ fn exit_with_msg(msg: &str) -> ! {
     process::exit(1)
 }
 
-/// Find the spec file for one major version (`v{version}_*_openrpc.json`), the lowest match if several.
-fn find_spec(specs_dir: &Path, version: &str) -> Option<PathBuf> {
-    let prefix = format!("v{version}_");
-    let mut matches: Vec<_> = fs::read_dir(specs_dir)
-        .ok()?
-        .filter_map(Result::ok)
-        .filter(|e| {
-            e.file_name()
-                .to_str()
-                .map(|n| n.starts_with(&prefix) && n.ends_with("_openrpc.json"))
-                .unwrap_or(false)
-        })
-        .map(|e| e.path())
-        .collect();
-    matches.sort();
-    matches.into_iter().next()
+/// The major version of a spec file named `v{X}_{Y}_{Z}_openrpc.json`,
+/// so `v17_2_0_openrpc.json` is major `17`.
+fn spec_major(file_name: &str) -> Option<&str> {
+    let rest = file_name.strip_prefix('v')?.strip_suffix("_openrpc.json")?;
+    rest.split('_').next()
 }
 
-/// List the distinct major versions that have a spec file under `specs_dir`. Entries such as `v30_2_0_openrpc.json`.
-fn list_versions(specs_dir: &Path) -> Result<Vec<String>, String> {
+/// Every spec file under `specs/` (see `specs/README.md`).
+fn spec_files(specs_dir: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
-    let entries =
-        fs::read_dir(specs_dir).map_err(|e| format!("read {}: {e}", specs_dir.display()))?;
+    let Ok(entries) = fs::read_dir(specs_dir) else { return out };
     for entry in entries.flatten() {
         let name = entry.file_name();
         let Some(name) = name.to_str() else { continue };
-        if !name.starts_with('v') || !name.ends_with("_openrpc.json") {
-            continue;
-        }
-        if let Some(major) = name[1..].split('_').next() {
-            if !out.contains(&major.to_owned()) {
-                out.push(major.to_owned());
-            }
+        if spec_major(name).is_some() {
+            out.push(entry.path());
         }
     }
     out.sort();
+    out
+}
+
+/// Find the spec file for one major version, the lowest match if several.
+fn find_spec(specs_dir: &Path, version: &str) -> Option<PathBuf> {
+    spec_files(specs_dir)
+        .into_iter()
+        .find(|p| p.file_name().and_then(|n| n.to_str()).and_then(spec_major) == Some(version))
+}
+
+/// List the distinct major versions that have a spec file under `specs_dir`.
+fn list_versions(specs_dir: &Path) -> Result<Vec<String>, String> {
+    let mut out: Vec<String> = Vec::new();
+    for path in spec_files(specs_dir) {
+        let Some(major) = path.file_name().and_then(|n| n.to_str()).and_then(spec_major) else {
+            continue;
+        };
+        if !out.iter().any(|v| v == major) {
+            out.push(major.to_owned());
+        }
+    }
+    out.sort_by_key(|v| v.parse::<u32>().unwrap_or(0));
     Ok(out)
 }

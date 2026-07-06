@@ -4,6 +4,10 @@
 //! rpc_txoutproof.py, rpc_scantxoutset.py, rpc_gettxspendingprevout.py,
 //! rpc_dumptxoutset.py and rpc_getblockstats.py
 
+// These tests read the GENERATED raw response shapes (v31-only mempool-entry fields, i64
+// numerics), which only exist on the async surface; the curated raw types differ.
+#![cfg(feature = "test-async")]
+
 use bitcoind::mtype;
 use bitcoind::vtype::*;
 use integration_test::{BitcoinD, BitcoinDExt as _, Wallet};
@@ -211,7 +215,7 @@ fn scan_tx_out_set_best_block_matches_tip() {
     let json: ScanTxOutSetStart = node.client.scan_tx_out_set_start(&[desc]).unwrap();
 
     assert_eq!(json.best_block, best.to_string());
-    assert_eq!(json.height, height);
+    assert_eq!(json.height, height as i64);
 }
 
 #[test]
@@ -300,12 +304,8 @@ fn get_raw_mempool_sequence_includes_tx() {
     node.fund_wallet();
     let (_, txid) = node.create_mempool_transaction();
 
-    let json: GetRawMempoolSequence = node.client.get_raw_mempool_sequence().unwrap();
+    let seq: GetRawMempoolSequence = node.client.get_raw_mempool_sequence().unwrap();
 
-    let seq = match json {
-        GetRawMempoolSequence::Object2(seq) => seq,
-        other => panic!("expected sequence object, got {:?}", other),
-    };
     assert!(seq.txids.iter().any(|t| *t == txid.to_string()));
     assert!(seq.mempool_sequence > 0);
 }

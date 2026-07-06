@@ -221,7 +221,7 @@ fn blockchain__get_block_count__modelled() {
     let node = BitcoinD::with_wallet(Wallet::None, &[]);
 
     let json: GetBlockCount = node.client.get_block_count().unwrap();
-    let _: mtype::GetBlockCount = json.into_model().unwrap();
+    let _: mtype::GetBlockCount = json.into_model();
 }
 
 #[test]
@@ -446,7 +446,7 @@ fn blockchain__get_difficulty__modelled() {
     let node = BitcoinD::with_wallet(Wallet::None, &[]);
 
     let json: GetDifficulty = node.client.get_difficulty().expect("getdifficulty");
-    let _: mtype::GetDifficulty = json.into_model().unwrap();
+    let _: mtype::GetDifficulty = json.into_model();
 }
 
 #[test]
@@ -561,22 +561,16 @@ fn blockchain__get_raw_mempool__modelled() {
 
     // verbose = false + mempool_sequence = false
     let json: GetRawMempool = node.client.get_raw_mempool().expect("getrawmempool");
-    let model: Result<mtype::GetRawMempoolResult, GetRawMempoolResultError> = json.clone().into_model();
-    let mempool = match model.unwrap() {
-        mtype::GetRawMempoolResult::List(list) => list,
-        other => panic!("expected txid list, got {:?}", other),
-    };
+    let model: Result<mtype::GetRawMempool, GetRawMempoolError> = json.into_model();
+    let mempool = model.unwrap();
     // Sanity check.
     assert_eq!(mempool.0.len(), 1);
 
     // verbose = true + mempool_sequence = false
     let json: GetRawMempoolVerbose =
         node.client.get_raw_mempool_verbose().expect("getrawmempool verbose");
-    let model: Result<mtype::GetRawMempoolResult, GetRawMempoolResultError> = json.into_model();
-    let mempool = match model.unwrap() {
-        mtype::GetRawMempoolResult::Verbose(map) => map,
-        other => panic!("expected verbose map, got {:?}", other),
-    };
+    let model: Result<mtype::GetRawMempoolVerbose, GetRawMempoolVerboseError> = json.into_model();
+    let mempool = model.unwrap();
     // Sanity check.
     assert_eq!(mempool.0.len(), 1);
     #[cfg(not(feature = "v30_and_below"))]
@@ -587,11 +581,9 @@ fn blockchain__get_raw_mempool__modelled() {
         // verbose = false + mempool_sequence = true
         let json: GetRawMempoolSequence =
             node.client.get_raw_mempool_sequence().expect("getrawmempool sequence");
-        let model: Result<mtype::GetRawMempoolResult, GetRawMempoolResultError> = json.into_model();
-        let mempool = match model.unwrap() {
-            mtype::GetRawMempoolResult::Sequence(seq) => seq,
-            other => panic!("expected sequence, got {:?}", other),
-        };
+        let model: Result<mtype::GetRawMempoolSequence, GetRawMempoolSequenceError> =
+            json.into_model();
+        let mempool = model.unwrap();
         // Sanity check.
         assert_eq!(mempool.txids.len(), 1);
     }

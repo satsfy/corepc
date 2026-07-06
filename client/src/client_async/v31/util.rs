@@ -11,7 +11,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     CreateMultisig, DeriveAddresses, EstimateSmartFee, GetDescriptorInfo, GetIndexInfo,
     SignMessageWithPrivKey, ValidateAddress, VerifyMessage,

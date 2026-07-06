@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -95,9 +94,7 @@ impl std::error::Error for DumpTxOutSetError {
 }
 
 impl From<crate::NumericError> for DumpTxOutSetError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBestBlockHash {
@@ -135,41 +132,7 @@ impl std::error::Error for GetBestBlockHashError {
 
 impl GetBlockCount {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::GetBlockCount, GetBlockCountError> {
-        use GetBlockCountError as E;
-
-        Ok(model::GetBlockCount(crate::to_u64(self.0, "inner")?))
-    }
-}
-
-/// Error when converting a `GetBlockCount` type into the model type.
-#[derive(Debug)]
-pub enum GetBlockCountError {
-    /// Conversion of a numeric type to the expected type failed.
-    Numeric(crate::NumericError),
-}
-
-impl fmt::Display for GetBlockCountError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for GetBlockCountError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::Numeric(ref e) => Some(e),
-        }
-    }
-}
-
-impl From<crate::NumericError> for GetBlockCountError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    pub fn into_model(self) -> model::GetBlockCount { model::GetBlockCount(self.0) }
 }
 
 impl GetBlockFilter {
@@ -374,9 +337,7 @@ impl std::error::Error for GetBlockHeaderVerboseError {
 }
 
 impl From<crate::NumericError> for GetBlockHeaderVerboseError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockStats {
@@ -511,9 +472,7 @@ impl std::error::Error for GetBlockStatsError {
 }
 
 impl From<crate::NumericError> for GetBlockStatsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose0 {
@@ -673,9 +632,7 @@ impl std::error::Error for GetBlockVerboseOneError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseOneError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose1CoinbaseTx {
@@ -721,9 +678,7 @@ impl std::error::Error for CoinbaseTransactionError {
 }
 
 impl From<crate::NumericError> for CoinbaseTransactionError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose2 {
@@ -847,9 +802,7 @@ impl std::error::Error for GetBlockVerboseTwoError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseTwoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose2CoinbaseTx {
@@ -1046,9 +999,7 @@ impl std::error::Error for GetBlockVerboseThreeError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreeError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose3CoinbaseTx {
@@ -1192,9 +1143,7 @@ impl std::error::Error for GetBlockVerboseThreePrevoutError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreePrevoutError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose3TxItemVinItemPrevoutScriptPubKey {
@@ -1337,9 +1286,7 @@ impl std::error::Error for GetBlockchainInfoError {
 }
 
 impl From<crate::NumericError> for GetBlockchainInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainStates {
@@ -1389,9 +1336,7 @@ impl std::error::Error for GetChainStatesError {
 }
 
 impl From<crate::NumericError> for GetChainStatesError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainStatesChainStatesItem {
@@ -1463,9 +1408,7 @@ impl std::error::Error for ChainStateError {
 }
 
 impl From<crate::NumericError> for ChainStateError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainTips {
@@ -1556,9 +1499,7 @@ impl std::error::Error for ChainTipsError {
 }
 
 impl From<crate::NumericError> for ChainTipsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainTxStats {
@@ -1636,9 +1577,7 @@ impl std::error::Error for GetChainTxStatsError {
 }
 
 impl From<crate::NumericError> for GetChainTxStatsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfo {
@@ -1694,9 +1633,7 @@ impl std::error::Error for GetDeploymentInfoError {
 }
 
 impl From<crate::NumericError> for GetDeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeployments {
@@ -1742,9 +1679,7 @@ impl std::error::Error for DeploymentInfoError {
 }
 
 impl From<crate::NumericError> for DeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeploymentsBip9 {
@@ -1812,9 +1747,7 @@ impl std::error::Error for Bip9InfoError {
 }
 
 impl From<crate::NumericError> for Bip9InfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeploymentsBip9Statistics {
@@ -1857,9 +1790,7 @@ impl std::error::Error for Bip9StatisticsError {
 }
 
 impl From<crate::NumericError> for Bip9StatisticsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivity {
@@ -1907,12 +1838,10 @@ impl GetDescriptorActivityActivity {
         use ActivityEntryError as E;
 
         Ok(match self {
-            GetDescriptorActivityActivity::Object(x) => {
-                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?)
-            }
-            GetDescriptorActivityActivity::Object2(x) => {
-                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?)
-            }
+            GetDescriptorActivityActivity::Object(x) =>
+                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?),
+            GetDescriptorActivityActivity::Object2(x) =>
+                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?),
         })
     }
 }
@@ -2020,9 +1949,7 @@ impl std::error::Error for SpendActivityError {
 }
 
 impl From<crate::NumericError> for SpendActivityError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivityActivityVariant0PrevoutSpk {
@@ -2108,9 +2035,7 @@ impl std::error::Error for ReceiveActivityError {
 }
 
 impl From<crate::NumericError> for ReceiveActivityError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivityActivityVariant1OutputSpk {
@@ -2133,28 +2058,7 @@ impl GetDescriptorActivityActivityVariant1OutputSpk {
 
 impl GetDifficulty {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::GetDifficulty, GetDifficultyError> {
-        use GetDifficultyError as E;
-
-        Ok(model::GetDifficulty(self.0))
-    }
-}
-
-/// Error when converting a `GetDifficulty` type into the model type.
-#[derive(Debug)]
-pub enum GetDifficultyError {}
-
-impl fmt::Display for GetDifficultyError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for GetDifficultyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
-    }
+    pub fn into_model(self) -> model::GetDifficulty { model::GetDifficulty(self.0) }
 }
 
 impl GetMempoolAncestorsVerbose0 {
@@ -2341,9 +2245,7 @@ impl std::error::Error for MempoolEntryError {
 }
 
 impl From<crate::NumericError> for MempoolEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolAncestorsVerbose1EntryFees {
@@ -2407,9 +2309,7 @@ impl std::error::Error for GetMempoolClusterError {
 }
 
 impl From<crate::NumericError> for GetMempoolClusterError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolClusterChunksItem {
@@ -2462,9 +2362,7 @@ impl std::error::Error for ChunkError {
 }
 
 impl From<crate::NumericError> for ChunkError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolDescendantsVerbose0 {
@@ -2720,9 +2618,7 @@ impl std::error::Error for GetMempoolEntryError {
 }
 
 impl From<crate::NumericError> for GetMempoolEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolEntryFees {
@@ -2779,92 +2675,6 @@ impl std::error::Error for MempoolEntryFeesError {
             Self::Descendant(ref e) => Some(e),
             Self::Chunk(ref e) => Some(e),
         }
-    }
-}
-
-impl GetMempoolFeeRateDiagram {
-    /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(
-        self,
-    ) -> Result<model::GetMempoolFeerateDiagram, GetMempoolFeerateDiagramError> {
-        use GetMempoolFeerateDiagramError as E;
-
-        Ok(model::GetMempoolFeerateDiagram(
-            self.0
-                .into_iter()
-                .map(|x| x.into_model().map_err(E::Inner))
-                .collect::<Result<Vec<_>, _>>()?,
-        ))
-    }
-}
-
-/// Error when converting a `GetMempoolFeerateDiagram` type into the model type.
-#[derive(Debug)]
-pub enum GetMempoolFeerateDiagramError {
-    /// Conversion of the `Inner` field failed.
-    Inner(FeerateDiagramEntryError),
-}
-
-impl fmt::Display for GetMempoolFeerateDiagramError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Inner(ref e) => write_err!(f, "conversion of the `Inner` field failed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for GetMempoolFeerateDiagramError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::Inner(ref e) => Some(e),
-        }
-    }
-}
-
-impl GetMempoolFeeRateDiagramItem {
-    /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::FeerateDiagramEntry, FeerateDiagramEntryError> {
-        use FeerateDiagramEntryError as E;
-
-        Ok(model::FeerateDiagramEntry {
-            weight: crate::to_u64(self.weight, "weight")?,
-            fee: Amount::from_btc(self.fee).map_err(E::Fee)?,
-        })
-    }
-}
-
-/// Error when converting a `FeerateDiagramEntry` type into the model type.
-#[derive(Debug)]
-pub enum FeerateDiagramEntryError {
-    /// Conversion of the `Fee` field failed.
-    Fee(amount::ParseAmountError),
-    /// Conversion of a numeric type to the expected type failed.
-    Numeric(crate::NumericError),
-}
-
-impl fmt::Display for FeerateDiagramEntryError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
-            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for FeerateDiagramEntryError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {
-            Self::Fee(ref e) => Some(e),
-            Self::Numeric(ref e) => Some(e),
-        }
-    }
-}
-
-impl From<crate::NumericError> for FeerateDiagramEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
     }
 }
 
@@ -2958,76 +2768,97 @@ impl std::error::Error for GetMempoolInfoError {
 }
 
 impl From<crate::NumericError> for GetMempoolInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
-impl GetRawMempool {
+impl GetRawMempoolVerbose0 {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::GetRawMempoolResult, GetRawMempoolResultError> {
-        use GetRawMempoolResultError as E;
+    pub fn into_model(self) -> Result<model::GetRawMempool, GetRawMempoolError> {
+        use GetRawMempoolError as E;
 
-        Ok(match self {
-            GetRawMempool::List(txids) => model::GetRawMempoolResult::List(model::GetRawMempool(
-                txids
-                    .into_iter()
-                    .map(|t| t.parse::<Txid>())
-                    .collect::<Result<_, _>>()
-                    .map_err(E::Txid)?,
-            )),
-            GetRawMempool::Object(map) => {
-                model::GetRawMempoolResult::Verbose(model::GetRawMempoolVerbose(
-                    map.into_iter()
-                        .map(|(k, v)| {
-                            Ok::<_, E>((
-                                k.parse::<Txid>().map_err(E::Txid)?,
-                                v.into_model().map_err(E::Verbose)?,
-                            ))
-                        })
-                        .collect::<Result<_, _>>()?,
-                ))
-            }
-            GetRawMempool::Object2(seq) => {
-                model::GetRawMempoolResult::Sequence(seq.into_model().map_err(E::Sequence)?)
-            }
-        })
+        Ok(model::GetRawMempool(
+            self.0
+                .into_iter()
+                .map(|x| x.parse::<Txid>().map_err(E::Inner))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
     }
 }
 
-/// Error when converting a `GetRawMempoolResult` type into the model type.
+/// Error when converting a `GetRawMempool` type into the model type.
 #[derive(Debug)]
-pub enum GetRawMempoolResultError {
-    /// Conversion of the `Txid` field failed.
-    Txid(hex::HexToArrayError),
-    /// Conversion of the `Verbose` field failed.
-    Verbose(MempoolEntryError),
-    /// Conversion of the `Sequence` field failed.
-    Sequence(GetRawMempoolSequenceError),
+pub enum GetRawMempoolError {
+    /// Conversion of the `Inner` field failed.
+    Inner(hex::HexToArrayError),
 }
 
-impl fmt::Display for GetRawMempoolResultError {
+impl fmt::Display for GetRawMempoolError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
-            Self::Verbose(ref e) => write_err!(f, "conversion of the `Verbose` field failed"; e),
-            Self::Sequence(ref e) => write_err!(f, "conversion of the `Sequence` field failed"; e),
+            Self::Inner(ref e) => write_err!(f, "conversion of the `Inner` field failed"; e),
         }
     }
 }
 
 #[cfg(feature = "std")]
-impl std::error::Error for GetRawMempoolResultError {
+impl std::error::Error for GetRawMempoolError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match *self {
-            Self::Txid(ref e) => Some(e),
-            Self::Verbose(ref e) => Some(e),
-            Self::Sequence(ref e) => Some(e),
+            Self::Inner(ref e) => Some(e),
         }
     }
 }
 
-impl GetRawMempoolVariant1 {
+impl GetRawMempoolVerbose1 {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::GetRawMempoolVerbose, GetRawMempoolVerboseError> {
+        use GetRawMempoolVerboseError as E;
+
+        Ok(model::GetRawMempoolVerbose(
+            self.0
+                .into_iter()
+                .map(|(k, v)| {
+                    Ok::<_, E>((
+                        k.parse::<Txid>().map_err(E::InnerKey)?,
+                        v.into_model().map_err(E::InnerValue)?,
+                    ))
+                })
+                .collect::<Result<std::collections::BTreeMap<_, _>, _>>()?,
+        ))
+    }
+}
+
+/// Error when converting a `GetRawMempoolVerbose` type into the model type.
+#[derive(Debug)]
+pub enum GetRawMempoolVerboseError {
+    /// Conversion of the `InnerKey` field failed.
+    InnerKey(hex::HexToArrayError),
+    /// Conversion of the `InnerValue` field failed.
+    InnerValue(MempoolEntryError),
+}
+
+impl fmt::Display for GetRawMempoolVerboseError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::InnerKey(ref e) => write_err!(f, "conversion of the `InnerKey` field failed"; e),
+            Self::InnerValue(ref e) => {
+                write_err!(f, "conversion of the `InnerValue` field failed"; e)
+            }
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for GetRawMempoolVerboseError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::InnerKey(ref e) => Some(e),
+            Self::InnerValue(ref e) => Some(e),
+        }
+    }
+}
+
+impl GetRawMempoolVerbose1Entry {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::MempoolEntry, MempoolEntryError> {
         use MempoolEntryError as E;
@@ -3081,7 +2912,7 @@ impl GetRawMempoolVariant1 {
     }
 }
 
-impl GetRawMempoolVariant1Fees {
+impl GetRawMempoolVerbose1EntryFees {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::MempoolEntryFees, MempoolEntryFeesError> {
         use MempoolEntryFeesError as E;
@@ -3096,7 +2927,7 @@ impl GetRawMempoolVariant1Fees {
     }
 }
 
-impl GetRawMempoolVariant2 {
+impl GetRawMempoolVerbose2 {
     /// Converts the raw type into the version-nonspecific model type.
     pub fn into_model(self) -> Result<model::GetRawMempoolSequence, GetRawMempoolSequenceError> {
         use GetRawMempoolSequenceError as E;
@@ -3239,9 +3070,7 @@ impl std::error::Error for GetTxOutSetInfoError {
 }
 
 impl From<crate::NumericError> for GetTxOutSetInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTxOutSetInfoBlockInfo {
@@ -3438,9 +3267,7 @@ impl std::error::Error for GetTxOutError {
 }
 
 impl From<crate::NumericError> for GetTxOutError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTxSpendingPrevout {
@@ -3561,9 +3388,7 @@ impl std::error::Error for GetTxSpendingPrevoutItemError {
 }
 
 impl From<crate::NumericError> for GetTxSpendingPrevoutItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl LoadTxOutSet {
@@ -3611,9 +3436,7 @@ impl std::error::Error for LoadTxOutSetError {
 }
 
 impl From<crate::NumericError> for LoadTxOutSetError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanBlocksVariant1 {
@@ -3665,9 +3488,7 @@ impl std::error::Error for ScanBlocksStartError {
 }
 
 impl From<crate::NumericError> for ScanBlocksStartError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanTxOutSetVariant0 {
@@ -3731,9 +3552,7 @@ impl std::error::Error for ScanTxOutSetStartError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetStartError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanTxOutSetVariant0UnspentsItem {
@@ -3800,9 +3619,7 @@ impl std::error::Error for ScanTxOutSetUnspentError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetUnspentError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl VerifyTxOutProof {
@@ -3884,9 +3701,7 @@ impl std::error::Error for WaitForBlockError {
 }
 
 impl From<crate::NumericError> for WaitForBlockError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl WaitForBlockHeight {
@@ -3930,9 +3745,7 @@ impl std::error::Error for WaitForBlockHeightError {
 }
 
 impl From<crate::NumericError> for WaitForBlockHeightError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl WaitForNewBlock {
@@ -3976,7 +3789,5 @@ impl std::error::Error for WaitForNewBlockError {
 }
 
 impl From<crate::NumericError> for WaitForNewBlockError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }

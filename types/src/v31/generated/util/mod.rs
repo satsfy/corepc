@@ -10,12 +10,12 @@
 
 mod into;
 
+use serde::{Deserialize, Serialize};
+
 pub use self::into::{
     CreateMultisigError, DeriveAddressesError, EstimateSmartFeeError, SignMessageWithPrivKeyError,
     ValidateAddressError,
 };
-
-use serde::{Deserialize, Serialize};
 
 /// Creates a multi-signature address with n signatures of m keys required.
 /// It returns a json object with the address and redeemScript.
@@ -126,9 +126,7 @@ pub struct SignMessageWithPrivKey(pub String);
 
 impl std::ops::Deref for SignMessageWithPrivKey {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Return information about the given bitcoin address.
@@ -174,7 +172,5 @@ pub struct VerifyMessage(pub bool);
 
 impl std::ops::Deref for VerifyMessage {
     type Target = bool;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }

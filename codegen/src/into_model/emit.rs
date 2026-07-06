@@ -187,7 +187,7 @@ fn emit_type(
     ctx: &Ctx,
     raw_name: &str,
     canon_name: &str,
-) -> (String, String, String, Vec<(String, String)>) {
+) -> (String, String, String, Vec<(String, String)>, Option<String>) {
     let err = format!("{canon_name}Error");
     let info = ctx.raw[raw_name];
 
@@ -197,6 +197,7 @@ fn emit_type(
             String::new(),
             err,
             vec![],
+            None,
         );
     };
 
@@ -305,8 +306,22 @@ fn emit_type(
     let mut seen_variants: BTreeSet<String> = BTreeSet::new();
     errs.retain(|(v, _)| seen_variants.insert(v.clone()));
 
+    // An infallible conversion of a pure root can drop the `Result` entirely, matching the curated
+    // convention (`pub fn into_model(self) -> model::X`). Offer the plain impl; the caller uses it
+    // only for types never referenced as another conversion's field (those callers `map_err`).
+    let plain = if errs.is_empty() && !numeric && nested.is_empty() && body.starts_with("Ok(") {
+        let inner = body.strip_prefix("Ok(").and_then(|b| b.strip_suffix(')'));
+        inner.map(|inner| {
+            format!(
+                "impl {raw_name} {{\n    /// Converts the raw type into the version-nonspecific model type.\n    pub fn into_model(self) -> model::{canon_name} {{\n        {inner}\n    }}\n}}\n\n"
+            )
+        })
+    } else {
+        None
+    };
+
     let error_enum = emit_error_enum(&err, canon_name, &errs, numeric);
-    (imp, error_enum, err, nested)
+    (imp, error_enum, err, nested, plain)
 }
 
 /// Emit the error enum for a converted type: one variant per named parse error, plus a shared
@@ -415,11 +430,14 @@ pub fn generate_category(
     let has_roots = !queue.is_empty();
 
     let mut seen: BTreeSet<String> = BTreeSet::new();
-    let mut emitted: Vec<(String, String)> = Vec::new(); // (raw_name, source)
-    let mut error_names: Vec<String> = Vec::new();
+    // (raw_name, result_impl + enum, err_name, plain_impl, enum_was_emitted)
+    let mut entries: Vec<(String, String, String, Option<String>, bool)> = Vec::new();
     // Several raw types can map to the same canonical type (e.g. the ancestor/descendant verbose
     // mempool entries both become `MempoolEntry`); their error enum must be emitted only once.
     let mut emitted_errors: BTreeSet<String> = BTreeSet::new();
+    // Raw types referenced as another conversion's field: their callers `map_err`, so they must
+    // keep the `Result` signature even when infallible.
+    let mut nested_refs: BTreeSet<String> = BTreeSet::new();
 
     while let Some((raw, canon)) = queue.pop_front() {
         if !seen.insert(raw.clone()) {
@@ -428,25 +446,36 @@ pub fn generate_category(
         if !ctx.raw.contains_key(&raw) {
             continue; // a nested type outside this category's response set; skip.
         }
-        let (imp, error_enum, err, nested) = emit_type(&ctx, &raw, &canon);
+        let (imp, error_enum, err, nested, plain) = emit_type(&ctx, &raw, &canon);
         let mut src = imp;
-        if emitted_errors.insert(err.clone()) {
+        let enum_emitted = emitted_errors.insert(err.clone());
+        if enum_emitted {
             src.push_str(&error_enum);
-            error_names.push(err);
         }
-        emitted.push((raw, src));
+        entries.push((raw, src, err, plain, enum_emitted));
         for pair in nested {
+            nested_refs.insert(pair.0.clone());
             queue.push_back(pair);
         }
     }
 
-    emitted.sort_by(|a, b| a.0.cmp(&b.0));
-    error_names.sort();
+    entries.sort_by(|a, b| a.0.cmp(&b.0));
 
+    let mut error_names: Vec<String> = Vec::new();
     let mut source = header(version, category);
-    for (_, src) in emitted {
-        source.push_str(&src);
+    for (raw, src, err, plain, enum_emitted) in entries {
+        match plain {
+            // Infallible pure root: plain signature, no error enum, matching curated conventions.
+            Some(plain) if !nested_refs.contains(&raw) => source.push_str(&plain),
+            _ => {
+                source.push_str(&src);
+                if enum_emitted {
+                    error_names.push(err);
+                }
+            }
+        }
     }
+    error_names.sort();
 
     Generated { source, error_names, has_roots }
 }

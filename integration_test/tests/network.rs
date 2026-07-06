@@ -103,7 +103,7 @@ fn network__get_node_addresses() {
         let json: GetNodeAddresses = node.client.get_node_addresses().expect("getnodeaddresses");
 
         assert_eq!(json.0[0].address, peer_address);
-        assert_eq!(json.0[0].port, peer_port as i64);
+        assert_eq!(json.0[0].port as i64, peer_port as i64);
     }
 }
 

@@ -836,7 +836,7 @@ fn wallet__list_wallets__modelled() {
     node.client.create_wallet(wallet_2).expect("createwallet w2");
 
     let json: ListWallets = node.client.list_wallets().expect("listwallets");
-    let model: mtype::ListWallets = json.into_model().unwrap();
+    let model: mtype::ListWallets = json.into_model();
 
     assert!(model.0.iter().any(|w| w == wallet_1));
     assert!(model.0.iter().any(|w| w == wallet_2));
@@ -1183,7 +1183,7 @@ fn create_load_unload_wallet() {
 
     let wallet = format!("wallet-{}", rand::random::<u32>()).to_string();
     let json: CreateWallet = node.client.create_wallet(&wallet).expect("createwallet");
-    let _: mtype::CreateWallet = json.into_model().unwrap();
+    let _: mtype::CreateWallet = json.into_model();
 
     // Upto version 20 Core returns null for `unloadwallet`.
     #[cfg(feature = "v20_and_below")]
@@ -1193,11 +1193,11 @@ fn create_load_unload_wallet() {
     #[cfg(not(feature = "v20_and_below"))]
     {
         let json: UnloadWallet = node.client.unload_wallet(&wallet).expect("unloadwallet");
-        let _: mtype::UnloadWallet = json.into_model().unwrap();
+        let _: mtype::UnloadWallet = json.into_model();
     }
 
     let json: LoadWallet = node.client.load_wallet(&wallet).expect("loadwallet");
-    let _: mtype::LoadWallet = json.into_model().unwrap();
+    let _: mtype::LoadWallet = json.into_model();
 }
 
 #[test]

@@ -5,6 +5,10 @@
 //! wallet_bumpfee.py, wallet_listdescriptors.py, wallet_listsinceblock.py,
 //! wallet_groups.py, and wallet_listreceivedby.py
 
+// These tests read the GENERATED raw response shapes (map-shaped groupings, i64 fields, union
+// variants), which only exist on the async surface; the curated raw types differ.
+#![cfg(feature = "test-async")]
+
 use bitcoin::Amount;
 use bitcoind::vtype::*;
 use bitcoind::AddressType;

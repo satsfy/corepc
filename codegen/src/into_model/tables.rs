@@ -26,12 +26,16 @@ pub(crate) const TYPE_ALIAS: &[(&str, &str)] = &[
     // type (the status/abort shapes are read raw by the tests, no model conversion).
     ("ScanBlocksVariant1", "ScanBlocksStart"),
     ("GetTxOutVariant1", "GetTxOut"),
+    // Hidden: the verbosity-0 shape drops the suffix in the model.
+    ("GetOrphanTxsVerbose0", "GetOrphanTxs"),
     // The splitter renders `feerate` as `FeeRate`; the model spells it `Feerate`.
     ("GetMempoolFeeRateDiagram", "GetMempoolFeerateDiagram"),
     ("GetMempoolFeeRateDiagramItem", "FeerateDiagramEntry"),
-    // `getrawmempool` is one untagged enum covering all three response shapes; it maps to the model
-    // union `GetRawMempoolResult` (bridged by the `ENUM_RECONSTRUCT` arm).
-    ("GetRawMempool", "GetRawMempoolResult"),
+    // `getrawmempool` splits per selector combination (see `verbose_variants`); each level maps to
+    // its own model type, mirroring the curated conversions.
+    ("GetRawMempoolVerbose0", "GetRawMempool"),
+    ("GetRawMempoolVerbose1", "GetRawMempoolVerbose"),
+    ("GetRawMempoolVerbose2", "GetRawMempoolSequence"),
     // Wallet: verbose levels / RPC-name aliases.
     ("SendResult", "Send"),
     ("SendManyVerbose0", "SendMany"),
@@ -49,6 +53,12 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("FundRawTransaction", "tx", "hex"),
     ("SignRawTransaction", "tx", "hex"),
     ("GetRawTransactionVerbose", "transaction", "hex"),
+    ("GetOrphanTxsVerboseTwoEntry", "transaction", "hex"),
+    // `getorphantxs` entries: Core's keys are `entry`/`expiration`, the model spells them out.
+    ("GetOrphanTxsVerboseOneEntry", "entry_time", "entry"),
+    ("GetOrphanTxsVerboseOneEntry", "expiration_time", "expiration"),
+    ("GetOrphanTxsVerboseTwoEntry", "entry_time", "entry"),
+    ("GetOrphanTxsVerboseTwoEntry", "expiration_time", "expiration"),
     // Spelled-out / pluralized names the splitter can't reach from the wire name.
     ("FundRawTransaction", "change_position", "changepos"),
     ("SubmitPackageTxResultFees", "base_fee", "base"),
@@ -150,6 +160,24 @@ pub(crate) const RECONSTRUCT: &[ReconstructRule] = &[
         expr: "OutPoint { txid: self.txid.parse::<Txid>().map_err(E::OutpointTxid)?, vout: crate::to_u32(self.vout, \"vout\")? }",
         errs: &[("OutpointTxid", "hex::HexToArrayError")],
         numeric: true,
+        nested: &[],
+    },
+    // `estimaterawfee` range endpoints: Core emits huge sentinel doubles for open-ended fail
+    // ranges; out-of-range values become `None` (matches the retired curated conversion).
+    ReconstructRule {
+        canon_type: "RawFeeRange",
+        field: "start_range",
+        expr: "crate::btc_per_kb(self.startrange).ok().flatten()",
+        errs: &[],
+        numeric: false,
+        nested: &[],
+    },
+    ReconstructRule {
+        canon_type: "RawFeeRange",
+        field: "end_range",
+        expr: "crate::btc_per_kb(self.endrange).ok().flatten()",
+        errs: &[],
+        numeric: false,
         nested: &[],
     },
     // `gettxout` returns a flat `{ value, scriptPubKey: { hex, address } }`; the canonical re-types
@@ -329,22 +357,4 @@ pub(crate) struct EnumReconstruct {
     pub(crate) nested: &'static [(&'static str, &'static str)],
 }
 
-pub(crate) const ENUM_RECONSTRUCT: &[EnumReconstruct] = &[
-    // `getrawmempool` is a single untagged enum (the `oneOf` is selected by two parameters, which the
-    // verbose splitter deliberately does not split) whose three shapes map to three unrelated model
-    // types. Bridge each arm by hand: the id list and the verbose map wrap their newtypes directly,
-    // the sequence struct delegates to `GetRawMempoolVariant2::into_model` (queued via `nested`).
-    EnumReconstruct {
-        canon_type: "GetRawMempoolResult",
-        body: "Ok(match self {\n            GetRawMempool::List(txids) => model::GetRawMempoolResult::List(model::GetRawMempool(txids.into_iter().map(|t| t.parse::<Txid>()).collect::<Result<_, _>>().map_err(E::Txid)?)),\n            GetRawMempool::Object(map) => model::GetRawMempoolResult::Verbose(model::GetRawMempoolVerbose(map.into_iter().map(|(k, v)| Ok::<_, E>((k.parse::<Txid>().map_err(E::Txid)?, v.into_model().map_err(E::Verbose)?))).collect::<Result<_, _>>()?)),\n            GetRawMempool::Object2(seq) => model::GetRawMempoolResult::Sequence(seq.into_model().map_err(E::Sequence)?),\n        })",
-        errs: &[
-            ("Txid", "hex::HexToArrayError"),
-            ("Verbose", "MempoolEntryError"),
-            ("Sequence", "GetRawMempoolSequenceError"),
-        ],
-        nested: &[
-            ("GetRawMempoolVariant1", "MempoolEntry"),
-            ("GetRawMempoolVariant2", "GetRawMempoolSequence"),
-        ],
-    },
-];
+pub(crate) const ENUM_RECONSTRUCT: &[EnumReconstruct] = &[];

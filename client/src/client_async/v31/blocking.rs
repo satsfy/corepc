@@ -9,7 +9,7 @@
 //! production client ([`crate::client_async::Client`]) on a private current-thread runtime.
 //! `bitcoind` swaps `node.client` to this type under its `client-async` feature, so the
 //! unchanged integration tests exercise the async transport. Methods listed in the codegen
-//! `BRIDGED_METHODS` are provided by `crate::impl_async_bridges!` instead (see below).
+//! the codegen `KEPT_MACROS` are provided by `crate::impl_async_bridges!` instead (see below).
 
 #![allow(unused_imports, clippy::needless_pass_by_value, clippy::too_many_arguments)]
 
@@ -41,9 +41,7 @@ pub use crate::client_sync::{
 
 /// Shorthand for `serde_json::to_value`, matching the free `into_json` the reused sync
 /// `impl_client_*` macros call.
-fn into_json<T: Serialize>(val: T) -> Result<Value> {
-    Ok(serde_json::to_value(val)?)
-}
+fn into_json<T: Serialize>(val: T) -> Result<Value> { Ok(serde_json::to_value(val)?) }
 
 /// The version-specific response-type namespace the integration tests import under
 /// `test-async`. GENERATED types only: every response type (and its `into_model` error)
@@ -74,8 +72,9 @@ pub mod vtype {
         GetMempoolAncestorsVerbose1 as GetMempoolAncestorsVerbose,
         GetMempoolDescendantsVerbose0 as GetMempoolDescendants,
         GetMempoolDescendantsVerbose1 as GetMempoolDescendantsVerbose,
-        GetRawMempool as GetRawMempoolVerbose,
-        GetRawMempool as GetRawMempoolSequence,
+        GetRawMempoolVerbose0 as GetRawMempool,
+        GetRawMempoolVerbose1 as GetRawMempoolVerbose,
+        GetRawMempoolVerbose2 as GetRawMempoolSequence,
         GetRawTransactionVerbose0 as GetRawTransaction,
         GetRawTransactionVerbose1 as GetRawTransactionVerbose,
         SendManyVerbose0 as SendMany,
@@ -86,6 +85,12 @@ pub mod vtype {
         GetChainTipsError as ChainTipsError,
         GetMempoolEntryError as MempoolEntryError,
         ScanTxOutSetStartError as ScanTxOutSetError,
+        GetOrphanTxsVerbose0 as GetOrphanTxs,
+        GetOrphanTxsVerbose1 as GetOrphanTxsVerboseOne,
+        GetOrphanTxsVerbose2 as GetOrphanTxsVerboseTwo,
+        GetOrphanTxsVerboseOneError as GetOrphanTxsVerboseOneEntryError,
+        GetOrphanTxsVerboseTwoError as GetOrphanTxsVerboseTwoEntryError,
+        EstimateRawFeeLongFail as RawFeeRange,
     };
 
     // Curated types with no generated counterpart: hidden/no-spec RPC responses and
@@ -95,7 +100,7 @@ pub mod vtype {
     pub use crate::types::v31::{
         Logging, GetZmqNotifications, ScanBlocksStatus, ScanBlocksAbort,
         TransactionCategory,
-        ScanTxOutSetStatus, ScanTxOutSetAbort, AddPeerAddress,
+        ScanTxOutSetStatus, ScanTxOutSetAbort,
     };
     pub use crate::types::v17::GetMemoryInfoStats;
     pub use crate::types::NumericError;
@@ -142,13 +147,12 @@ impl Client {
     /// codes behave the same against either client.
     fn map_err(e: crate::client_async::Error) -> Error {
         match e {
-            crate::client_async::Error::Rpc { code, message, .. } => {
+            crate::client_async::Error::Rpc { code, message, .. } =>
                 Error::JsonRpc(jsonrpc::error::Error::Rpc(jsonrpc::error::RpcError {
                     code,
                     message,
                     data: None,
-                }))
-            }
+                })),
             other => Error::Returned(other.to_string()),
         }
     }
@@ -165,10 +169,3 @@ impl Client {
 crate::impl_async_bridges!(v31);
 
 crate::impl_client_check_expected_server_version!({ [310000] });
-
-// == Network ==
-// get_network_info: bridged by `impl_async_bridges!` (see above).
-// get_node_addresses: bridged by `impl_async_bridges!` (see above).
-// get_peer_info: bridged by `impl_async_bridges!` (see above).
-// list_banned: bridged by `impl_async_bridges!` (see above).
-// ping: bridged by `impl_async_bridges!` (see above).

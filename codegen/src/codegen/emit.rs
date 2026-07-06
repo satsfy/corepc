@@ -72,6 +72,10 @@ impl Modules {
             &types_dir.join("compatibility.rs"),
             &crate::into_model::emit_compatibility(version),
         )?;
+        write_file(
+            &types_dir.join("vtype_sync.rs"),
+            &super::blocking::emit_vtype_sync(version),
+        )?;
 
         // The canonical model source the `into_model` generator reads its target shapes from.
         let model_dir = types_dir
@@ -347,13 +351,18 @@ fn emit_verbose_methods(m: &MethodOut) -> String {
         if req_args.is_empty() { "&self".to_owned() } else { format!("&self, {req_args}") };
 
     // Positional args in spec order with the selector reinserted at its real index. `with_opts`
-    // selects whether optionals read from the `opts` struct or are sent as `null`.
-    let call_array = |selector: &str, with_opts: bool| {
+    // selects whether optionals read from the `opts` struct or are sent as `null`. Params pinned
+    // by a composite arm condition (`VerboseVariant::extra`) always take their pinned literal.
+    let call_array = |v: &crate::codegen::VerboseVariant, with_opts: bool| {
         let mut items: Vec<String> = m
             .params
             .iter()
             .map(|p| {
-                if p.required {
+                if let Some((_, lit)) =
+                    v.extra.iter().find(|(n, _)| *n == p.wire_name || *n == p.rust_name)
+                {
+                    format!("json!({lit})")
+                } else if p.required {
                     format!("json!({})", p.rust_name)
                 } else if with_opts {
                     format!("json!(opts.{})", p.rust_name)
@@ -362,7 +371,7 @@ fn emit_verbose_methods(m: &MethodOut) -> String {
                 }
             })
             .collect();
-        items.insert(selector_slot, format!("json!({selector})"));
+        items.insert(selector_slot, format!("json!({})", v.selector));
         format!("&[{}]", items.join(", "))
     };
 
@@ -377,7 +386,7 @@ fn emit_verbose_methods(m: &MethodOut) -> String {
         out.push_str(&format!(
             "        self.call_raw(\"{}\", {}).await\n    }}\n\n",
             m.method_name,
-            call_array(&v.selector, false)
+            call_array(v, false)
         ));
 
         if has_opts {
@@ -397,7 +406,7 @@ fn emit_verbose_methods(m: &MethodOut) -> String {
             out.push_str(&format!(
                 "        self.call_raw(\"{}\", {}).await\n    }}\n\n",
                 m.method_name,
-                call_array(&v.selector, true)
+                call_array(v, true)
             ));
         }
     }
@@ -660,7 +669,10 @@ fn emit_types_mod_rs(version: &str, categories: &[String]) -> String {
     s.push_str(
         "\n// Hand-maintained override shims for conversions the canonical `crate::model` types\n\
          // get wrong; emitted by codegen from a fixed table. See `corepc_bugs_backlog.md`.\n\
-         pub mod compatibility;\n\n",
+         pub mod compatibility;\n\n\
+         // The response-type namespace the SYNC build's `bitcoind::vtype` re-exports (curated\n\
+         // types + generated-error-name aliases). Not globbed below on purpose.\n\
+         pub mod vtype_sync;\n\n",
     );
     for cat in categories {
         s.push_str(&format!("pub use self::{}::*;\n", category_module(cat)));

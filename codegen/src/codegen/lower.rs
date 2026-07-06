@@ -34,6 +34,14 @@ const FLOAT_FIELDS: &[&str] = &[
     "pingtime",
     "minping",
     "pingwait",
+    // estimaterawfee: moving-average estimator internals, all doubles.
+    "decay",
+    "startrange",
+    "endrange",
+    "withintarget",
+    "totalconfirmed",
+    "inmempool",
+    "leftmempool",
 ];
 
 /// Generic names that also appear as signed ints elsewhere are handled per-parent in [`classify_number`].
@@ -129,6 +137,7 @@ pub static INTEGER_PARAM_NAMES: &[&str] = &[
     "uid",
     "nrequired",
     "fee_delta",
+    "delta_time",
 ];
 
 /// Map a PascalCase method name to its generated type name, avoiding std/prelude collisions.
@@ -355,20 +364,43 @@ pub(crate) fn verbose_variants(method: &Method) -> Option<Vec<VerboseVariant>> {
     let mut out = Vec::with_capacity(variants.len());
     for (i, v) in variants.iter().enumerate() {
         let cond = v.condition.clone().unwrap_or_else(|| v.description.clone().unwrap_or_default());
-        if cond.contains(" and ") {
-            return None;
-        }
-        let suffix = verbose_suffix(&cond, i);
+        // A composite condition fixes additional boolean params besides the selector, e.g.
+        // `getrawmempool`'s "for verbose = false and mempool_sequence = true". The variant takes
+        // its level from its position; the extra `param = literal` clauses are pinned literally.
+        let (cond, extra) = match cond.split_once(" and ") {
+            None => (cond, Vec::new()),
+            Some((first, rest)) => {
+                let mut extra = Vec::new();
+                for clause in rest.split(" and ") {
+                    let (name, lit) = clause.split_once('=')?;
+                    let name = name.trim();
+                    method.params.iter().position(|p| p.name == name)?;
+                    extra.push((name.to_owned(), lit.trim().to_owned()));
+                }
+                (first.to_owned(), extra)
+            }
+        };
+        let suffix = if extra.is_empty() {
+            verbose_suffix(&cond, i)
+        } else {
+            (*labels.get(i.min(4)).expect("bounded")).to_owned()
+        };
         let level = labels.iter().position(|l| *l == suffix).unwrap_or(i).min(4);
-        let selector = match (is_bool, level) {
-            (true, 0) => "false".to_owned(),
-            (true, _) => "true".to_owned(),
-            (false, l) => l.to_string(),
+        let selector = if extra.is_empty() {
+            match (is_bool, level) {
+                (true, 0) => "false".to_owned(),
+                (true, _) => "true".to_owned(),
+                (false, l) => l.to_string(),
+            }
+        } else {
+            // The selector clause itself carries the literal ("verbose = false").
+            cond.split_once('=').map(|(_, lit)| lit.trim().to_owned())?
         };
         out.push(VerboseVariant {
             word: words[level].to_owned(),
             type_name: format!("{pascal}{suffix}"),
             selector,
+            extra,
         });
     }
     Some(out)
@@ -842,6 +874,8 @@ const RAW_FIELD_OPTIONAL: &[(&str, &str, bool)] = &[
     // `getblocktemplate`: the curated raw type makes `longpollid` an `Option` (matching how tests
     // read it); the OpenRPC `required` set disagrees. Match the curated shape.
     ("GetBlockTemplateVariant2", "longpollid", true),
+    // `estimaterawfee`: Core always returns the `long` horizon (the model requires it).
+    ("EstimateRawFee", "long", false),
     // `getpeerinfo`: the tests (and the curated type) treat these as optional per peer state.
     ("GetPeerInfoItem", "connection_type", true),
     ("GetPeerInfoItem", "synced_headers", true),
@@ -1108,6 +1142,10 @@ pub(crate) fn classify_number(parent: &str, field: &str, desc: Option<&str>) -> 
     if matches!(field, "minfeefilter" | "chunkfee") {
         return NumKind::F64;
     }
+    // `getmempoolfeeratediagram`: cumulative fee in fractional BTC (the dump omits the unit).
+    if field == "fee" && parent.starts_with("GetMempoolFeeRateDiagram") {
+        return NumKind::F64;
+    }
 
     if FLOAT_FIELDS.contains(&field) {
         return NumKind::F64;
@@ -1124,7 +1162,7 @@ pub(crate) fn classify_number(parent: &str, field: &str, desc: Option<&str>) -> 
     if field == "txouts" {
         return if parent.starts_with("GetTxOutSetInfo") { NumKind::U64 } else { NumKind::I64 };
     }
-    if field.is_empty() && parent == "GetConnectionCount" {
+    if field.is_empty() && matches!(parent, "GetConnectionCount" | "GetBlockCount") {
         return NumKind::U64;
     }
     if parent.contains("Locked")

@@ -7,7 +7,6 @@
 
 pub mod blockchain;
 pub mod control;
-pub mod generating;
 pub mod mining;
 pub mod network;
 pub mod raw_transactions;
@@ -19,9 +18,12 @@ pub mod wallet;
 // get wrong; emitted by codegen from a fixed table. See `corepc_bugs_backlog.md`.
 pub mod compatibility;
 
+// The response-type namespace the SYNC build's `bitcoind::vtype` re-exports (curated
+// types + generated-error-name aliases). Not globbed below on purpose.
+pub mod vtype_sync;
+
 pub use self::blockchain::*;
 pub use self::control::*;
-pub use self::generating::*;
 pub use self::mining::*;
 pub use self::network::*;
 pub use self::raw_transactions::*;

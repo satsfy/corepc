@@ -94,6 +94,9 @@ pub(crate) struct VerboseVariant {
     pub(crate) word: String,      // verbosity level digit: "0", "1", ...
     pub(crate) type_name: String, // concrete variant return type, e.g. "GetBlockVerbose1"
     pub(crate) selector: String, // JSON literal for the selector argument: "0", "1", "true", "false"
+    // Further `(param name, JSON literal)` pins from a composite arm condition, e.g.
+    // `getrawmempool`'s "for verbose = false and mempool_sequence = true".
+    pub(crate) extra: Vec<(String, String)>,
 }
 
 impl Modules {
@@ -401,7 +404,7 @@ mod tests {
     }
 
     #[test]
-    fn verbose_variants_bails_on_multi_parameter_condition() {
+    fn verbose_variants_pins_multi_parameter_condition() {
         let m = method(serde_json::json!({
             "name": "getrawmempool",
             "params": [
@@ -414,7 +417,14 @@ mod tests {
                 { "type": "object", "x-bitcoin-condition": "verbose=false and mempool_sequence=true" }
             ] } }
         }));
-        assert!(verbose_variants(&m).is_none());
+        let vs = verbose_variants(&m).expect("composite condition splits");
+        assert_eq!(vs.len(), 3);
+        assert_eq!(vs[0].selector, "false");
+        assert!(vs[0].extra.is_empty());
+        assert_eq!(vs[1].selector, "true");
+        assert_eq!(vs[2].selector, "false");
+        assert_eq!(vs[2].extra, vec![("mempool_sequence".to_owned(), "true".to_owned())]);
+        assert_eq!(vs[2].type_name, "GetRawMempoolVerbose2");
     }
 
     #[test]

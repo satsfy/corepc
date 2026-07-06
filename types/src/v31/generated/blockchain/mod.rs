@@ -10,27 +10,27 @@
 
 mod into;
 
+use serde::{Deserialize, Serialize};
+
 pub use self::into::{
     ActivityEntryError, Bip9InfoError, Bip9StatisticsError, ChainStateError, ChainTipsError,
     ChunkError, CoinbaseTransactionError, DeploymentInfoError, DumpTxOutSetError,
-    FeerateDiagramEntryError, GetBestBlockHashError, GetBlockCountError, GetBlockFilterError,
-    GetBlockHashError, GetBlockHeaderError, GetBlockHeaderVerboseError, GetBlockStatsError,
-    GetBlockVerboseOneError, GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
+    GetBestBlockHashError, GetBlockFilterError, GetBlockHashError, GetBlockHeaderError,
+    GetBlockHeaderVerboseError, GetBlockStatsError, GetBlockVerboseOneError,
+    GetBlockVerboseThreeError, GetBlockVerboseThreePrevoutError,
     GetBlockVerboseThreeTransactionError, GetBlockVerboseTwoError,
     GetBlockVerboseTwoTransactionError, GetBlockVerboseZeroError, GetBlockchainInfoError,
     GetChainStatesError, GetChainTipsError, GetChainTxStatsError, GetDeploymentInfoError,
-    GetDescriptorActivityError, GetDifficultyError, GetMempoolAncestorsError,
-    GetMempoolAncestorsVerboseError, GetMempoolClusterError, GetMempoolDescendantsError,
-    GetMempoolDescendantsVerboseError, GetMempoolEntryError, GetMempoolFeerateDiagramError,
-    GetMempoolInfoError, GetRawMempoolResultError, GetRawMempoolSequenceError, GetTxOutError,
-    GetTxOutSetInfoBlockInfoError, GetTxOutSetInfoError, GetTxOutSetInfoUnspendablesError,
-    GetTxSpendingPrevoutError, GetTxSpendingPrevoutItemError, LoadTxOutSetError, MempoolEntryError,
-    MempoolEntryFeesError, ReceiveActivityError, ScanBlocksStartError, ScanTxOutSetStartError,
-    ScanTxOutSetUnspentError, ScriptPubKeyError, SpendActivityError, VerifyTxOutProofError,
-    WaitForBlockError, WaitForBlockHeightError, WaitForNewBlockError,
+    GetDescriptorActivityError, GetMempoolAncestorsError, GetMempoolAncestorsVerboseError,
+    GetMempoolClusterError, GetMempoolDescendantsError, GetMempoolDescendantsVerboseError,
+    GetMempoolEntryError, GetMempoolInfoError, GetRawMempoolError, GetRawMempoolSequenceError,
+    GetRawMempoolVerboseError, GetTxOutError, GetTxOutSetInfoBlockInfoError, GetTxOutSetInfoError,
+    GetTxOutSetInfoUnspendablesError, GetTxSpendingPrevoutError, GetTxSpendingPrevoutItemError,
+    LoadTxOutSetError, MempoolEntryError, MempoolEntryFeesError, ReceiveActivityError,
+    ScanBlocksStartError, ScanTxOutSetStartError, ScanTxOutSetUnspentError, ScriptPubKeyError,
+    SpendActivityError, VerifyTxOutProofError, WaitForBlockError, WaitForBlockHeightError,
+    WaitForNewBlockError,
 };
-
-use serde::{Deserialize, Serialize};
 
 /// Write the serialized UTXO set to a file. This can be used in loadtxoutset afterwards if this snapshot height is supported in the chainparams as well.
 ///
@@ -67,9 +67,7 @@ pub struct GetBestBlockHash(pub String);
 
 impl std::ops::Deref for GetBestBlockHash {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `getblockcount`.
@@ -80,13 +78,11 @@ impl std::ops::Deref for GetBestBlockHash {
 /// > The genesis block has height 0.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetBlockCount(pub i64);
+pub struct GetBlockCount(pub u64);
 
 impl std::ops::Deref for GetBlockCount {
-    type Target = i64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    type Target = u64;
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Retrieve a BIP 157 content filter for a particular block.
@@ -124,9 +120,7 @@ pub struct GetBlockHash(pub String);
 
 impl std::ops::Deref for GetBlockHash {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 impl GetBlockHash {
@@ -144,9 +138,7 @@ pub struct GetBlockHeaderVerbose0(pub String);
 
 impl std::ops::Deref for GetBlockHeaderVerbose0 {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 impl GetBlockHeaderVerbose0 {
@@ -314,9 +306,7 @@ pub struct GetBlockVerbose0(pub String);
 
 impl std::ops::Deref for GetBlockVerbose0 {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// If verbosity is 0, returns a string that is serialized, hex-encoded data for block 'hash'.
@@ -930,9 +920,7 @@ pub struct GetDifficulty(pub f64);
 
 impl std::ops::Deref for GetDifficulty {
     type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// If txid is in the mempool, returns all in-mempool ancestors.
@@ -1160,24 +1148,6 @@ pub struct GetMempoolEntryFees {
     pub modified: f64,
 }
 
-/// Result of the JSON-RPC method `getmempoolfeeratediagram`.
-///
-/// > getmempoolfeeratediagram
-/// >
-/// > Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetMempoolFeeRateDiagram(pub Vec<GetMempoolFeeRateDiagramItem>);
-
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetMempoolFeeRateDiagramItem {
-    /// cumulative fee in BTC
-    pub fee: f64,
-    /// cumulative sigops-adjusted weight
-    pub weight: i64,
-}
-
 /// Returns details on the active state of the TX memory pool.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
@@ -1226,24 +1196,26 @@ pub struct GetMempoolInfo {
     pub usage: u64,
 }
 
-/// Result of the JSON-RPC method `getrawmempool`.
+/// Returns all transaction ids in memory pool as a json array of string transaction ids.
 ///
-/// > getrawmempool
-/// >
-/// > Returns all transaction ids in memory pool as a json array of string transaction ids.
-/// >
-/// > Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+/// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[serde(untagged)]
-pub enum GetRawMempool {
-    List(Vec<String>),
-    Object(std::collections::BTreeMap<String, GetRawMempoolVariant1>),
-    Object2(GetRawMempoolVariant2),
-}
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetRawMempoolVerbose0(pub Vec<String>);
+
+/// Returns all transaction ids in memory pool as a json array of string transaction ids.
+///
+/// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetRawMempoolVerbose1(
+    /// for verbose = true
+    pub std::collections::BTreeMap<String, GetRawMempoolVerbose1Entry>,
+);
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetRawMempoolVariant1 {
+pub struct GetRawMempoolVerbose1Entry {
     /// number of in-mempool ancestor transactions (including this one)
     #[serde(rename = "ancestorcount")]
     pub ancestor_count: u64,
@@ -1265,7 +1237,7 @@ pub struct GetRawMempoolVariant1 {
     /// virtual transaction size of in-mempool descendants (including this one)
     #[serde(rename = "descendantsize")]
     pub descendant_size: u64,
-    pub fees: GetRawMempoolVariant1Fees,
+    pub fees: GetRawMempoolVerbose1EntryFees,
     /// block height when transaction entered pool
     pub height: i64,
     /// unconfirmed transactions spending outputs from this transaction
@@ -1285,7 +1257,7 @@ pub struct GetRawMempoolVariant1 {
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetRawMempoolVariant1Fees {
+pub struct GetRawMempoolVerbose1EntryFees {
     /// transaction fees of in-mempool ancestors (including this one) with fee deltas used for mining priority, denominated in BTC
     pub ancestor: f64,
     /// transaction fee, denominated in BTC
@@ -1298,10 +1270,12 @@ pub struct GetRawMempoolVariant1Fees {
     pub modified: f64,
 }
 
-/// for verbose = false and mempool_sequence = true
+/// Returns all transaction ids in memory pool as a json array of string transaction ids.
+///
+/// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetRawMempoolVariant2 {
+pub struct GetRawMempoolVerbose2 {
     /// The mempool sequence value.
     pub mempool_sequence: u64,
     pub txids: Vec<String>,
@@ -1335,9 +1309,7 @@ pub struct GetTxOutProof(pub String);
 
 impl std::ops::Deref for GetTxOutProof {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Returns statistics about the unspent transaction output set.
@@ -1506,9 +1478,7 @@ pub struct PruneBlockchain(pub i64);
 
 impl std::ops::Deref for PruneBlockchain {
     type Target = i64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Dumps the mempool to disk. It will fail until the previous dump is fully loaded.
@@ -1651,9 +1621,7 @@ pub struct VerifyChain(pub bool);
 
 impl std::ops::Deref for VerifyChain {
     type Target = bool;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `verifytxoutproof`.

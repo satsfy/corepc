@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -84,27 +83,8 @@ impl std::error::Error for BumpFeeError {
 
 impl CreateWallet {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::CreateWallet, CreateWalletError> {
-        use CreateWalletError as E;
-
-        Ok(model::CreateWallet { name: self.name, warnings: self.warnings.unwrap_or_default() })
-    }
-}
-
-/// Error when converting a `CreateWallet` type into the model type.
-#[derive(Debug)]
-pub enum CreateWalletError {}
-
-impl fmt::Display for CreateWalletError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for CreateWalletError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
+    pub fn into_model(self) -> model::CreateWallet {
+        model::CreateWallet { name: self.name, warnings: self.warnings.unwrap_or_default() }
     }
 }
 
@@ -282,9 +262,7 @@ impl std::error::Error for GetAddressInfoError {
 }
 
 impl From<crate::NumericError> for GetAddressInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetAddressInfoEmbedded {
@@ -422,9 +400,7 @@ impl std::error::Error for GetAddressInfoEmbeddedError {
 }
 
 impl From<crate::NumericError> for GetAddressInfoEmbeddedError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetAddressesByLabel {
@@ -635,9 +611,7 @@ impl std::error::Error for LastProcessedBlockError {
 }
 
 impl From<crate::NumericError> for LastProcessedBlockError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBalancesMine {
@@ -797,16 +771,12 @@ impl GetHdKeysItemDescriptorsItem {
 pub enum HdKeyDescriptorError {}
 
 impl fmt::Display for HdKeyDescriptorError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for HdKeyDescriptorError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
-    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
 }
 
 impl GetNewAddress {
@@ -1110,9 +1080,7 @@ impl std::error::Error for GetTransactionError {
 }
 
 impl From<crate::NumericError> for GetTransactionError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTransactionDetailsItem {
@@ -1183,9 +1151,7 @@ impl std::error::Error for GetTransactionDetailError {
 }
 
 impl From<crate::NumericError> for GetTransactionDetailError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTransactionLastProcessedBlock {
@@ -1294,9 +1260,7 @@ impl std::error::Error for GetWalletInfoError {
 }
 
 impl From<crate::NumericError> for GetWalletInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetWalletInfoLastProcessedBlock {
@@ -1463,9 +1427,7 @@ impl std::error::Error for ListLockUnspentItemError {
 }
 
 impl From<crate::NumericError> for ListLockUnspentItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ListReceivedByAddress {
@@ -1643,9 +1605,7 @@ impl std::error::Error for ListReceivedByLabelItemError {
 }
 
 impl From<crate::NumericError> for ListReceivedByLabelItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ListSinceBlock {
@@ -1879,9 +1839,7 @@ impl std::error::Error for TransactionItemError {
 }
 
 impl From<crate::NumericError> for TransactionItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ListTransactions {
@@ -2117,60 +2075,18 @@ impl std::error::Error for ListUnspentItemError {
 }
 
 impl From<crate::NumericError> for ListUnspentItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ListWallets {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::ListWallets, ListWalletsError> {
-        use ListWalletsError as E;
-
-        Ok(model::ListWallets(self.0))
-    }
-}
-
-/// Error when converting a `ListWallets` type into the model type.
-#[derive(Debug)]
-pub enum ListWalletsError {}
-
-impl fmt::Display for ListWalletsError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for ListWalletsError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
-    }
+    pub fn into_model(self) -> model::ListWallets { model::ListWallets(self.0) }
 }
 
 impl LoadWallet {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::LoadWallet, LoadWalletError> {
-        use LoadWalletError as E;
-
-        Ok(model::LoadWallet { name: self.name, warnings: self.warnings.unwrap_or_default() })
-    }
-}
-
-/// Error when converting a `LoadWallet` type into the model type.
-#[derive(Debug)]
-pub enum LoadWalletError {}
-
-impl fmt::Display for LoadWalletError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for LoadWalletError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
+    pub fn into_model(self) -> model::LoadWallet {
+        model::LoadWallet { name: self.name, warnings: self.warnings.unwrap_or_default() }
     }
 }
 
@@ -2259,9 +2175,7 @@ impl std::error::Error for RescanBlockchainError {
 }
 
 impl From<crate::NumericError> for RescanBlockchainError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SendAll {
@@ -2595,9 +2509,7 @@ impl std::error::Error for SignFailError {
 }
 
 impl From<crate::NumericError> for SignFailError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SimulateRawTransaction {
@@ -2640,27 +2552,8 @@ impl std::error::Error for SimulateRawTransactionError {
 
 impl UnloadWallet {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> Result<model::UnloadWallet, UnloadWalletError> {
-        use UnloadWalletError as E;
-
-        Ok(model::UnloadWallet { warnings: self.warnings.unwrap_or_default() })
-    }
-}
-
-/// Error when converting a `UnloadWallet` type into the model type.
-#[derive(Debug)]
-pub enum UnloadWalletError {}
-
-impl fmt::Display for UnloadWalletError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
-}
-
-#[cfg(feature = "std")]
-impl std::error::Error for UnloadWalletError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
+    pub fn into_model(self) -> model::UnloadWallet {
+        model::UnloadWallet { warnings: self.warnings.unwrap_or_default() }
     }
 }
 
@@ -2710,9 +2603,7 @@ impl std::error::Error for WalletCreateFundedPsbtError {
 }
 
 impl From<crate::NumericError> for WalletCreateFundedPsbtError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl WalletDisplayAddress {

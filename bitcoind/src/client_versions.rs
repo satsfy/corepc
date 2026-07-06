@@ -10,9 +10,11 @@
 // is version-generic: it exposes the active version's method surface (same names, args, curated
 // return types), so the integration tests run unchanged but exercise the async transport. Without
 // `client-async`, `Client` is the sync client for the same version. The `blocking::*` glob also
-// re-exports the facade's `vtype` shim module.
+// re-exports the facade's `vtype` shim module; the sync build points `vtype` at the generated
+// `vtype_sync` shim (curated types + generated-error-name aliases) so the same test annotations
+// compile against both clients.
 #[cfg(all(feature = "31_0", not(feature = "client-async")))]
-pub use corepc_client::{client_sync::v31::*, types::v31 as vtype};
+pub use corepc_client::{client_sync::v31::*, types::v31::generated::vtype_sync as vtype};
 #[cfg(all(feature = "31_0", feature = "client-async"))]
 pub use corepc_client::client_async::blocking::*;
 

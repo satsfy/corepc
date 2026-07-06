@@ -109,7 +109,7 @@ fn util__get_index_info() {
 
     let txindex_info = index_info.0.get("txindex").unwrap();
     assert!(
-        txindex_info.best_block_height < i64::from(u32::MAX),
+        i64::from(txindex_info.best_block_height) < i64::from(u32::MAX),
         "best_block_height should be a valid block height"
     );
 }

@@ -10,49 +10,12 @@
 //! integration tests run against the async transport because `bitcoind` swaps `node.client` to this
 //! type under its `client-async` feature.
 //!
-//! Methods in [`BRIDGED_METHODS`] are the exception: the facade implements them itself (via the
-//! `impl_async_bridges!` macro in `client_async/blocking_bridges.rs` - real Rust, not a string
-//! template here) instead of reusing the sync macro, so a bug in the sync arg-encoding cannot reach
-//! the async path. Their sync macros are skipped to avoid duplicate definitions. The generated file
-//! just invokes `crate::impl_async_bridges!(v{N});`.
+//! The method surface itself comes from the `impl_async_bridges!` macro in
+//! `client_async/blocking_bridges.rs` (real Rust, not a string template here): every method routes
+//! through the generated async wrappers, so a bug in the sync arg-encoding cannot reach the async
+//! path. The generated file just invokes `crate::impl_async_bridges!(v{N});` plus the version-check
+//! macro kept from the sync `mod.rs` ([`KEPT_MACROS`]).
 
-/// Sync macro suffixes (`impl_client_vNN__<suffix>`) the facade replaces with its own bridge body
-/// from `impl_async_bridges!` (see `client_async/blocking_bridges.rs`). Skipped from the reused
-/// surface so there is no duplicate definition. Keep in sync with that macro.
-const BRIDGED_METHODS: &[&str] = &[
-    // Wallet
-    "get_new_address",
-    // Generating
-    "generate_block",
-    "generate_to_address",
-    "generate_to_descriptor",
-    "invalidate_block",
-    // Mining (note: `get_network_hashes_per_second` is the macro suffix for `get_network_hash_ps`)
-    "get_block_template",
-    "get_mining_info",
-    "get_network_hashes_per_second",
-    "get_prioritised_transactions",
-    "prioritise_transaction",
-    "submit_block",
-    "submit_header",
-    // Network
-    "add_node",
-    "clear_banned",
-    "disconnect_node",
-    "get_added_node_info",
-    "get_addr_man_info",
-    "get_connection_count",
-    "get_net_totals",
-    "get_network_info",
-    "get_node_addresses",
-    "get_peer_info",
-    "list_banned",
-    "ping",
-    "set_ban",
-    "set_network_active",
-    // Hidden RPC used by the network tests (no generated wrapper; bridged via raw `self.call`).
-    "add_peer_address",
-];
 
 /// Emit `blocking.rs` for `version`, reusing the sync client's macro surface taken from
 /// `sync_mod_src` (the verbatim contents of `client_sync/v{N}/mod.rs`).
@@ -69,7 +32,7 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
          //! production client ([`crate::client_async::Client`]) on a private current-thread runtime.\n\
          //! `bitcoind` swaps `node.client` to this type under its `client-async` feature, so the\n\
          //! unchanged integration tests exercise the async transport. Methods listed in the codegen\n\
-         //! `BRIDGED_METHODS` are provided by `crate::impl_async_bridges!` instead (see below).\n\n\
+         //! the codegen `KEPT_MACROS` are provided by `crate::impl_async_bridges!` instead (see below).\n\n\
          #![allow(unused_imports, clippy::needless_pass_by_value, clippy::too_many_arguments)]\n\n\
          use std::collections::BTreeMap;\n\
          use std::fmt;\n\
@@ -115,8 +78,9 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
                  GetMempoolAncestorsVerbose1 as GetMempoolAncestorsVerbose,\n        \
                  GetMempoolDescendantsVerbose0 as GetMempoolDescendants,\n        \
                  GetMempoolDescendantsVerbose1 as GetMempoolDescendantsVerbose,\n        \
-                 GetRawMempool as GetRawMempoolVerbose,\n        \
-                 GetRawMempool as GetRawMempoolSequence,\n        \
+                 GetRawMempoolVerbose0 as GetRawMempool,\n        \
+                 GetRawMempoolVerbose1 as GetRawMempoolVerbose,\n        \
+                 GetRawMempoolVerbose2 as GetRawMempoolSequence,\n        \
                  GetRawTransactionVerbose0 as GetRawTransaction,\n        \
                  GetRawTransactionVerbose1 as GetRawTransactionVerbose,\n        \
                  SendManyVerbose0 as SendMany,\n        \
@@ -126,7 +90,13 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
                  SignRawTransactionWithWallet as SignRawTransaction,\n        \
                  GetChainTipsError as ChainTipsError,\n        \
                  GetMempoolEntryError as MempoolEntryError,\n        \
-                 ScanTxOutSetStartError as ScanTxOutSetError,\n    \
+                 ScanTxOutSetStartError as ScanTxOutSetError,\n        \
+                 GetOrphanTxsVerbose0 as GetOrphanTxs,\n        \
+                 GetOrphanTxsVerbose1 as GetOrphanTxsVerboseOne,\n        \
+                 GetOrphanTxsVerbose2 as GetOrphanTxsVerboseTwo,\n        \
+                 GetOrphanTxsVerboseOneError as GetOrphanTxsVerboseOneEntryError,\n        \
+                 GetOrphanTxsVerboseTwoError as GetOrphanTxsVerboseTwoEntryError,\n        \
+                 EstimateRawFeeLongFail as RawFeeRange,\n    \
              }};\n\n    \
              // Curated types with no generated counterpart: hidden/no-spec RPC responses and\n    \
              // shapes the tests read raw (no `into_model`). `Logging` shadows the generated one\n    \
@@ -135,7 +105,7 @@ pub(crate) fn emit_blocking(version: &str, sync_mod_src: &str) -> String {
              pub use crate::types::v{version}::{{\n        \
                  Logging, GetZmqNotifications, ScanBlocksStatus, ScanBlocksAbort,\n        \
                  TransactionCategory,\n        \
-                 ScanTxOutSetStatus, ScanTxOutSetAbort, AddPeerAddress,\n    \
+                 ScanTxOutSetStatus, ScanTxOutSetAbort,\n    \
 
                  }};\n    \
 
@@ -228,28 +198,90 @@ fn extract_reexport_block(src: &str) -> String {
 
 /// Pull the ordered macro surface (section comments + `crate::impl_client_*!()` invocations) out of
 /// the sync `mod.rs`, dropping `define_jsonrpc_bitreq_client!` (the facade defines its own client)
-/// and any [`BRIDGED_METHODS`] macro (the facade provides those itself via `impl_async_bridges!`).
+/// keeping only [`KEPT_MACROS`] (the facade provides everything else via `impl_async_bridges!`).
 fn extract_macro_surface(src: &str) -> String {
     let mut out = Vec::new();
     for line in src.lines() {
         let t = line.trim_start();
-        if t.starts_with("// ==") {
-            out.push(String::new());
-            out.push(line.to_owned());
-        } else if t.starts_with("crate::impl_client_") {
-            if let Some(suffix) = macro_method_suffix(t) {
-                if BRIDGED_METHODS.contains(&suffix) {
-                    out.push(format!("// {suffix}: bridged by `impl_async_bridges!` (see above)."));
-                    continue;
-                }
-            }
-            out.push(line.to_owned());
+        // `impl_async_bridges!` implements the whole method surface; the only sync macro the
+        // facade reuses is the version-check one (its expected-versions argument lives in the
+        // sync `mod.rs`). Everything else would be a duplicate definition. Matching on the
+        // KEPT_MACROS prefix also survives the sync mod being commented out wholesale.
+        if KEPT_MACROS.iter().any(|k| t.trim_start_matches("// ").starts_with(k)) {
+            out.push(line.trim_start().trim_start_matches("// ").to_owned());
         }
     }
     out.join("\n").trim_start().to_owned()
 }
 
-/// Extract `<suffix>` from a `crate::impl_client_vNN__<suffix>!();` line.
-fn macro_method_suffix(line: &str) -> Option<&str> {
-    line.split("__").nth(1)?.split('!').next()
+/// Sync macro invocations the facade reuses verbatim (see `extract_macro_surface`).
+const KEPT_MACROS: &[&str] = &["crate::impl_client_check_expected_server_version!"];
+
+/// Error-name aliases for the sync build's `vtype` shim: the integration tests annotate
+/// `into_model` results with the GENERATED error names; under the sync client the curated
+/// conversions return these (mostly bare foreign) error types instead. `(name, target path)`.
+const SYNC_ERROR_ALIASES: &[(&str, &str)] = &[
+    ("DeriveAddressesError", "bitcoin::address::ParseError"),
+    ("EstimateSmartFeeError", "bitcoin::amount::ParseAmountError"),
+    ("GenerateToAddressError", "bitcoin::hex::HexToArrayError"),
+    ("GenerateToDescriptorError", "bitcoin::hex::HexToArrayError"),
+    ("GetAddressesByLabelError", "bitcoin::address::ParseError"),
+    ("GetBalanceError", "bitcoin::amount::ParseAmountError"),
+    ("GetBestBlockHashError", "bitcoin::hex::HexToArrayError"),
+    ("GetBlockHashError", "bitcoin::hex::HexToArrayError"),
+    ("GetBlockVerboseZeroError", "bitcoin::consensus::encode::FromHexError"),
+    ("GetMempoolAncestorsError", "bitcoin::hex::HexToArrayError"),
+    ("GetMempoolAncestorsVerboseError", "MapMempoolEntryError"),
+    ("GetMempoolDescendantsError", "bitcoin::hex::HexToArrayError"),
+    ("GetMempoolDescendantsVerboseError", "MapMempoolEntryError"),
+    ("GetPrioritisedTransactionsError", "bitcoin::hex::HexToArrayError"),
+    ("GetRawChangeAddressError", "bitcoin::address::ParseError"),
+    ("GetRawMempoolError", "bitcoin::hex::HexToArrayError"),
+    ("GetRawMempoolSequenceError", "bitcoin::hex::HexToArrayError"),
+    ("GetRawMempoolVerboseError", "MapMempoolEntryError"),
+    ("GetReceivedByAddressError", "bitcoin::amount::ParseAmountError"),
+    ("GetReceivedByLabelError", "bitcoin::amount::ParseAmountError"),
+    ("ListLockUnspentError", "ListLockUnspentItemError"),
+    ("ListTransactionsError", "TransactionItemError"),
+    ("ListUnspentError", "ListUnspentItemError"),
+    ("RescanBlockchainError", "crate::NumericError"),
+    ("SendManyError", "bitcoin::hex::HexToArrayError"),
+    ("SendManyVerboseError", "bitcoin::hex::HexToArrayError"),
+    ("SendToAddressError", "bitcoin::hex::HexToArrayError"),
+    ("SignMessageError", "bitcoin::sign_message::MessageSignatureError"),
+    ("SignMessageWithPrivKeyError", "bitcoin::sign_message::MessageSignatureError"),
+    ("SimulateRawTransactionError", "bitcoin::amount::ParseAmountError"),
+    ("VerifyTxOutProofError", "bitcoin::hex::HexToArrayError"),
+    ("WalletDisplayAddressError", "bitcoin::address::ParseError"),
+    ("CreatePsbtError", "bitcoin::psbt::PsbtParseError"),
+    ("CombinePsbtError", "bitcoin::psbt::PsbtParseError"),
+    ("CombineRawTransactionError", "bitcoin::consensus::encode::FromHexError"),
+    ("ConvertToPsbtError", "bitcoin::psbt::PsbtParseError"),
+    ("DecodeRawTransactionError", "RawTransactionError"),
+    ("GetRawTransactionError", "bitcoin::consensus::encode::FromHexError"),
+    ("JoinPsbtsError", "bitcoin::psbt::PsbtParseError"),
+    ("UtxoUpdatePsbtError", "bitcoin::psbt::PsbtParseError"),
+    ("CreateRawTransactionError", "bitcoin::consensus::encode::FromHexError"),
+    ("SendRawTransactionError", "bitcoin::hex::HexToArrayError"),
+    ("GetPrivateBroadcastInfoError", "bitcoin::consensus::encode::FromHexError"),
+];
+
+/// Emit `types/src/v{N}/generated/vtype_sync.rs`: the response-type namespace the SYNC build's
+/// `bitcoind::vtype` points at. Curated types plus error-name aliases, so test annotations
+/// written against the generated error names compile against the curated conversions too.
+pub(crate) fn emit_vtype_sync(version: &str) -> String {
+    let mut s = format!(
+        "// SPDX-License-Identifier: CC0-1.0\n\n\
+         //! Auto-generated `vtype` shim for the SYNC build of Bitcoin Core `{version}`.\n//!\n\
+         //! Generated by `codegen`. Do not edit by hand, re-run `just codegen` to regenerate.\n//!\n\
+         //! `bitcoind` re-exports this module as `vtype` when the `client-async` feature is off,\n\
+         //! so the integration tests resolve response types to the CURATED types (the sync\n\
+         //! client's surface). The `type` aliases map the GENERATED error names the tests\n\
+         //! annotate onto the (mostly bare foreign) error types the curated conversions return.\n\n\
+         pub use crate::v{version}::*;\n\n"
+    );
+    for (name, target) in SYNC_ERROR_ALIASES {
+        s.push_str(&format!("pub type {name} = {target};\n"));
+    }
+    s
 }

@@ -10,12 +10,12 @@
 
 mod into;
 
+use serde::{Deserialize, Serialize};
+
 pub use self::into::{
     BlockTemplateTransactionError, GetBlockTemplateError, GetMiningInfoError,
     GetPrioritisedTransactionsError, NextBlockInfoError, PrioritisedTransactionError,
 };
-
-use serde::{Deserialize, Serialize};
 
 /// Result of the JSON-RPC method `getblocktemplate`.
 ///
@@ -183,9 +183,7 @@ pub struct GetNetworkHashPs(pub f64);
 
 impl std::ops::Deref for GetNetworkHashPs {
     type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `getprioritisedtransactions`.
@@ -223,9 +221,7 @@ pub struct PrioritiseTransaction(pub bool);
 
 impl std::ops::Deref for PrioritiseTransaction {
     type Target = bool;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `submitblock`.

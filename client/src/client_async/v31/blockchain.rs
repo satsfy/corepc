@@ -11,15 +11,14 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     DumpTxOutSet, GetBestBlockHash, GetBlockCount, GetBlockFilter, GetBlockFromPeer, GetBlockHash,
     GetBlockHeaderVerbose0, GetBlockHeaderVerbose1, GetBlockStats, GetBlockVerbose0,
     GetBlockVerbose1, GetBlockVerbose2, GetBlockVerbose3, GetBlockchainInfo, GetChainStates,
     GetChainTips, GetChainTxStats, GetDeploymentInfo, GetDescriptorActivity, GetDifficulty,
     GetMempoolAncestorsVerbose0, GetMempoolAncestorsVerbose1, GetMempoolCluster,
-    GetMempoolDescendantsVerbose0, GetMempoolDescendantsVerbose1, GetMempoolEntry,
-    GetMempoolFeeRateDiagram, GetMempoolInfo, GetRawMempool, GetTxOut, GetTxOutProof,
+    GetMempoolDescendantsVerbose0, GetMempoolDescendantsVerbose1, GetMempoolEntry, GetMempoolInfo,
+    GetRawMempoolVerbose0, GetRawMempoolVerbose1, GetRawMempoolVerbose2, GetTxOut, GetTxOutProof,
     GetTxOutSetInfo, GetTxSpendingPrevout, ImportMempool, LoadTxOutSet, PruneBlockchain,
     SaveMempool, ScanBlocks, ScanTxOutSet, VerifyChain, VerifyTxOutProof, WaitForBlock,
     WaitForBlockHeight, WaitForNewBlock,
@@ -207,10 +206,6 @@ pub struct GetDescriptorActivityOptions {
 #[derive(Clone, Debug, Default, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GetRawMempoolOptions {
-    /// True for a json object, false for array of transaction ids
-    ///
-    /// Default in Bitcoin Core: `false`.
-    pub verbose: Option<bool>,
     /// If verbose=false, returns a json object with transaction list and mempool sequence number attached.
     ///
     /// Default in Bitcoin Core: `false`.
@@ -682,13 +677,6 @@ impl Client {
         self.call_raw("getmempoolentry", &[json!(txid)]).await
     }
 
-    /// `getmempoolfeeratediagram` with required arguments only.
-    ///
-    /// Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.
-    pub async fn get_mempool_fee_rate_diagram(&self) -> Result<GetMempoolFeeRateDiagram> {
-        self.call_raw("getmempoolfeeratediagram", &[(); 0] as &[()]).await
-    }
-
     /// `getmempoolinfo` with required arguments only.
     ///
     /// Returns details on the active state of the TX memory pool.
@@ -696,22 +684,67 @@ impl Client {
         self.call_raw("getmempoolinfo", &[(); 0] as &[()]).await
     }
 
-    /// `getrawmempool` with required arguments only.
+    /// `getrawmempool` with the result selected for verbosity `false`.
     ///
     /// Returns all transaction ids in memory pool as a json array of string transaction ids.
     ///
     /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
-    pub async fn get_raw_mempool(&self) -> Result<GetRawMempool> {
-        self.call_raw("getrawmempool", &[(); 0] as &[()]).await
+    pub async fn get_raw_mempool_verbose_0(&self) -> Result<GetRawMempoolVerbose0> {
+        self.call_raw("getrawmempool", &[json!(false), json!(null)]).await
     }
 
-    /// `getrawmempool` with all optional arguments via [`GetRawMempoolOptions`].
+    /// `getrawmempool` with the result selected for verbosity `false`. With all optional arguments via [`GetRawMempoolOptions`].
     ///
     /// Returns all transaction ids in memory pool as a json array of string transaction ids.
     ///
     /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
-    pub async fn get_raw_mempool_with(&self, opts: GetRawMempoolOptions) -> Result<GetRawMempool> {
-        self.call_raw("getrawmempool", &[json!(opts.verbose), json!(opts.mempool_sequence)]).await
+    pub async fn get_raw_mempool_verbose_0_with(
+        &self,
+        opts: GetRawMempoolOptions,
+    ) -> Result<GetRawMempoolVerbose0> {
+        self.call_raw("getrawmempool", &[json!(false), json!(opts.mempool_sequence)]).await
+    }
+
+    /// `getrawmempool` with the result selected for verbosity `true`.
+    ///
+    /// Returns all transaction ids in memory pool as a json array of string transaction ids.
+    ///
+    /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+    pub async fn get_raw_mempool_verbose_1(&self) -> Result<GetRawMempoolVerbose1> {
+        self.call_raw("getrawmempool", &[json!(true), json!(null)]).await
+    }
+
+    /// `getrawmempool` with the result selected for verbosity `true`. With all optional arguments via [`GetRawMempoolOptions`].
+    ///
+    /// Returns all transaction ids in memory pool as a json array of string transaction ids.
+    ///
+    /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+    pub async fn get_raw_mempool_verbose_1_with(
+        &self,
+        opts: GetRawMempoolOptions,
+    ) -> Result<GetRawMempoolVerbose1> {
+        self.call_raw("getrawmempool", &[json!(true), json!(opts.mempool_sequence)]).await
+    }
+
+    /// `getrawmempool` with the result selected for verbosity `false`.
+    ///
+    /// Returns all transaction ids in memory pool as a json array of string transaction ids.
+    ///
+    /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+    pub async fn get_raw_mempool_verbose_2(&self) -> Result<GetRawMempoolVerbose2> {
+        self.call_raw("getrawmempool", &[json!(false), json!(true)]).await
+    }
+
+    /// `getrawmempool` with the result selected for verbosity `false`. With all optional arguments via [`GetRawMempoolOptions`].
+    ///
+    /// Returns all transaction ids in memory pool as a json array of string transaction ids.
+    ///
+    /// Hint: use getmempoolentry to fetch a specific transaction from the mempool.
+    pub async fn get_raw_mempool_verbose_2_with(
+        &self,
+        opts: GetRawMempoolOptions,
+    ) -> Result<GetRawMempoolVerbose2> {
+        self.call_raw("getrawmempool", &[json!(false), json!(true)]).await
     }
 
     /// `gettxout` with required arguments only.

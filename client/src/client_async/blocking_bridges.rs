@@ -138,7 +138,7 @@ macro_rules! impl_async_bridges {
                 transactions: &[String],
                 submit: bool,
             ) -> Result<vgen::GenerateBlock> {
-                let opts = vcli::generating::GenerateBlockOptions { submit: Some(submit) };
+                let opts = vcli::hidden::GenerateBlockOptions { submit: Some(submit) };
                 self.rt
                     .block_on(self.inner.generate_block_with(
                         output.to_owned(),
@@ -283,9 +283,77 @@ macro_rules! impl_async_bridges {
                 self.rt.block_on(self.inner.get_node_addresses()).map_err(Self::map_err)
             }
 
-            // Hidden RPC (not in Core's OpenRPC): raw call returning the curated type.
-            pub fn add_peer_address(&self, address: &str, port: u16) -> Result<AddPeerAddress> {
-                self.call("addpeeraddress", &[address.into(), port.into()])
+            pub fn add_peer_address(&self, address: &str, port: u16) -> Result<vgen::AddPeerAddress> {
+                self.rt
+                    .block_on(self.inner.add_peer_address(address.to_owned(), port as i64))
+                    .map_err(Self::map_err)
+            }
+
+            // == Hidden ==
+            //
+            // Hidden RPCs are absent from Core's OpenRPC dump; the codegen supplement adds
+            // them, so these route through the generated wrappers like everything else.
+
+            /// # Panics
+            ///
+            /// * Panics if `conf_target` is outside the range [1, 1008].
+            pub fn estimate_raw_fee(&self, conf_target: u32) -> Result<vgen::EstimateRawFee> {
+                assert!(
+                    (1..=1008).contains(&conf_target),
+                    "invalid conf_target, must be between 1 and 1008 inclusive"
+                );
+                self.rt
+                    .block_on(self.inner.estimate_raw_fee(conf_target as i64))
+                    .map_err(Self::map_err)
+            }
+
+            pub fn get_orphan_txs(&self) -> Result<vgen::GetOrphanTxsVerbose0> {
+                self.rt.block_on(self.inner.get_orphan_txs_verbose_0()).map_err(Self::map_err)
+            }
+
+            pub fn get_orphan_txs_verbosity_1(&self) -> Result<vgen::GetOrphanTxsVerbose1> {
+                self.rt.block_on(self.inner.get_orphan_txs_verbose_1()).map_err(Self::map_err)
+            }
+
+            pub fn get_orphan_txs_verbosity_2(&self) -> Result<vgen::GetOrphanTxsVerbose2> {
+                self.rt.block_on(self.inner.get_orphan_txs_verbose_2()).map_err(Self::map_err)
+            }
+
+            pub fn add_connection(
+                &self,
+                address: &str,
+                connection_type: &str,
+                v2transport: bool,
+            ) -> Result<vgen::AddConnection> {
+                self.rt
+                    .block_on(self.inner.add_connection(
+                        address.to_owned(),
+                        connection_type.to_owned(),
+                        v2transport,
+                    ))
+                    .map_err(Self::map_err)
+            }
+
+            pub fn sync_with_validation_interface_queue(&self) -> Result<()> {
+                self.rt
+                    .block_on(self.inner.sync_with_validation_interface_queue())
+                    .map_err(Self::map_err)
+            }
+
+            pub fn reconsider_block(&self, block_hash: bitcoin::BlockHash) -> Result<()> {
+                self.rt
+                    .block_on(self.inner.reconsider_block(block_hash.to_string()))
+                    .map_err(Self::map_err)
+            }
+
+            pub fn mock_scheduler(&self, delta_time: u64) -> Result<()> {
+                self.rt
+                    .block_on(self.inner.mock_scheduler(delta_time as i64))
+                    .map_err(Self::map_err)
+            }
+
+            pub fn get_raw_addrman(&self) -> Result<vgen::GetRawAddrMan> {
+                self.rt.block_on(self.inner.get_raw_addr_man()).map_err(Self::map_err)
             }
 
             pub fn get_peer_info(&self) -> Result<vgen::GetPeerInfo> {
@@ -516,24 +584,16 @@ macro_rules! impl_async_bridges {
                 self.rt.block_on(self.inner.get_mempool_info()).map_err(Self::map_err)
             }
 
-            pub fn get_raw_mempool(&self) -> Result<vgen::GetRawMempool> {
-                self.rt.block_on(self.inner.get_raw_mempool()).map_err(Self::map_err)
+            pub fn get_raw_mempool(&self) -> Result<vgen::GetRawMempoolVerbose0> {
+                self.rt.block_on(self.inner.get_raw_mempool_verbose_0()).map_err(Self::map_err)
             }
 
-            pub fn get_raw_mempool_verbose(&self) -> Result<vgen::GetRawMempool> {
-                let opts = vcli::blockchain::GetRawMempoolOptions {
-                    verbose: Some(true),
-                    mempool_sequence: None,
-                };
-                self.rt.block_on(self.inner.get_raw_mempool_with(opts)).map_err(Self::map_err)
+            pub fn get_raw_mempool_verbose(&self) -> Result<vgen::GetRawMempoolVerbose1> {
+                self.rt.block_on(self.inner.get_raw_mempool_verbose_1()).map_err(Self::map_err)
             }
 
-            pub fn get_raw_mempool_sequence(&self) -> Result<vgen::GetRawMempool> {
-                let opts = vcli::blockchain::GetRawMempoolOptions {
-                    verbose: Some(false),
-                    mempool_sequence: Some(true),
-                };
-                self.rt.block_on(self.inner.get_raw_mempool_with(opts)).map_err(Self::map_err)
+            pub fn get_raw_mempool_sequence(&self) -> Result<vgen::GetRawMempoolVerbose2> {
+                self.rt.block_on(self.inner.get_raw_mempool_verbose_2()).map_err(Self::map_err)
             }
 
             // Returns the GENERATED `Object` variant; `vtype` aliases it to `GetTxOut`. A `null`
