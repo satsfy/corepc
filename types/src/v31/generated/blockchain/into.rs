@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -74,8 +75,9 @@ impl fmt::Display for DumpTxOutSetError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::BaseHash(ref e) => write_err!(f, "conversion of the `BaseHash` field failed"; e),
-            Self::TxOutSetHash(ref e) =>
-                write_err!(f, "conversion of the `TxOutSetHash` field failed"; e),
+            Self::TxOutSetHash(ref e) => {
+                write_err!(f, "conversion of the `TxOutSetHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -93,7 +95,9 @@ impl std::error::Error for DumpTxOutSetError {
 }
 
 impl From<crate::NumericError> for DumpTxOutSetError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBestBlockHash {
@@ -163,7 +167,9 @@ impl std::error::Error for GetBlockCountError {
 }
 
 impl From<crate::NumericError> for GetBlockCountError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockFilter {
@@ -332,16 +338,20 @@ impl fmt::Display for GetBlockHeaderVerboseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Hash(ref e) => write_err!(f, "conversion of the `Hash` field failed"; e),
-            Self::MerkleRoot(ref e) =>
-                write_err!(f, "conversion of the `MerkleRoot` field failed"; e),
+            Self::MerkleRoot(ref e) => {
+                write_err!(f, "conversion of the `MerkleRoot` field failed"; e)
+            }
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::ChainWork(ref e) =>
-                write_err!(f, "conversion of the `ChainWork` field failed"; e),
-            Self::PreviousBlockHash(ref e) =>
-                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e),
-            Self::NextBlockHash(ref e) =>
-                write_err!(f, "conversion of the `NextBlockHash` field failed"; e),
+            Self::ChainWork(ref e) => {
+                write_err!(f, "conversion of the `ChainWork` field failed"; e)
+            }
+            Self::PreviousBlockHash(ref e) => {
+                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e)
+            }
+            Self::NextBlockHash(ref e) => {
+                write_err!(f, "conversion of the `NextBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -364,7 +374,9 @@ impl std::error::Error for GetBlockHeaderVerboseError {
 }
 
 impl From<crate::NumericError> for GetBlockHeaderVerboseError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockStats {
@@ -480,8 +492,9 @@ pub enum GetBlockStatsError {
 impl fmt::Display for GetBlockStatsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -498,7 +511,9 @@ impl std::error::Error for GetBlockStatsError {
 }
 
 impl From<crate::NumericError> for GetBlockStatsError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose0 {
@@ -616,19 +631,24 @@ impl fmt::Display for GetBlockVerboseOneError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Hash(ref e) => write_err!(f, "conversion of the `Hash` field failed"; e),
-            Self::CoinbaseTx(ref e) =>
-                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e),
-            Self::MerkleRoot(ref e) =>
-                write_err!(f, "conversion of the `MerkleRoot` field failed"; e),
+            Self::CoinbaseTx(ref e) => {
+                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e)
+            }
+            Self::MerkleRoot(ref e) => {
+                write_err!(f, "conversion of the `MerkleRoot` field failed"; e)
+            }
             Self::Tx(ref e) => write_err!(f, "conversion of the `Tx` field failed"; e),
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::ChainWork(ref e) =>
-                write_err!(f, "conversion of the `ChainWork` field failed"; e),
-            Self::PreviousBlockHash(ref e) =>
-                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e),
-            Self::NextBlockHash(ref e) =>
-                write_err!(f, "conversion of the `NextBlockHash` field failed"; e),
+            Self::ChainWork(ref e) => {
+                write_err!(f, "conversion of the `ChainWork` field failed"; e)
+            }
+            Self::PreviousBlockHash(ref e) => {
+                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e)
+            }
+            Self::NextBlockHash(ref e) => {
+                write_err!(f, "conversion of the `NextBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -653,7 +673,9 @@ impl std::error::Error for GetBlockVerboseOneError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseOneError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose1CoinbaseTx {
@@ -699,7 +721,9 @@ impl std::error::Error for CoinbaseTransactionError {
 }
 
 impl From<crate::NumericError> for CoinbaseTransactionError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose2 {
@@ -781,19 +805,24 @@ impl fmt::Display for GetBlockVerboseTwoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Hash(ref e) => write_err!(f, "conversion of the `Hash` field failed"; e),
-            Self::CoinbaseTx(ref e) =>
-                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e),
-            Self::MerkleRoot(ref e) =>
-                write_err!(f, "conversion of the `MerkleRoot` field failed"; e),
+            Self::CoinbaseTx(ref e) => {
+                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e)
+            }
+            Self::MerkleRoot(ref e) => {
+                write_err!(f, "conversion of the `MerkleRoot` field failed"; e)
+            }
             Self::Tx(ref e) => write_err!(f, "conversion of the `Tx` field failed"; e),
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::ChainWork(ref e) =>
-                write_err!(f, "conversion of the `ChainWork` field failed"; e),
-            Self::PreviousBlockHash(ref e) =>
-                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e),
-            Self::NextBlockHash(ref e) =>
-                write_err!(f, "conversion of the `NextBlockHash` field failed"; e),
+            Self::ChainWork(ref e) => {
+                write_err!(f, "conversion of the `ChainWork` field failed"; e)
+            }
+            Self::PreviousBlockHash(ref e) => {
+                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e)
+            }
+            Self::NextBlockHash(ref e) => {
+                write_err!(f, "conversion of the `NextBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -818,7 +847,9 @@ impl std::error::Error for GetBlockVerboseTwoError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseTwoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose2CoinbaseTx {
@@ -872,10 +903,12 @@ pub enum GetBlockVerboseTwoTransactionError {
 impl fmt::Display for GetBlockVerboseTwoTransactionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Transaction(ref e) =>
-                write_err!(f, "conversion of the `Transaction` field failed"; e),
-            Self::TransactionModel(ref e) =>
-                write_err!(f, "conversion of the `TransactionModel` field failed"; e),
+            Self::Transaction(ref e) => {
+                write_err!(f, "conversion of the `Transaction` field failed"; e)
+            }
+            Self::TransactionModel(ref e) => {
+                write_err!(f, "conversion of the `TransactionModel` field failed"; e)
+            }
             Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
         }
     }
@@ -971,19 +1004,24 @@ impl fmt::Display for GetBlockVerboseThreeError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Hash(ref e) => write_err!(f, "conversion of the `Hash` field failed"; e),
-            Self::CoinbaseTx(ref e) =>
-                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e),
-            Self::MerkleRoot(ref e) =>
-                write_err!(f, "conversion of the `MerkleRoot` field failed"; e),
+            Self::CoinbaseTx(ref e) => {
+                write_err!(f, "conversion of the `CoinbaseTx` field failed"; e)
+            }
+            Self::MerkleRoot(ref e) => {
+                write_err!(f, "conversion of the `MerkleRoot` field failed"; e)
+            }
             Self::Tx(ref e) => write_err!(f, "conversion of the `Tx` field failed"; e),
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::ChainWork(ref e) =>
-                write_err!(f, "conversion of the `ChainWork` field failed"; e),
-            Self::PreviousBlockHash(ref e) =>
-                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e),
-            Self::NextBlockHash(ref e) =>
-                write_err!(f, "conversion of the `NextBlockHash` field failed"; e),
+            Self::ChainWork(ref e) => {
+                write_err!(f, "conversion of the `ChainWork` field failed"; e)
+            }
+            Self::PreviousBlockHash(ref e) => {
+                write_err!(f, "conversion of the `PreviousBlockHash` field failed"; e)
+            }
+            Self::NextBlockHash(ref e) => {
+                write_err!(f, "conversion of the `NextBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1008,7 +1046,9 @@ impl std::error::Error for GetBlockVerboseThreeError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreeError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose3CoinbaseTx {
@@ -1077,10 +1117,12 @@ pub enum GetBlockVerboseThreeTransactionError {
 impl fmt::Display for GetBlockVerboseThreeTransactionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Transaction(ref e) =>
-                write_err!(f, "conversion of the `Transaction` field failed"; e),
-            Self::TransactionModel(ref e) =>
-                write_err!(f, "conversion of the `TransactionModel` field failed"; e),
+            Self::Transaction(ref e) => {
+                write_err!(f, "conversion of the `Transaction` field failed"; e)
+            }
+            Self::TransactionModel(ref e) => {
+                write_err!(f, "conversion of the `TransactionModel` field failed"; e)
+            }
             Self::Prevouts(ref e) => write_err!(f, "conversion of the `Prevouts` field failed"; e),
             Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
         }
@@ -1130,8 +1172,9 @@ impl fmt::Display for GetBlockVerboseThreePrevoutError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Value(ref e) => write_err!(f, "conversion of the `Value` field failed"; e),
-            Self::ScriptPubkey(ref e) =>
-                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e),
+            Self::ScriptPubkey(ref e) => {
+                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1149,7 +1192,9 @@ impl std::error::Error for GetBlockVerboseThreePrevoutError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreePrevoutError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBlockVerbose3TxItemVinItemPrevoutScriptPubKey {
@@ -1182,8 +1227,9 @@ pub enum ScriptPubKeyError {
 impl fmt::Display for ScriptPubKeyError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::ScriptPubkey(ref e) =>
-                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e),
+            Self::ScriptPubkey(ref e) => {
+                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e)
+            }
             Self::Address(ref e) => write_err!(f, "conversion of the `Address` field failed"; e),
         }
     }
@@ -1259,14 +1305,17 @@ impl fmt::Display for GetBlockchainInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Chain(ref e) => write_err!(f, "conversion of the `Chain` field failed"; e),
-            Self::BestBlockHash(ref e) =>
-                write_err!(f, "conversion of the `BestBlockHash` field failed"; e),
+            Self::BestBlockHash(ref e) => {
+                write_err!(f, "conversion of the `BestBlockHash` field failed"; e)
+            }
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::ChainWork(ref e) =>
-                write_err!(f, "conversion of the `ChainWork` field failed"; e),
-            Self::SignetChallenge(ref e) =>
-                write_err!(f, "conversion of the `SignetChallenge` field failed"; e),
+            Self::ChainWork(ref e) => {
+                write_err!(f, "conversion of the `ChainWork` field failed"; e)
+            }
+            Self::SignetChallenge(ref e) => {
+                write_err!(f, "conversion of the `SignetChallenge` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1288,7 +1337,9 @@ impl std::error::Error for GetBlockchainInfoError {
 }
 
 impl From<crate::NumericError> for GetBlockchainInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetChainStates {
@@ -1319,8 +1370,9 @@ pub enum GetChainStatesError {
 impl fmt::Display for GetChainStatesError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::ChainStates(ref e) =>
-                write_err!(f, "conversion of the `ChainStates` field failed"; e),
+            Self::ChainStates(ref e) => {
+                write_err!(f, "conversion of the `ChainStates` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1337,7 +1389,9 @@ impl std::error::Error for GetChainStatesError {
 }
 
 impl From<crate::NumericError> for GetChainStatesError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetChainStatesChainStatesItem {
@@ -1382,12 +1436,14 @@ pub enum ChainStateError {
 impl fmt::Display for ChainStateError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::BestBlockHash(ref e) =>
-                write_err!(f, "conversion of the `BestBlockHash` field failed"; e),
+            Self::BestBlockHash(ref e) => {
+                write_err!(f, "conversion of the `BestBlockHash` field failed"; e)
+            }
             Self::Bits(ref e) => write_err!(f, "conversion of the `Bits` field failed"; e),
             Self::Target(ref e) => write_err!(f, "conversion of the `Target` field failed"; e),
-            Self::SnapshotBlockHash(ref e) =>
-                write_err!(f, "conversion of the `SnapshotBlockHash` field failed"; e),
+            Self::SnapshotBlockHash(ref e) => {
+                write_err!(f, "conversion of the `SnapshotBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1407,7 +1463,9 @@ impl std::error::Error for ChainStateError {
 }
 
 impl From<crate::NumericError> for ChainStateError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetChainTips {
@@ -1498,7 +1556,9 @@ impl std::error::Error for ChainTipsError {
 }
 
 impl From<crate::NumericError> for ChainTipsError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetChainTxStats {
@@ -1557,8 +1617,9 @@ pub enum GetChainTxStatsError {
 impl fmt::Display for GetChainTxStatsError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::WindowFinalBlockHash(ref e) =>
-                write_err!(f, "conversion of the `WindowFinalBlockHash` field failed"; e),
+            Self::WindowFinalBlockHash(ref e) => {
+                write_err!(f, "conversion of the `WindowFinalBlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1575,7 +1636,9 @@ impl std::error::Error for GetChainTxStatsError {
 }
 
 impl From<crate::NumericError> for GetChainTxStatsError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDeploymentInfo {
@@ -1611,8 +1674,9 @@ impl fmt::Display for GetDeploymentInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Hash(ref e) => write_err!(f, "conversion of the `Hash` field failed"; e),
-            Self::DeploymentsValue(ref e) =>
-                write_err!(f, "conversion of the `DeploymentsValue` field failed"; e),
+            Self::DeploymentsValue(ref e) => {
+                write_err!(f, "conversion of the `DeploymentsValue` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1630,7 +1694,9 @@ impl std::error::Error for GetDeploymentInfoError {
 }
 
 impl From<crate::NumericError> for GetDeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDeploymentInfoDeployments {
@@ -1676,7 +1742,9 @@ impl std::error::Error for DeploymentInfoError {
 }
 
 impl From<crate::NumericError> for DeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDeploymentInfoDeploymentsBip9 {
@@ -1725,8 +1793,9 @@ pub enum Bip9InfoError {
 impl fmt::Display for Bip9InfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Statistics(ref e) =>
-                write_err!(f, "conversion of the `Statistics` field failed"; e),
+            Self::Statistics(ref e) => {
+                write_err!(f, "conversion of the `Statistics` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1743,7 +1812,9 @@ impl std::error::Error for Bip9InfoError {
 }
 
 impl From<crate::NumericError> for Bip9InfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDeploymentInfoDeploymentsBip9Statistics {
@@ -1786,7 +1857,9 @@ impl std::error::Error for Bip9StatisticsError {
 }
 
 impl From<crate::NumericError> for Bip9StatisticsError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDescriptorActivity {
@@ -1834,10 +1907,12 @@ impl GetDescriptorActivityActivity {
         use ActivityEntryError as E;
 
         Ok(match self {
-            GetDescriptorActivityActivity::Object(x) =>
-                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?),
-            GetDescriptorActivityActivity::Object2(x) =>
-                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?),
+            GetDescriptorActivityActivity::Object(x) => {
+                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?)
+            }
+            GetDescriptorActivityActivity::Object2(x) => {
+                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?)
+            }
         })
     }
 }
@@ -1913,14 +1988,18 @@ impl fmt::Display for SpendActivityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Amount(ref e) => write_err!(f, "conversion of the `Amount` field failed"; e),
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
-            Self::SpendTxid(ref e) =>
-                write_err!(f, "conversion of the `SpendTxid` field failed"; e),
-            Self::PrevoutTxid(ref e) =>
-                write_err!(f, "conversion of the `PrevoutTxid` field failed"; e),
-            Self::PrevoutSpk(ref e) =>
-                write_err!(f, "conversion of the `PrevoutSpk` field failed"; e),
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
+            Self::SpendTxid(ref e) => {
+                write_err!(f, "conversion of the `SpendTxid` field failed"; e)
+            }
+            Self::PrevoutTxid(ref e) => {
+                write_err!(f, "conversion of the `PrevoutTxid` field failed"; e)
+            }
+            Self::PrevoutSpk(ref e) => {
+                write_err!(f, "conversion of the `PrevoutSpk` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -1941,7 +2020,9 @@ impl std::error::Error for SpendActivityError {
 }
 
 impl From<crate::NumericError> for SpendActivityError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDescriptorActivityActivityVariant0PrevoutSpk {
@@ -2001,11 +2082,13 @@ impl fmt::Display for ReceiveActivityError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Amount(ref e) => write_err!(f, "conversion of the `Amount` field failed"; e),
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
             Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
-            Self::OutputSpk(ref e) =>
-                write_err!(f, "conversion of the `OutputSpk` field failed"; e),
+            Self::OutputSpk(ref e) => {
+                write_err!(f, "conversion of the `OutputSpk` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -2025,7 +2108,9 @@ impl std::error::Error for ReceiveActivityError {
 }
 
 impl From<crate::NumericError> for ReceiveActivityError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetDescriptorActivityActivityVariant1OutputSpk {
@@ -2060,12 +2145,16 @@ impl GetDifficulty {
 pub enum GetDifficultyError {}
 
 impl fmt::Display for GetDifficultyError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for GetDifficultyError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {}
+    }
 }
 
 impl GetMempoolAncestorsVerbose0 {
@@ -2140,8 +2229,9 @@ impl fmt::Display for GetMempoolAncestorsVerboseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::InnerKey(ref e) => write_err!(f, "conversion of the `InnerKey` field failed"; e),
-            Self::InnerValue(ref e) =>
-                write_err!(f, "conversion of the `InnerValue` field failed"; e),
+            Self::InnerValue(ref e) => {
+                write_err!(f, "conversion of the `InnerValue` field failed"; e)
+            }
         }
     }
 }
@@ -2251,7 +2341,9 @@ impl std::error::Error for MempoolEntryError {
 }
 
 impl From<crate::NumericError> for MempoolEntryError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetMempoolAncestorsVerbose1EntryFees {
@@ -2315,7 +2407,9 @@ impl std::error::Error for GetMempoolClusterError {
 }
 
 impl From<crate::NumericError> for GetMempoolClusterError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetMempoolClusterChunksItem {
@@ -2368,7 +2462,9 @@ impl std::error::Error for ChunkError {
 }
 
 impl From<crate::NumericError> for ChunkError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetMempoolDescendantsVerbose0 {
@@ -2443,8 +2539,9 @@ impl fmt::Display for GetMempoolDescendantsVerboseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::InnerKey(ref e) => write_err!(f, "conversion of the `InnerKey` field failed"; e),
-            Self::InnerValue(ref e) =>
-                write_err!(f, "conversion of the `InnerValue` field failed"; e),
+            Self::InnerValue(ref e) => {
+                write_err!(f, "conversion of the `InnerValue` field failed"; e)
+            }
         }
     }
 }
@@ -2623,7 +2720,9 @@ impl std::error::Error for GetMempoolEntryError {
 }
 
 impl From<crate::NumericError> for GetMempoolEntryError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetMempoolEntryFees {
@@ -2662,8 +2761,9 @@ impl fmt::Display for MempoolEntryFeesError {
             Self::Base(ref e) => write_err!(f, "conversion of the `Base` field failed"; e),
             Self::Modified(ref e) => write_err!(f, "conversion of the `Modified` field failed"; e),
             Self::Ancestor(ref e) => write_err!(f, "conversion of the `Ancestor` field failed"; e),
-            Self::Descendant(ref e) =>
-                write_err!(f, "conversion of the `Descendant` field failed"; e),
+            Self::Descendant(ref e) => {
+                write_err!(f, "conversion of the `Descendant` field failed"; e)
+            }
             Self::Chunk(ref e) => write_err!(f, "conversion of the `Chunk` field failed"; e),
         }
     }
@@ -2679,6 +2779,92 @@ impl std::error::Error for MempoolEntryFeesError {
             Self::Descendant(ref e) => Some(e),
             Self::Chunk(ref e) => Some(e),
         }
+    }
+}
+
+impl GetMempoolFeeRateDiagram {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(
+        self,
+    ) -> Result<model::GetMempoolFeerateDiagram, GetMempoolFeerateDiagramError> {
+        use GetMempoolFeerateDiagramError as E;
+
+        Ok(model::GetMempoolFeerateDiagram(
+            self.0
+                .into_iter()
+                .map(|x| x.into_model().map_err(E::Inner))
+                .collect::<Result<Vec<_>, _>>()?,
+        ))
+    }
+}
+
+/// Error when converting a `GetMempoolFeerateDiagram` type into the model type.
+#[derive(Debug)]
+pub enum GetMempoolFeerateDiagramError {
+    /// Conversion of the `Inner` field failed.
+    Inner(FeerateDiagramEntryError),
+}
+
+impl fmt::Display for GetMempoolFeerateDiagramError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Inner(ref e) => write_err!(f, "conversion of the `Inner` field failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for GetMempoolFeerateDiagramError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Inner(ref e) => Some(e),
+        }
+    }
+}
+
+impl GetMempoolFeeRateDiagramItem {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::FeerateDiagramEntry, FeerateDiagramEntryError> {
+        use FeerateDiagramEntryError as E;
+
+        Ok(model::FeerateDiagramEntry {
+            weight: crate::to_u64(self.weight, "weight")?,
+            fee: Amount::from_btc(self.fee).map_err(E::Fee)?,
+        })
+    }
+}
+
+/// Error when converting a `FeerateDiagramEntry` type into the model type.
+#[derive(Debug)]
+pub enum FeerateDiagramEntryError {
+    /// Conversion of the `Fee` field failed.
+    Fee(amount::ParseAmountError),
+    /// Conversion of a numeric type to the expected type failed.
+    Numeric(crate::NumericError),
+}
+
+impl fmt::Display for FeerateDiagramEntryError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
+            Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for FeerateDiagramEntryError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Fee(ref e) => Some(e),
+            Self::Numeric(ref e) => Some(e),
+        }
+    }
+}
+
+impl From<crate::NumericError> for FeerateDiagramEntryError {
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
     }
 }
 
@@ -2745,12 +2931,15 @@ pub enum GetMempoolInfoError {
 impl fmt::Display for GetMempoolInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::MempoolMinFee(ref e) =>
-                write_err!(f, "conversion of the `MempoolMinFee` field failed"; e),
-            Self::MinRelayTxFee(ref e) =>
-                write_err!(f, "conversion of the `MinRelayTxFee` field failed"; e),
-            Self::IncrementalRelayFee(ref e) =>
-                write_err!(f, "conversion of the `IncrementalRelayFee` field failed"; e),
+            Self::MempoolMinFee(ref e) => {
+                write_err!(f, "conversion of the `MempoolMinFee` field failed"; e)
+            }
+            Self::MinRelayTxFee(ref e) => {
+                write_err!(f, "conversion of the `MinRelayTxFee` field failed"; e)
+            }
+            Self::IncrementalRelayFee(ref e) => {
+                write_err!(f, "conversion of the `IncrementalRelayFee` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -2769,7 +2958,9 @@ impl std::error::Error for GetMempoolInfoError {
 }
 
 impl From<crate::NumericError> for GetMempoolInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetRawMempool {
@@ -2785,7 +2976,7 @@ impl GetRawMempool {
                     .collect::<Result<_, _>>()
                     .map_err(E::Txid)?,
             )),
-            GetRawMempool::Object(map) =>
+            GetRawMempool::Object(map) => {
                 model::GetRawMempoolResult::Verbose(model::GetRawMempoolVerbose(
                     map.into_iter()
                         .map(|(k, v)| {
@@ -2795,9 +2986,11 @@ impl GetRawMempool {
                             ))
                         })
                         .collect::<Result<_, _>>()?,
-                )),
-            GetRawMempool::Object2(seq) =>
-                model::GetRawMempoolResult::Sequence(seq.into_model().map_err(E::Sequence)?),
+                ))
+            }
+            GetRawMempool::Object2(seq) => {
+                model::GetRawMempoolResult::Sequence(seq.into_model().map_err(E::Sequence)?)
+            }
         })
     }
 }
@@ -3015,14 +3208,18 @@ pub enum GetTxOutSetInfoError {
 impl fmt::Display for GetTxOutSetInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::BestBlock(ref e) =>
-                write_err!(f, "conversion of the `BestBlock` field failed"; e),
-            Self::TotalAmount(ref e) =>
-                write_err!(f, "conversion of the `TotalAmount` field failed"; e),
-            Self::TotalUnspendableAmount(ref e) =>
-                write_err!(f, "conversion of the `TotalUnspendableAmount` field failed"; e),
-            Self::BlockInfo(ref e) =>
-                write_err!(f, "conversion of the `BlockInfo` field failed"; e),
+            Self::BestBlock(ref e) => {
+                write_err!(f, "conversion of the `BestBlock` field failed"; e)
+            }
+            Self::TotalAmount(ref e) => {
+                write_err!(f, "conversion of the `TotalAmount` field failed"; e)
+            }
+            Self::TotalUnspendableAmount(ref e) => {
+                write_err!(f, "conversion of the `TotalUnspendableAmount` field failed"; e)
+            }
+            Self::BlockInfo(ref e) => {
+                write_err!(f, "conversion of the `BlockInfo` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -3042,7 +3239,9 @@ impl std::error::Error for GetTxOutSetInfoError {
 }
 
 impl From<crate::NumericError> for GetTxOutSetInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetTxOutSetInfoBlockInfo {
@@ -3081,15 +3280,19 @@ pub enum GetTxOutSetInfoBlockInfoError {
 impl fmt::Display for GetTxOutSetInfoBlockInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::PrevoutSpent(ref e) =>
-                write_err!(f, "conversion of the `PrevoutSpent` field failed"; e),
+            Self::PrevoutSpent(ref e) => {
+                write_err!(f, "conversion of the `PrevoutSpent` field failed"; e)
+            }
             Self::Coinbase(ref e) => write_err!(f, "conversion of the `Coinbase` field failed"; e),
-            Self::NewOutputsExCoinbase(ref e) =>
-                write_err!(f, "conversion of the `NewOutputsExCoinbase` field failed"; e),
-            Self::Unspendable(ref e) =>
-                write_err!(f, "conversion of the `Unspendable` field failed"; e),
-            Self::Unspendables(ref e) =>
-                write_err!(f, "conversion of the `Unspendables` field failed"; e),
+            Self::NewOutputsExCoinbase(ref e) => {
+                write_err!(f, "conversion of the `NewOutputsExCoinbase` field failed"; e)
+            }
+            Self::Unspendable(ref e) => {
+                write_err!(f, "conversion of the `Unspendable` field failed"; e)
+            }
+            Self::Unspendables(ref e) => {
+                write_err!(f, "conversion of the `Unspendables` field failed"; e)
+            }
         }
     }
 }
@@ -3140,12 +3343,14 @@ pub enum GetTxOutSetInfoUnspendablesError {
 impl fmt::Display for GetTxOutSetInfoUnspendablesError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::GenesisBlock(ref e) =>
-                write_err!(f, "conversion of the `GenesisBlock` field failed"; e),
+            Self::GenesisBlock(ref e) => {
+                write_err!(f, "conversion of the `GenesisBlock` field failed"; e)
+            }
             Self::Bip30(ref e) => write_err!(f, "conversion of the `Bip30` field failed"; e),
             Self::Scripts(ref e) => write_err!(f, "conversion of the `Scripts` field failed"; e),
-            Self::UnclaimedRewards(ref e) =>
-                write_err!(f, "conversion of the `UnclaimedRewards` field failed"; e),
+            Self::UnclaimedRewards(ref e) => {
+                write_err!(f, "conversion of the `UnclaimedRewards` field failed"; e)
+            }
         }
     }
 }
@@ -3204,12 +3409,15 @@ pub enum GetTxOutError {
 impl fmt::Display for GetTxOutError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::BestBlock(ref e) =>
-                write_err!(f, "conversion of the `BestBlock` field failed"; e),
-            Self::TxOutValue(ref e) =>
-                write_err!(f, "conversion of the `TxOutValue` field failed"; e),
-            Self::TxOutScript(ref e) =>
-                write_err!(f, "conversion of the `TxOutScript` field failed"; e),
+            Self::BestBlock(ref e) => {
+                write_err!(f, "conversion of the `BestBlock` field failed"; e)
+            }
+            Self::TxOutValue(ref e) => {
+                write_err!(f, "conversion of the `TxOutValue` field failed"; e)
+            }
+            Self::TxOutScript(ref e) => {
+                write_err!(f, "conversion of the `TxOutScript` field failed"; e)
+            }
             Self::Address(ref e) => write_err!(f, "conversion of the `Address` field failed"; e),
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
@@ -3230,7 +3438,9 @@ impl std::error::Error for GetTxOutError {
 }
 
 impl From<crate::NumericError> for GetTxOutError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetTxSpendingPrevout {
@@ -3320,14 +3530,18 @@ pub enum GetTxSpendingPrevoutItemError {
 impl fmt::Display for GetTxSpendingPrevoutItemError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::OutpointTxid(ref e) =>
-                write_err!(f, "conversion of the `OutpointTxid` field failed"; e),
-            Self::SpendingTxid(ref e) =>
-                write_err!(f, "conversion of the `SpendingTxid` field failed"; e),
-            Self::SpendingTx(ref e) =>
-                write_err!(f, "conversion of the `SpendingTx` field failed"; e),
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
+            Self::OutpointTxid(ref e) => {
+                write_err!(f, "conversion of the `OutpointTxid` field failed"; e)
+            }
+            Self::SpendingTxid(ref e) => {
+                write_err!(f, "conversion of the `SpendingTxid` field failed"; e)
+            }
+            Self::SpendingTx(ref e) => {
+                write_err!(f, "conversion of the `SpendingTx` field failed"; e)
+            }
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -3347,7 +3561,9 @@ impl std::error::Error for GetTxSpendingPrevoutItemError {
 }
 
 impl From<crate::NumericError> for GetTxSpendingPrevoutItemError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl LoadTxOutSet {
@@ -3395,7 +3611,9 @@ impl std::error::Error for LoadTxOutSetError {
 }
 
 impl From<crate::NumericError> for LoadTxOutSetError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ScanBlocksVariant1 {
@@ -3428,8 +3646,9 @@ pub enum ScanBlocksStartError {
 impl fmt::Display for ScanBlocksStartError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::RelevantBlocks(ref e) =>
-                write_err!(f, "conversion of the `RelevantBlocks` field failed"; e),
+            Self::RelevantBlocks(ref e) => {
+                write_err!(f, "conversion of the `RelevantBlocks` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -3446,7 +3665,9 @@ impl std::error::Error for ScanBlocksStartError {
 }
 
 impl From<crate::NumericError> for ScanBlocksStartError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ScanTxOutSetVariant0 {
@@ -3485,11 +3706,13 @@ pub enum ScanTxOutSetStartError {
 impl fmt::Display for ScanTxOutSetStartError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::BestBlock(ref e) =>
-                write_err!(f, "conversion of the `BestBlock` field failed"; e),
+            Self::BestBlock(ref e) => {
+                write_err!(f, "conversion of the `BestBlock` field failed"; e)
+            }
             Self::Unspents(ref e) => write_err!(f, "conversion of the `Unspents` field failed"; e),
-            Self::TotalAmount(ref e) =>
-                write_err!(f, "conversion of the `TotalAmount` field failed"; e),
+            Self::TotalAmount(ref e) => {
+                write_err!(f, "conversion of the `TotalAmount` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -3508,7 +3731,9 @@ impl std::error::Error for ScanTxOutSetStartError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetStartError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ScanTxOutSetVariant0UnspentsItem {
@@ -3549,11 +3774,13 @@ impl fmt::Display for ScanTxOutSetUnspentError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
-            Self::ScriptPubkey(ref e) =>
-                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e),
+            Self::ScriptPubkey(ref e) => {
+                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e)
+            }
             Self::Amount(ref e) => write_err!(f, "conversion of the `Amount` field failed"; e),
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -3573,7 +3800,9 @@ impl std::error::Error for ScanTxOutSetUnspentError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetUnspentError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl VerifyTxOutProof {
@@ -3655,7 +3884,9 @@ impl std::error::Error for WaitForBlockError {
 }
 
 impl From<crate::NumericError> for WaitForBlockError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl WaitForBlockHeight {
@@ -3699,7 +3930,9 @@ impl std::error::Error for WaitForBlockHeightError {
 }
 
 impl From<crate::NumericError> for WaitForBlockHeightError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl WaitForNewBlock {
@@ -3743,5 +3976,7 @@ impl std::error::Error for WaitForNewBlockError {
 }
 
 impl From<crate::NumericError> for WaitForNewBlockError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }

@@ -153,7 +153,9 @@ pub struct Help(pub String);
 
 impl std::ops::Deref for Help {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `logging`.
@@ -186,7 +188,9 @@ pub struct Stop(pub String);
 
 impl std::ops::Deref for Stop {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `uptime`.
@@ -200,5 +204,7 @@ pub struct Uptime(pub i64);
 
 impl std::ops::Deref for Uptime {
     type Target = i64;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

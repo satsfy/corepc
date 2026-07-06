@@ -1,0 +1,195 @@
+[
+  {
+    "name": "generateblock",
+    "description": "Mine a set of ordered transactions to a specified address or descriptor and return the block hash.",
+    "params": [
+      {
+        "name": "output",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The address or descriptor to send the newly generated bitcoin to."
+      },
+      {
+        "name": "transactions",
+        "required": true,
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "description": "txids or raw transactions to include in the block"
+      },
+      {
+        "name": "submit",
+        "required": false,
+        "schema": {
+          "type": "boolean"
+        },
+        "description": "Whether to submit the block before the RPC call returns or to return it as hex."
+      }
+    ],
+    "result": {
+      "name": "result",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "hash": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]+$",
+            "description": "hash of generated block"
+          },
+          "hex": {
+            "type": "string",
+            "pattern": "^[0-9a-fA-F]+$",
+            "description": "hex of generated block, only present when submit=false"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "hash"
+        ]
+      }
+    },
+    "x-bitcoin-category": "generating"
+  },
+  {
+    "name": "generatetoaddress",
+    "description": "Mine to a specified address and return the block hashes.",
+    "params": [
+      {
+        "name": "nblocks",
+        "required": true,
+        "schema": {
+          "type": "number",
+          "description": "How many blocks are generated."
+        }
+      },
+      {
+        "name": "address",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The address to send the newly generated bitcoin to."
+      },
+      {
+        "name": "maxtries",
+        "required": false,
+        "schema": {
+          "type": "number",
+          "description": "How many iterations to try."
+        }
+      }
+    ],
+    "result": {
+      "name": "result",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]+$"
+        },
+        "description": "hashes of blocks generated"
+      }
+    },
+    "x-bitcoin-category": "generating"
+  },
+  {
+    "name": "generatetodescriptor",
+    "description": "Mine to a specified descriptor and return the block hashes.",
+    "params": [
+      {
+        "name": "num_blocks",
+        "required": true,
+        "schema": {
+          "type": "number",
+          "description": "How many blocks are generated."
+        }
+      },
+      {
+        "name": "descriptor",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The descriptor to send the newly generated bitcoin to."
+      },
+      {
+        "name": "maxtries",
+        "required": false,
+        "schema": {
+          "type": "number",
+          "description": "How many iterations to try."
+        }
+      }
+    ],
+    "result": {
+      "name": "result",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]+$"
+        },
+        "description": "hashes of blocks generated"
+      }
+    },
+    "x-bitcoin-category": "generating"
+  },
+  {
+    "name": "invalidateblock",
+    "description": "Permanently marks a block as invalid, as if it violated a consensus rule.",
+    "params": [
+      {
+        "name": "blockhash",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]+$"
+        },
+        "description": "the hash of the block to mark as invalid"
+      }
+    ],
+    "result": {
+      "name": "result",
+      "schema": {
+        "type": "null"
+      }
+    },
+    "x-bitcoin-category": "generating"
+  },
+  {
+    "name": "getmempoolfeeratediagram",
+    "description": "Returns the mempool feerate diagram: cumulative (weight, fee) points of the mempool's chunks in mining order.",
+    "params": [],
+    "result": {
+      "name": "result",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "weight": {
+              "type": "number",
+              "description": "cumulative sigops-adjusted weight"
+            },
+            "fee": {
+              "type": "number",
+              "description": "cumulative fee in BTC"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "weight",
+            "fee"
+          ]
+        },
+        "description": "points on the feerate diagram (in mining order)"
+      }
+    },
+    "x-bitcoin-category": "blockchain"
+  }
+]

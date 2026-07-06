@@ -10,8 +10,6 @@
 
 mod into;
 
-use serde::{Deserialize, Serialize};
-
 pub use self::into::{
     AbortPrivateBroadcastError, AnalyzePsbtError, AnalyzePsbtInputError,
     AnalyzePsbtInputMissingError, CombinePsbtError, CombineRawTransactionError, ConvertToPsbtError,
@@ -22,6 +20,8 @@ pub use self::into::{
     SignFailError, SignRawTransactionError, SubmitPackageError, SubmitPackageTxResultError,
     SubmitPackageTxResultFeesError, TestMempoolAcceptError, UtxoUpdatePsbtError,
 };
+
+use serde::{Deserialize, Serialize};
 
 /// Abort private broadcast attempts for a transaction currently being privately broadcast.
 /// The transaction will be removed from the private broadcast queue.
@@ -108,7 +108,9 @@ pub struct CombinePsbt(pub String);
 
 impl std::ops::Deref for CombinePsbt {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `combinerawtransaction`.
@@ -124,7 +126,9 @@ pub struct CombineRawTransaction(pub String);
 
 impl std::ops::Deref for CombineRawTransaction {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `converttopsbt`.
@@ -139,7 +143,9 @@ pub struct ConvertToPsbt(pub String);
 
 impl std::ops::Deref for ConvertToPsbt {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `createpsbt`.
@@ -156,7 +162,9 @@ pub struct CreatePsbt(pub String);
 
 impl std::ops::Deref for CreatePsbt {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `createrawtransaction`.
@@ -174,7 +182,9 @@ pub struct CreateRawTransaction(pub String);
 
 impl std::ops::Deref for CreateRawTransaction {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl CreateRawTransaction {
@@ -808,7 +818,9 @@ pub struct GetRawTransactionVerbose0(pub String);
 
 impl std::ops::Deref for GetRawTransactionVerbose0 {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl GetRawTransactionVerbose0 {
@@ -1058,7 +1070,9 @@ pub struct JoinPsbts(pub String);
 
 impl std::ops::Deref for JoinPsbts {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Result of the JSON-RPC method `sendrawtransaction`.
@@ -1087,7 +1101,9 @@ pub struct SendRawTransaction(pub String);
 
 impl std::ops::Deref for SendRawTransaction {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Sign inputs for raw transaction (serialized, hex-encoded).
@@ -1244,5 +1260,7 @@ pub struct UtxoUpdatePsbt(pub String);
 
 impl std::ops::Deref for UtxoUpdatePsbt {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

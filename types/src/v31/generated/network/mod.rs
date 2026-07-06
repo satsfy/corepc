@@ -10,9 +10,9 @@
 
 mod into;
 
-use serde::{Deserialize, Serialize};
-
 pub use self::into::{GetNetworkInfoAddressError, GetNetworkInfoError, GetNetworkInfoNetworkError};
+
+use serde::{Deserialize, Serialize};
 
 /// Result of the JSON-RPC method `getaddednodeinfo`.
 ///
@@ -80,7 +80,9 @@ pub struct GetConnectionCount(pub u64);
 
 impl std::ops::Deref for GetConnectionCount {
     type Target = u64;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Returns information about network traffic, including bytes in, bytes out,
@@ -381,5 +383,7 @@ pub struct SetNetworkActive(pub bool);
 
 impl std::ops::Deref for SetNetworkActive {
     type Target = bool;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

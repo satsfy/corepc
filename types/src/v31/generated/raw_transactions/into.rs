@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -58,8 +59,9 @@ pub enum AbortPrivateBroadcastError {
 impl fmt::Display for AbortPrivateBroadcastError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::RemovedTransactions(ref e) =>
-                write_err!(f, "conversion of the `RemovedTransactions` field failed"; e),
+            Self::RemovedTransactions(ref e) => {
+                write_err!(f, "conversion of the `RemovedTransactions` field failed"; e)
+            }
         }
     }
 }
@@ -122,8 +124,9 @@ impl fmt::Display for AnalyzePsbtError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Inputs(ref e) => write_err!(f, "conversion of the `Inputs` field failed"; e),
-            Self::EstimatedFeeRate(ref e) =>
-                write_err!(f, "conversion of the `EstimatedFeeRate` field failed"; e),
+            Self::EstimatedFeeRate(ref e) => {
+                write_err!(f, "conversion of the `EstimatedFeeRate` field failed"; e)
+            }
             Self::Fee(ref e) => write_err!(f, "conversion of the `Fee` field failed"; e),
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
@@ -143,7 +146,9 @@ impl std::error::Error for AnalyzePsbtError {
 }
 
 impl From<crate::NumericError> for AnalyzePsbtError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl AnalyzePsbtInputsItem {
@@ -235,12 +240,15 @@ impl fmt::Display for AnalyzePsbtInputMissingError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Pubkeys(ref e) => write_err!(f, "conversion of the `Pubkeys` field failed"; e),
-            Self::Signatures(ref e) =>
-                write_err!(f, "conversion of the `Signatures` field failed"; e),
-            Self::RedeemScript(ref e) =>
-                write_err!(f, "conversion of the `RedeemScript` field failed"; e),
-            Self::WitnessScript(ref e) =>
-                write_err!(f, "conversion of the `WitnessScript` field failed"; e),
+            Self::Signatures(ref e) => {
+                write_err!(f, "conversion of the `Signatures` field failed"; e)
+            }
+            Self::RedeemScript(ref e) => {
+                write_err!(f, "conversion of the `RedeemScript` field failed"; e)
+            }
+            Self::WitnessScript(ref e) => {
+                write_err!(f, "conversion of the `WitnessScript` field failed"; e)
+            }
         }
     }
 }
@@ -487,8 +495,9 @@ pub enum DecodeRawTransactionError {
 impl fmt::Display for DecodeRawTransactionError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Reconstruct(ref e) =>
-                write_err!(f, "conversion of the `Reconstruct` field failed"; e),
+            Self::Reconstruct(ref e) => {
+                write_err!(f, "conversion of the `Reconstruct` field failed"; e)
+            }
         }
     }
 }
@@ -714,8 +723,9 @@ pub enum GetPrivateBroadcastInfoError {
 impl fmt::Display for GetPrivateBroadcastInfoError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Transactions(ref e) =>
-                write_err!(f, "conversion of the `Transactions` field failed"; e),
+            Self::Transactions(ref e) => {
+                write_err!(f, "conversion of the `Transactions` field failed"; e)
+            }
         }
     }
 }
@@ -807,10 +817,12 @@ pub enum GetRawTransactionVerboseError {
 impl fmt::Display for GetRawTransactionVerboseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::Transaction(ref e) =>
-                write_err!(f, "conversion of the `Transaction` field failed"; e),
-            Self::BlockHash(ref e) =>
-                write_err!(f, "conversion of the `BlockHash` field failed"; e),
+            Self::Transaction(ref e) => {
+                write_err!(f, "conversion of the `Transaction` field failed"; e)
+            }
+            Self::BlockHash(ref e) => {
+                write_err!(f, "conversion of the `BlockHash` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -828,7 +840,9 @@ impl std::error::Error for GetRawTransactionVerboseError {
 }
 
 impl From<crate::NumericError> for GetRawTransactionVerboseError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl JoinPsbts {
@@ -973,8 +987,9 @@ impl fmt::Display for SignFailError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
-            Self::ScriptSig(ref e) =>
-                write_err!(f, "conversion of the `ScriptSig` field failed"; e),
+            Self::ScriptSig(ref e) => {
+                write_err!(f, "conversion of the `ScriptSig` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -992,7 +1007,9 @@ impl std::error::Error for SignFailError {
 }
 
 impl From<crate::NumericError> for SignFailError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl SubmitPackage {
@@ -1036,12 +1053,15 @@ pub enum SubmitPackageError {
 impl fmt::Display for SubmitPackageError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::TxResultsKey(ref e) =>
-                write_err!(f, "conversion of the `TxResultsKey` field failed"; e),
-            Self::TxResultsValue(ref e) =>
-                write_err!(f, "conversion of the `TxResultsValue` field failed"; e),
-            Self::ReplacedTransactions(ref e) =>
-                write_err!(f, "conversion of the `ReplacedTransactions` field failed"; e),
+            Self::TxResultsKey(ref e) => {
+                write_err!(f, "conversion of the `TxResultsKey` field failed"; e)
+            }
+            Self::TxResultsValue(ref e) => {
+                write_err!(f, "conversion of the `TxResultsValue` field failed"; e)
+            }
+            Self::ReplacedTransactions(ref e) => {
+                write_err!(f, "conversion of the `ReplacedTransactions` field failed"; e)
+            }
         }
     }
 }
@@ -1093,8 +1113,9 @@ impl fmt::Display for SubmitPackageTxResultError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Txid(ref e) => write_err!(f, "conversion of the `Txid` field failed"; e),
-            Self::OtherWtxid(ref e) =>
-                write_err!(f, "conversion of the `OtherWtxid` field failed"; e),
+            Self::OtherWtxid(ref e) => {
+                write_err!(f, "conversion of the `OtherWtxid` field failed"; e)
+            }
             Self::Fees(ref e) => write_err!(f, "conversion of the `Fees` field failed"; e),
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
@@ -1114,7 +1135,9 @@ impl std::error::Error for SubmitPackageTxResultError {
 }
 
 impl From<crate::NumericError> for SubmitPackageTxResultError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl SubmitPackageTxResultsFees {
@@ -1156,10 +1179,12 @@ impl fmt::Display for SubmitPackageTxResultFeesError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::BaseFee(ref e) => write_err!(f, "conversion of the `BaseFee` field failed"; e),
-            Self::EffectiveFeeRate(ref e) =>
-                write_err!(f, "conversion of the `EffectiveFeeRate` field failed"; e),
-            Self::EffectiveIncludes(ref e) =>
-                write_err!(f, "conversion of the `EffectiveIncludes` field failed"; e),
+            Self::EffectiveFeeRate(ref e) => {
+                write_err!(f, "conversion of the `EffectiveFeeRate` field failed"; e)
+            }
+            Self::EffectiveIncludes(ref e) => {
+                write_err!(f, "conversion of the `EffectiveIncludes` field failed"; e)
+            }
         }
     }
 }
@@ -1268,7 +1293,9 @@ impl std::error::Error for MempoolAcceptanceError {
 }
 
 impl From<crate::NumericError> for MempoolAcceptanceError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl TestMempoolAcceptItemFees {
@@ -1305,10 +1332,12 @@ impl fmt::Display for MempoolAcceptanceFeesError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Base(ref e) => write_err!(f, "conversion of the `Base` field failed"; e),
-            Self::EffectiveFeeRate(ref e) =>
-                write_err!(f, "conversion of the `EffectiveFeeRate` field failed"; e),
-            Self::EffectiveIncludes(ref e) =>
-                write_err!(f, "conversion of the `EffectiveIncludes` field failed"; e),
+            Self::EffectiveFeeRate(ref e) => {
+                write_err!(f, "conversion of the `EffectiveFeeRate` field failed"; e)
+            }
+            Self::EffectiveIncludes(ref e) => {
+                write_err!(f, "conversion of the `EffectiveIncludes` field failed"; e)
+            }
         }
     }
 }

@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -60,8 +61,9 @@ impl fmt::Display for CreateMultisigError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Self::Address(ref e) => write_err!(f, "conversion of the `Address` field failed"; e),
-            Self::RedeemScript(ref e) =>
-                write_err!(f, "conversion of the `RedeemScript` field failed"; e),
+            Self::RedeemScript(ref e) => {
+                write_err!(f, "conversion of the `RedeemScript` field failed"; e)
+            }
         }
     }
 }
@@ -72,6 +74,47 @@ impl std::error::Error for CreateMultisigError {
         match *self {
             Self::Address(ref e) => Some(e),
             Self::RedeemScript(ref e) => Some(e),
+        }
+    }
+}
+
+impl DeriveAddresses {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::DeriveAddresses, DeriveAddressesError> {
+        use DeriveAddressesError as E;
+
+        Ok(model::DeriveAddresses {
+            addresses: self
+                .0
+                .into_iter()
+                .map(|x| x.parse::<Address<NetworkUnchecked>>().map_err(E::Addresses))
+                .collect::<Result<Vec<_>, _>>()?,
+        })
+    }
+}
+
+/// Error when converting a `DeriveAddresses` type into the model type.
+#[derive(Debug)]
+pub enum DeriveAddressesError {
+    /// Conversion of the `Addresses` field failed.
+    Addresses(address::ParseError),
+}
+
+impl fmt::Display for DeriveAddressesError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::Addresses(ref e) => {
+                write_err!(f, "conversion of the `Addresses` field failed"; e)
+            }
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for DeriveAddressesError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {
+            Self::Addresses(ref e) => Some(e),
         }
     }
 }
@@ -122,7 +165,9 @@ impl std::error::Error for EstimateSmartFeeError {
 }
 
 impl From<crate::NumericError> for EstimateSmartFeeError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl SignMessageWithPrivKey {
@@ -235,19 +280,25 @@ pub enum ValidateAddressError {
 impl fmt::Display for ValidateAddressError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            Self::AddressMissing(ref e) =>
-                write_err!(f, "conversion of the `AddressMissing` field failed"; e),
+            Self::AddressMissing(ref e) => {
+                write_err!(f, "conversion of the `AddressMissing` field failed"; e)
+            }
             Self::Address(ref e) => write_err!(f, "conversion of the `Address` field failed"; e),
-            Self::ScriptPubkeyMissing(ref e) =>
-                write_err!(f, "conversion of the `ScriptPubkeyMissing` field failed"; e),
-            Self::ScriptPubkey(ref e) =>
-                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e),
-            Self::WitnessVersion(ref e) =>
-                write_err!(f, "conversion of the `WitnessVersion` field failed"; e),
-            Self::WitnessProgramBytes(ref e) =>
-                write_err!(f, "conversion of the `WitnessProgramBytes` field failed"; e),
-            Self::WitnessProgram(ref e) =>
-                write_err!(f, "conversion of the `WitnessProgram` field failed"; e),
+            Self::ScriptPubkeyMissing(ref e) => {
+                write_err!(f, "conversion of the `ScriptPubkeyMissing` field failed"; e)
+            }
+            Self::ScriptPubkey(ref e) => {
+                write_err!(f, "conversion of the `ScriptPubkey` field failed"; e)
+            }
+            Self::WitnessVersion(ref e) => {
+                write_err!(f, "conversion of the `WitnessVersion` field failed"; e)
+            }
+            Self::WitnessProgramBytes(ref e) => {
+                write_err!(f, "conversion of the `WitnessProgramBytes` field failed"; e)
+            }
+            Self::WitnessProgram(ref e) => {
+                write_err!(f, "conversion of the `WitnessProgram` field failed"; e)
+            }
             Self::Numeric(ref e) => write_err!(f, "numeric conversion failed"; e),
         }
     }
@@ -270,5 +321,7 @@ impl std::error::Error for ValidateAddressError {
 }
 
 impl From<crate::NumericError> for ValidateAddressError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }

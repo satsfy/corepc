@@ -11,6 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
 use types::v31::generated::EnumerateSigners;
 
 use crate::client_async::error::Result;
