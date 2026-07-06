@@ -180,8 +180,8 @@ impl EstimateRawFeeShortFail {
         use RawFeeRangeError as E;
 
         Ok(model::RawFeeRange {
-            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
-            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            start_range: crate::btc_per_kb(self.startrange).ok().flatten(),
+            end_range: crate::btc_per_kb(self.endrange).ok().flatten(),
             // TODO(codegen): canonical field `within_target: f64` has no raw counterpart; needs manual reconstruction.
             within_target: todo!("no raw field for `within_target`"),
             // TODO(codegen): canonical field `total_confirmed: f64` has no raw counterpart; needs manual reconstruction.
