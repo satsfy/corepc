@@ -41,7 +41,9 @@ pub use crate::client_sync::{
 
 /// Shorthand for `serde_json::to_value`, matching the free `into_json` the reused sync
 /// `impl_client_*` macros call.
-fn into_json<T: Serialize>(val: T) -> Result<Value> { Ok(serde_json::to_value(val)?) }
+fn into_json<T: Serialize>(val: T) -> Result<Value> {
+    Ok(serde_json::to_value(val)?)
+}
 
 /// The version-specific response-type namespace the integration tests import under
 /// `test-async`. GENERATED types only: every response type (and its `into_model` error)
@@ -147,12 +149,13 @@ impl Client {
     /// codes behave the same against either client.
     fn map_err(e: crate::client_async::Error) -> Error {
         match e {
-            crate::client_async::Error::Rpc { code, message, .. } =>
+            crate::client_async::Error::Rpc { code, message, .. } => {
                 Error::JsonRpc(jsonrpc::error::Error::Rpc(jsonrpc::error::RpcError {
                     code,
                     message,
                     data: None,
-                })),
+                }))
+            }
             other => Error::Returned(other.to_string()),
         }
     }

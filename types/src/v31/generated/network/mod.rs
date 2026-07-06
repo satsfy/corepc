@@ -10,9 +10,9 @@
 
 mod into;
 
-use serde::{Deserialize, Serialize};
-
 pub use self::into::{GetNetworkInfoAddressError, GetNetworkInfoError, GetNetworkInfoNetworkError};
+
+use serde::{Deserialize, Serialize};
 
 /// Result of the JSON-RPC method `getaddednodeinfo`.
 ///
@@ -80,7 +80,9 @@ pub struct GetConnectionCount(pub u64);
 
 impl std::ops::Deref for GetConnectionCount {
     type Target = u64;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Returns information about network traffic, including bytes in, bytes out,
@@ -93,10 +95,10 @@ pub struct GetNetTotals {
     pub time_millis: i64,
     /// Total bytes received
     #[serde(rename = "totalbytesrecv")]
-    pub total_bytesrecv: u64,
+    pub total_bytes_received: u64,
     /// Total bytes sent
     #[serde(rename = "totalbytessent")]
-    pub total_bytessent: u64,
+    pub total_bytes_sent: u64,
     #[serde(rename = "uploadtarget")]
     pub upload_target: GetNetTotalsUploadTarget,
 }
@@ -239,21 +241,23 @@ pub struct GetPeerInfoItem {
     /// Whether we participate in address relay with this peer
     pub addr_relay_enabled: bool,
     /// (ip:port) Bind address of the connection to the peer
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub addrbind: Option<String>,
+    #[serde(rename = "addrbind", skip_serializing_if = "Option::is_none")]
+    pub address_bind: Option<String>,
     /// (ip:port) Local address as reported by the peer
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub addrlocal: Option<String>,
+    #[serde(rename = "addrlocal", skip_serializing_if = "Option::is_none")]
+    pub address_local: Option<String>,
     /// Whether peer selected us as (compact blocks) high-bandwidth peer
     pub bip152_hb_from: bool,
     /// Whether we selected peer as (compact blocks) high-bandwidth peer
     pub bip152_hb_to: bool,
     /// The total bytes received
-    pub bytesrecv: u64,
+    #[serde(rename = "bytesrecv")]
+    pub bytes_received: u64,
     #[serde(rename = "bytesrecv_per_msg")]
     pub bytes_received_per_message: std::collections::BTreeMap<String, u64>,
     /// The total bytes sent
-    pub bytessent: u64,
+    #[serde(rename = "bytessent")]
+    pub bytes_sent: u64,
     #[serde(rename = "bytessent_per_msg")]
     pub bytes_sent_per_message: std::collections::BTreeMap<String, u64>,
     /// Type of connection:
@@ -285,7 +289,8 @@ pub struct GetPeerInfoItem {
     /// The UNIX epoch time of the last valid transaction received from this peer
     pub last_transaction: i64,
     /// The UNIX epoch time of the last receive
-    pub lastrecv: i64,
+    #[serde(rename = "lastrecv")]
+    pub last_received: i64,
     /// The UNIX epoch time of the last send
     #[serde(rename = "lastsend")]
     pub last_send: i64,
@@ -295,7 +300,7 @@ pub struct GetPeerInfoItem {
     pub mapped_as: Option<i64>,
     /// The minimum fee rate for transactions this peer accepts
     #[serde(rename = "minfeefilter")]
-    pub min_fee_filter: f64,
+    pub minimum_fee_filter: f64,
     /// The minimum observed ping time in seconds, if any
     #[serde(skip_serializing_if = "Option::is_none")]
     pub minping: Option<f64>,
@@ -381,5 +386,7 @@ pub struct SetNetworkActive(pub bool);
 
 impl std::ops::Deref for SetNetworkActive {
     type Target = bool;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }

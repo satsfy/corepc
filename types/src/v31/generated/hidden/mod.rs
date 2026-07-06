@@ -10,8 +10,6 @@
 
 mod into;
 
-use serde::{Deserialize, Serialize};
-
 pub use self::into::{
     EstimateRawFeeError, FeerateDiagramEntryError, GenerateBlockError, GenerateError,
     GenerateToAddressError, GenerateToDescriptorError, GetMempoolFeerateDiagramError,
@@ -19,6 +17,8 @@ pub use self::into::{
     GetOrphanTxsVerboseTwoEntryError, GetOrphanTxsVerboseTwoError, RawFeeDetailError,
     RawFeeRangeError,
 };
+
+use serde::{Deserialize, Serialize};
 
 /// Open an outbound connection to a specified node. This RPC is for testing only.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -62,7 +62,9 @@ pub struct EchoIpc(pub String);
 
 impl std::ops::Deref for EchoIpc {
     type Target = String;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 /// Simply echo back the input arguments. This command is for testing.
@@ -98,16 +100,142 @@ pub struct EstimateRawFee {
 
 /// estimate for long time horizon
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct EstimateRawFeeLong {
-    #[serde(flatten)]
-    pub extra: std::collections::BTreeMap<String, serde_json::Value>,
+    /// exponential decay (per block) for historical moving average of confirmation data
+    pub decay: f64,
+    /// Errors encountered during processing (if there are any)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub errors: Option<Vec<String>>,
+    /// information about the highest range of feerates to fail to meet the threshold
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fail: Option<EstimateRawFeeLongFail>,
+    /// estimate fee rate in BTC/kvB
+    #[serde(rename = "feerate", skip_serializing_if = "Option::is_none")]
+    pub fee_rate: Option<f64>,
+    /// information about the lowest range of feerates to succeed in meeting the threshold
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pass: Option<EstimateRawFeeLongPass>,
+    /// The resolution of confirmation targets at this time horizon
+    pub scale: i64,
+}
+
+/// information about the highest range of feerates to fail to meet the threshold
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct EstimateRawFeeLongFail {
+    /// end of feerate range
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
+    /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
+    #[serde(rename = "inmempool")]
+    pub in_mempool: f64,
+    /// number of txs over history horizon in the feerate range that left mempool unconfirmed after target
+    #[serde(rename = "leftmempool")]
+    pub left_mempool: f64,
+    /// start of feerate range
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed at any point
+    #[serde(rename = "totalconfirmed")]
+    pub total_confirmed: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed within target
+    #[serde(rename = "withintarget")]
+    pub within_target: f64,
+}
+
+/// information about the lowest range of feerates to succeed in meeting the threshold
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct EstimateRawFeeLongPass {
+    /// end of feerate range
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
+    /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
+    #[serde(rename = "inmempool")]
+    pub in_mempool: f64,
+    /// number of txs over history horizon in the feerate range that left mempool unconfirmed after target
+    #[serde(rename = "leftmempool")]
+    pub left_mempool: f64,
+    /// start of feerate range
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed at any point
+    #[serde(rename = "totalconfirmed")]
+    pub total_confirmed: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed within target
+    #[serde(rename = "withintarget")]
+    pub within_target: f64,
 }
 
 /// estimate for medium time horizon
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
 pub struct EstimateRawFeeMedium {
-    #[serde(flatten)]
-    pub extra: std::collections::BTreeMap<String, serde_json::Value>,
+    /// exponential decay (per block) for historical moving average of confirmation data
+    pub decay: f64,
+    /// Errors encountered during processing (if there are any)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub errors: Option<Vec<String>>,
+    /// information about the highest range of feerates to fail to meet the threshold
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fail: Option<EstimateRawFeeMediumFail>,
+    /// estimate fee rate in BTC/kvB
+    #[serde(rename = "feerate", skip_serializing_if = "Option::is_none")]
+    pub fee_rate: Option<f64>,
+    /// information about the lowest range of feerates to succeed in meeting the threshold
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub pass: Option<EstimateRawFeeMediumPass>,
+    /// The resolution of confirmation targets at this time horizon
+    pub scale: i64,
+}
+
+/// information about the highest range of feerates to fail to meet the threshold
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct EstimateRawFeeMediumFail {
+    /// end of feerate range
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
+    /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
+    #[serde(rename = "inmempool")]
+    pub in_mempool: f64,
+    /// number of txs over history horizon in the feerate range that left mempool unconfirmed after target
+    #[serde(rename = "leftmempool")]
+    pub left_mempool: f64,
+    /// start of feerate range
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed at any point
+    #[serde(rename = "totalconfirmed")]
+    pub total_confirmed: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed within target
+    #[serde(rename = "withintarget")]
+    pub within_target: f64,
+}
+
+/// information about the lowest range of feerates to succeed in meeting the threshold
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct EstimateRawFeeMediumPass {
+    /// end of feerate range
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
+    /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
+    #[serde(rename = "inmempool")]
+    pub in_mempool: f64,
+    /// number of txs over history horizon in the feerate range that left mempool unconfirmed after target
+    #[serde(rename = "leftmempool")]
+    pub left_mempool: f64,
+    /// start of feerate range
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed at any point
+    #[serde(rename = "totalconfirmed")]
+    pub total_confirmed: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed within target
+    #[serde(rename = "withintarget")]
+    pub within_target: f64,
 }
 
 /// estimate for short time horizon
@@ -134,17 +262,11 @@ pub struct EstimateRawFeeShort {
 
 /// information about the highest range of feerates to fail to meet the threshold
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub struct EstimateRawFeeShortFail {
-    #[serde(flatten)]
-    pub extra: std::collections::BTreeMap<String, serde_json::Value>,
-}
-
-/// information about the lowest range of feerates to succeed in meeting the threshold
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct EstimateRawFeeShortPass {
+pub struct EstimateRawFeeShortFail {
     /// end of feerate range
-    pub endrange: f64,
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
     /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
     #[serde(rename = "inmempool")]
     pub in_mempool: f64,
@@ -152,7 +274,32 @@ pub struct EstimateRawFeeShortPass {
     #[serde(rename = "leftmempool")]
     pub left_mempool: f64,
     /// start of feerate range
-    pub startrange: f64,
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed at any point
+    #[serde(rename = "totalconfirmed")]
+    pub total_confirmed: f64,
+    /// number of txs over history horizon in the feerate range that were confirmed within target
+    #[serde(rename = "withintarget")]
+    pub within_target: f64,
+}
+
+/// information about the lowest range of feerates to succeed in meeting the threshold
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct EstimateRawFeeShortPass {
+    /// end of feerate range
+    #[serde(rename = "endrange")]
+    pub end_range: f64,
+    /// current number of txs in mempool in the feerate range unconfirmed for at least target blocks
+    #[serde(rename = "inmempool")]
+    pub in_mempool: f64,
+    /// number of txs over history horizon in the feerate range that left mempool unconfirmed after target
+    #[serde(rename = "leftmempool")]
+    pub left_mempool: f64,
+    /// start of feerate range
+    #[serde(rename = "startrange")]
+    pub start_range: f64,
     /// number of txs over history horizon in the feerate range that were confirmed at any point
     #[serde(rename = "totalconfirmed")]
     pub total_confirmed: f64,
@@ -268,23 +415,46 @@ pub struct GetOrphanTxsVerbose2Item {
     pub wtxid: String,
 }
 
-/// Result of the JSON-RPC method `getrawaddrman`.
+/// EXPERIMENTAL warning: this call may be changed in future releases.
 ///
-/// > getrawaddrman
-/// >
-/// > EXPERIMENTAL warning: this call may be changed in future releases.
-/// >
-/// > Returns information on all address manager entries for the new and tried tables.
+/// Returns information on all address manager entries for the new and tried tables.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetRawAddrMan(
-    /// Map entries
-    pub std::collections::BTreeMap<String, std::collections::BTreeMap<String, GetRawAddrManEntry>>,
-);
+pub struct GetRawAddrMan {
+    /// addresses in the "new" table, keyed by bucket/position
+    pub new: std::collections::BTreeMap<String, GetRawAddrManNew>,
+    /// addresses in the "tried" table, keyed by bucket/position
+    pub tried: std::collections::BTreeMap<String, GetRawAddrManTried>,
+}
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
-pub struct GetRawAddrManEntry {
+pub struct GetRawAddrManNew {
+    /// The address of the node
+    pub address: String,
+    /// Mapped AS (Autonomous System) number at the end of the BGP route to the peer, used for diversifying peer selection (only displayed if the -asmap config option is set)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mapped_as: Option<i64>,
+    /// The network (ipv4, ipv6, onion, i2p, cjdns) of the address
+    pub network: String,
+    /// The port number of the node
+    pub port: i64,
+    /// The services offered by the node
+    pub services: u64,
+    /// The address that relayed the address to us
+    pub source: String,
+    /// Mapped AS (Autonomous System) number at the end of the BGP route to the source, used for diversifying peer selection (only displayed if the -asmap config option is set)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_mapped_as: Option<i64>,
+    /// The network (ipv4, ipv6, onion, i2p, cjdns) of the source address
+    pub source_network: String,
+    /// The UNIX epoch time when the node was last seen
+    pub time: i64,
+}
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "serde-deny-unknown-fields", serde(deny_unknown_fields))]
+pub struct GetRawAddrManTried {
     /// The address of the node
     pub address: String,
     /// Mapped AS (Autonomous System) number at the end of the BGP route to the peer, used for diversifying peer selection (only displayed if the -asmap config option is set)

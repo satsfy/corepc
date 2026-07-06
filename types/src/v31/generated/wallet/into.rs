@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -95,9 +96,9 @@ impl GetAddressInfo {
 
         Ok(model::GetAddressInfo {
             address: self.address.parse::<Address<NetworkUnchecked>>().map_err(E::Address)?,
-            script_pubkey: ScriptBuf::from_hex(&self.script_pub_key).map_err(E::ScriptPubkey)?,
-            is_mine: self.ismine,
-            is_watch_only: self.is_watch_only,
+            script_pubkey: ScriptBuf::from_hex(&self.script_pubkey).map_err(E::ScriptPubkey)?,
+            is_mine: self.is_mine,
+            is_watch_only: self.is_watchonly,
             solvable: Some(self.solvable),
             descriptor: self.desc,
             parent_descriptor: self.parent_descriptor,
@@ -150,7 +151,7 @@ impl GetAddressInfo {
                 .transpose()?,
             pubkey: self.pubkey.map(|x| x.parse::<PublicKey>()).transpose().map_err(E::Pubkey)?,
             embedded: self.embedded.map(|x| x.into_model()).transpose().map_err(E::Embedded)?,
-            is_compressed: self.iscompressed,
+            is_compressed: self.is_compressed,
             label: None, // no raw field; canonical is optional
             timestamp: self.timestamp.map(|x| crate::to_u32(x, "timestamp")).transpose()?,
             hd_key_path: self
@@ -159,12 +160,12 @@ impl GetAddressInfo {
                 .transpose()
                 .map_err(E::HdKeyPath)?,
             hd_seed_id: self
-                .hdseedid
+                .hd_seed_id
                 .map(|x| x.parse::<hash160::Hash>())
                 .transpose()
                 .map_err(E::HdSeedId)?,
             hd_master_fingerprint: self
-                .hdmasterfingerprint
+                .hd_master_fingerprint
                 .map(|x| x.parse::<bip32::Fingerprint>())
                 .transpose()
                 .map_err(E::HdMasterFingerprint)?,
@@ -262,7 +263,9 @@ impl std::error::Error for GetAddressInfoError {
 }
 
 impl From<crate::NumericError> for GetAddressInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetAddressInfoEmbedded {
@@ -400,7 +403,9 @@ impl std::error::Error for GetAddressInfoEmbeddedError {
 }
 
 impl From<crate::NumericError> for GetAddressInfoEmbeddedError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetAddressesByLabel {
@@ -611,7 +616,9 @@ impl std::error::Error for LastProcessedBlockError {
 }
 
 impl From<crate::NumericError> for LastProcessedBlockError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetBalancesMine {
@@ -771,12 +778,16 @@ impl GetHdKeysItemDescriptorsItem {
 pub enum HdKeyDescriptorError {}
 
 impl fmt::Display for HdKeyDescriptorError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for HdKeyDescriptorError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {}
+    }
 }
 
 impl GetNewAddress {
@@ -1080,7 +1091,9 @@ impl std::error::Error for GetTransactionError {
 }
 
 impl From<crate::NumericError> for GetTransactionError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetTransactionDetailsItem {
@@ -1151,7 +1164,9 @@ impl std::error::Error for GetTransactionDetailError {
 }
 
 impl From<crate::NumericError> for GetTransactionDetailError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetTransactionLastProcessedBlock {
@@ -1260,7 +1275,9 @@ impl std::error::Error for GetWalletInfoError {
 }
 
 impl From<crate::NumericError> for GetWalletInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetWalletInfoLastProcessedBlock {
@@ -1427,7 +1444,9 @@ impl std::error::Error for ListLockUnspentItemError {
 }
 
 impl From<crate::NumericError> for ListLockUnspentItemError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ListReceivedByAddress {
@@ -1605,7 +1624,9 @@ impl std::error::Error for ListReceivedByLabelItemError {
 }
 
 impl From<crate::NumericError> for ListReceivedByLabelItemError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ListSinceBlock {
@@ -1839,7 +1860,9 @@ impl std::error::Error for TransactionItemError {
 }
 
 impl From<crate::NumericError> for TransactionItemError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ListTransactions {
@@ -2009,7 +2032,7 @@ impl ListUnspentItem {
                 .transpose()
                 .map_err(E::Address)?,
             label: self.label.unwrap_or_default(),
-            script_pubkey: ScriptBuf::from_hex(&self.script_pub_key).map_err(E::ScriptPubkey)?,
+            script_pubkey: ScriptBuf::from_hex(&self.script_pubkey).map_err(E::ScriptPubkey)?,
             amount: Amount::from_btc(self.amount).map_err(E::Amount)?,
             confirmations: crate::to_u32(self.confirmations, "confirmations")?,
             redeem_script: self
@@ -2075,12 +2098,16 @@ impl std::error::Error for ListUnspentItemError {
 }
 
 impl From<crate::NumericError> for ListUnspentItemError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl ListWallets {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> model::ListWallets { model::ListWallets(self.0) }
+    pub fn into_model(self) -> model::ListWallets {
+        model::ListWallets(self.0)
+    }
 }
 
 impl LoadWallet {
@@ -2175,7 +2202,9 @@ impl std::error::Error for RescanBlockchainError {
 }
 
 impl From<crate::NumericError> for RescanBlockchainError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl SendAll {
@@ -2509,7 +2538,9 @@ impl std::error::Error for SignFailError {
 }
 
 impl From<crate::NumericError> for SignFailError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl SimulateRawTransaction {
@@ -2603,7 +2634,9 @@ impl std::error::Error for WalletCreateFundedPsbtError {
 }
 
 impl From<crate::NumericError> for WalletCreateFundedPsbtError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl WalletDisplayAddress {

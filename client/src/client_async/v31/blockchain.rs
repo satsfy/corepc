@@ -11,6 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
 use types::v31::generated::{
     DumpTxOutSet, GetBestBlockHash, GetBlockCount, GetBlockFilter, GetBlockFromPeer, GetBlockHash,
     GetBlockHeaderVerbose0, GetBlockHeaderVerbose1, GetBlockStats, GetBlockVerbose0,

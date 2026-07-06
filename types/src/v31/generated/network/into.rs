@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -140,7 +141,9 @@ impl std::error::Error for GetNetworkInfoError {
 }
 
 impl From<crate::NumericError> for GetNetworkInfoError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetNetworkInfoLocalAddressesItem {
@@ -184,7 +187,9 @@ impl std::error::Error for GetNetworkInfoAddressError {
 }
 
 impl From<crate::NumericError> for GetNetworkInfoAddressError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetNetworkInfoNetworksItem {
@@ -207,10 +212,14 @@ impl GetNetworkInfoNetworksItem {
 pub enum GetNetworkInfoNetworkError {}
 
 impl fmt::Display for GetNetworkInfoNetworkError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for GetNetworkInfoNetworkError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {}
+    }
 }

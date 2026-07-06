@@ -95,8 +95,6 @@ pub(crate) const FIELD_ALIAS: &[(&str, &str, &str)] = &[
     ("GetBlockStats", "segwit_total_weight", "sw_total_weight"),
     ("GetBlockStats", "segwit_txs", "swtxs"),
     ("GetNetworkInfo", "local_services_names", "localservices_names"),
-    ("EstimateRawFeeShortPass", "startrange", "start_range"),
-    ("EstimateRawFeeShortPass", "endrange", "end_range"),
 ];
 
 /// A `(canonical type, field)` whose canonical Rust type is buggy: codegen routes it through a
@@ -169,7 +167,7 @@ pub(crate) const RECONSTRUCT: &[ReconstructRule] = &[
     ReconstructRule {
         canon_type: "RawFeeRange",
         field: "start_range",
-        expr: "crate::btc_per_kb(self.startrange).ok().flatten()",
+        expr: "crate::btc_per_kb(self.start_range).ok().flatten()",
         errs: &[],
         numeric: false,
         nested: &[],
@@ -177,7 +175,7 @@ pub(crate) const RECONSTRUCT: &[ReconstructRule] = &[
     ReconstructRule {
         canon_type: "RawFeeRange",
         field: "end_range",
-        expr: "crate::btc_per_kb(self.endrange).ok().flatten()",
+        expr: "crate::btc_per_kb(self.end_range).ok().flatten()",
         errs: &[],
         numeric: false,
         nested: &[],
@@ -187,7 +185,7 @@ pub(crate) const RECONSTRUCT: &[ReconstructRule] = &[
     ReconstructRule {
         canon_type: "GetTxOut",
         field: "tx_out",
-        expr: "TxOut { value: Amount::from_btc(self.value).map_err(E::TxOutValue)?, script_pubkey: ScriptBuf::from_hex(&self.script_pub_key.hex).map_err(E::TxOutScript)? }",
+        expr: "TxOut { value: Amount::from_btc(self.value).map_err(E::TxOutValue)?, script_pubkey: ScriptBuf::from_hex(&self.script_pubkey.hex).map_err(E::TxOutScript)? }",
         errs: &[("TxOutValue", "amount::ParseAmountError"), ("TxOutScript", "hex::HexToBytesError")],
         numeric: false,
         nested: &[],
@@ -195,7 +193,7 @@ pub(crate) const RECONSTRUCT: &[ReconstructRule] = &[
     ReconstructRule {
         canon_type: "GetTxOut",
         field: "address",
-        expr: "self.script_pub_key.address.map(|a| a.parse::<Address<NetworkUnchecked>>()).transpose().map_err(E::Address)?",
+        expr: "self.script_pubkey.address.map(|a| a.parse::<Address<NetworkUnchecked>>()).transpose().map_err(E::Address)?",
         errs: &[("Address", "address::ParseError")],
         numeric: false,
         nested: &[],

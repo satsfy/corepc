@@ -21,11 +21,12 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
+use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
-    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
-    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
-    WitnessVersion, Work, Wtxid,
+    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
+    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
+    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
+    Wtxid,
 };
 
 use super::*;
@@ -84,14 +85,48 @@ impl EstimateRawFeeLong {
         use RawFeeDetailError as E;
 
         Ok(model::RawFeeDetail {
-            fee_rate: None, // no raw field; canonical is optional
-            // TODO(codegen): canonical field `decay: f64` has no raw counterpart; needs manual reconstruction.
-            decay: todo!("no raw field for `decay`"),
-            // TODO(codegen): canonical field `scale: u32` has no raw counterpart; needs manual reconstruction.
-            scale: todo!("no raw field for `scale`"),
-            pass: None,   // no raw field; canonical is optional
-            fail: None,   // no raw field; canonical is optional
-            errors: None, // no raw field; canonical is optional
+            fee_rate: self
+                .fee_rate
+                .map(|f| crate::btc_per_kb(f).map_err(E::FeeRate))
+                .transpose()?
+                .flatten(),
+            decay: self.decay,
+            scale: crate::to_u32(self.scale, "scale")?,
+            pass: self.pass.map(|x| x.into_model()).transpose().map_err(E::Pass)?,
+            fail: self.fail.map(|x| x.into_model()).transpose().map_err(E::Fail)?,
+            errors: self.errors,
+        })
+    }
+}
+
+impl EstimateRawFeeLongFail {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::RawFeeRange, RawFeeRangeError> {
+        use RawFeeRangeError as E;
+
+        Ok(model::RawFeeRange {
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            within_target: self.within_target,
+            total_confirmed: self.total_confirmed,
+            in_mempool: self.in_mempool,
+            left_mempool: self.left_mempool,
+        })
+    }
+}
+
+impl EstimateRawFeeLongPass {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::RawFeeRange, RawFeeRangeError> {
+        use RawFeeRangeError as E;
+
+        Ok(model::RawFeeRange {
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            within_target: self.within_target,
+            total_confirmed: self.total_confirmed,
+            in_mempool: self.in_mempool,
+            left_mempool: self.left_mempool,
         })
     }
 }
@@ -102,14 +137,48 @@ impl EstimateRawFeeMedium {
         use RawFeeDetailError as E;
 
         Ok(model::RawFeeDetail {
-            fee_rate: None, // no raw field; canonical is optional
-            // TODO(codegen): canonical field `decay: f64` has no raw counterpart; needs manual reconstruction.
-            decay: todo!("no raw field for `decay`"),
-            // TODO(codegen): canonical field `scale: u32` has no raw counterpart; needs manual reconstruction.
-            scale: todo!("no raw field for `scale`"),
-            pass: None,   // no raw field; canonical is optional
-            fail: None,   // no raw field; canonical is optional
-            errors: None, // no raw field; canonical is optional
+            fee_rate: self
+                .fee_rate
+                .map(|f| crate::btc_per_kb(f).map_err(E::FeeRate))
+                .transpose()?
+                .flatten(),
+            decay: self.decay,
+            scale: crate::to_u32(self.scale, "scale")?,
+            pass: self.pass.map(|x| x.into_model()).transpose().map_err(E::Pass)?,
+            fail: self.fail.map(|x| x.into_model()).transpose().map_err(E::Fail)?,
+            errors: self.errors,
+        })
+    }
+}
+
+impl EstimateRawFeeMediumFail {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::RawFeeRange, RawFeeRangeError> {
+        use RawFeeRangeError as E;
+
+        Ok(model::RawFeeRange {
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            within_target: self.within_target,
+            total_confirmed: self.total_confirmed,
+            in_mempool: self.in_mempool,
+            left_mempool: self.left_mempool,
+        })
+    }
+}
+
+impl EstimateRawFeeMediumPass {
+    /// Converts the raw type into the version-nonspecific model type.
+    pub fn into_model(self) -> Result<model::RawFeeRange, RawFeeRangeError> {
+        use RawFeeRangeError as E;
+
+        Ok(model::RawFeeRange {
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            within_target: self.within_target,
+            total_confirmed: self.total_confirmed,
+            in_mempool: self.in_mempool,
+            left_mempool: self.left_mempool,
         })
     }
 }
@@ -171,7 +240,9 @@ impl std::error::Error for RawFeeDetailError {
 }
 
 impl From<crate::NumericError> for RawFeeDetailError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl EstimateRawFeeShortFail {
@@ -180,16 +251,12 @@ impl EstimateRawFeeShortFail {
         use RawFeeRangeError as E;
 
         Ok(model::RawFeeRange {
-            start_range: crate::btc_per_kb(self.startrange).ok().flatten(),
-            end_range: crate::btc_per_kb(self.endrange).ok().flatten(),
-            // TODO(codegen): canonical field `within_target: f64` has no raw counterpart; needs manual reconstruction.
-            within_target: todo!("no raw field for `within_target`"),
-            // TODO(codegen): canonical field `total_confirmed: f64` has no raw counterpart; needs manual reconstruction.
-            total_confirmed: todo!("no raw field for `total_confirmed`"),
-            // TODO(codegen): canonical field `in_mempool: f64` has no raw counterpart; needs manual reconstruction.
-            in_mempool: todo!("no raw field for `in_mempool`"),
-            // TODO(codegen): canonical field `left_mempool: f64` has no raw counterpart; needs manual reconstruction.
-            left_mempool: todo!("no raw field for `left_mempool`"),
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
+            within_target: self.within_target,
+            total_confirmed: self.total_confirmed,
+            in_mempool: self.in_mempool,
+            left_mempool: self.left_mempool,
         })
     }
 }
@@ -200,8 +267,8 @@ impl EstimateRawFeeShortPass {
         use RawFeeRangeError as E;
 
         Ok(model::RawFeeRange {
-            start_range: crate::btc_per_kb(self.startrange).ok().flatten(),
-            end_range: crate::btc_per_kb(self.endrange).ok().flatten(),
+            start_range: crate::btc_per_kb(self.start_range).ok().flatten(),
+            end_range: crate::btc_per_kb(self.end_range).ok().flatten(),
             within_target: self.within_target,
             total_confirmed: self.total_confirmed,
             in_mempool: self.in_mempool,
@@ -215,12 +282,16 @@ impl EstimateRawFeeShortPass {
 pub enum RawFeeRangeError {}
 
 impl fmt::Display for RawFeeRangeError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for RawFeeRangeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {}
+    }
 }
 
 impl Generate {
@@ -240,12 +311,16 @@ impl Generate {
 pub enum GenerateError {}
 
 impl fmt::Display for GenerateError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {}
+    }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for GenerateError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match *self {}
+    }
 }
 
 impl GenerateBlock {
@@ -449,7 +524,9 @@ impl std::error::Error for FeerateDiagramEntryError {
 }
 
 impl From<crate::NumericError> for FeerateDiagramEntryError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetOrphanTxsVerbose0 {
@@ -585,7 +662,9 @@ impl std::error::Error for GetOrphanTxsVerboseOneEntryError {
 }
 
 impl From<crate::NumericError> for GetOrphanTxsVerboseOneEntryError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }
 
 impl GetOrphanTxsVerbose2 {
@@ -691,5 +770,7 @@ impl std::error::Error for GetOrphanTxsVerboseTwoEntryError {
 }
 
 impl From<crate::NumericError> for GetOrphanTxsVerboseTwoEntryError {
-    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
+    fn from(e: crate::NumericError) -> Self {
+        Self::Numeric(e)
+    }
 }

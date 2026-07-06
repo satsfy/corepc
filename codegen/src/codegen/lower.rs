@@ -843,11 +843,20 @@ const RAW_FIELD_RENAME: &[(&str, &str, &str)] = &[
     ("GetNetworkInfo", "subversion", "subversion"),
     // `savemempool`: tests read `.filename`; keep the wire word unsplit.
     ("SaveMempool", "filename", "filename"),
-    // `getpeerinfo` / `getnettotals` / `gettxoutsetinfo`: match the curated field names the tests read.
+    // `getpeerinfo` / `getnettotals` / `gettxoutsetinfo`: match the curated field names the tests
+    // read. `recv` expands to `received` and `min` to `minimum`, which no splitter can derive.
     ("GetPeerInfoItem", "addr", "address"),
+    ("GetPeerInfoItem", "addrbind", "address_bind"),
+    ("GetPeerInfoItem", "addrlocal", "address_local"),
+    ("GetPeerInfoItem", "lastrecv", "last_received"),
+    ("GetPeerInfoItem", "bytesrecv", "bytes_received"),
+    ("GetPeerInfoItem", "minfeefilter", "minimum_fee_filter"),
     ("GetPeerInfoItem", "bytessent_per_msg", "bytes_sent_per_message"),
     ("GetPeerInfoItem", "bytesrecv_per_msg", "bytes_received_per_message"),
     ("GetNetTotals", "timemillis", "time_millis"),
+    ("GetNetTotals", "totalbytesrecv", "total_bytes_received"),
+    // `getaddressinfo`: `hdseedid` cannot split (`id` is not a safe dictionary word).
+    ("GetAddressInfo", "hdseedid", "hd_seed_id"),
     ("GetTxOutSetInfo", "muhash", "muhash"),
     ("GetBlockStats", "utxo_size_inc", "utxo_size_increase"),
     ("GetBlockStats", "utxo_size_inc_actual", "utxo_size_increase_actual"),

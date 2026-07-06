@@ -11,6 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
 use types::v31::generated::{
     AbortRescan, BumpFee, CreateWallet, CreateWalletDescriptor, EncryptWallet, GetAddressInfo,
     GetAddressesByLabel, GetBalance, GetBalances, GetHdKeys, GetNewAddress, GetRawChangeAddress,
@@ -487,7 +488,7 @@ pub struct SignRawTransactionWithWalletPrevTxs {
     pub redeem_script: Option<String>,
     /// The output script
     #[serde(rename = "scriptPubKey")]
-    pub script_pub_key: String,
+    pub script_pubkey: String,
     /// The transaction id
     pub txid: String,
     /// The output number
@@ -508,8 +509,8 @@ pub enum SignRawTransactionWithWalletPrevTxsAmount {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct SimulateRawTransactionOptionsArg {
     /// (DEPRECATED) No longer used
-    #[serde(rename = "include_watchonly", skip_serializing_if = "Option::is_none")]
-    pub include_watch_only: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub include_watchonly: Option<bool>,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -746,7 +747,7 @@ pub struct GetBalanceOptions {
     /// No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
     /// (only available if avoid_reuse wallet flag is set) Do not include balance in dirty outputs; addresses are considered dirty if they have previously been used in a transaction.
     ///
     /// Default in Bitcoin Core: `true`.
@@ -823,7 +824,7 @@ pub struct GetTransactionOptions {
     /// (DEPRECATED) No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
     /// Whether to include a `decoded` field containing the decoded transaction (equivalent to RPC decoderawtransaction)
     ///
     /// Default in Bitcoin Core: `false`.
@@ -871,7 +872,7 @@ pub struct ListReceivedByAddressOptions {
     /// (DEPRECATED) No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
     /// If present and non-empty, only return information on this address.
     pub address_filter: Option<String>,
     /// Include immature coinbase transactions.
@@ -895,7 +896,7 @@ pub struct ListReceivedByLabelOptions {
     /// (DEPRECATED) No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
     /// Include immature coinbase transactions.
     ///
     /// Default in Bitcoin Core: `false`.
@@ -915,7 +916,7 @@ pub struct ListSinceBlockOptions {
     /// (DEPRECATED) No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
     /// Show transactions that were removed due to a reorg in the "removed" array
     /// (not guaranteed to work on pruned nodes)
     ///
@@ -947,7 +948,7 @@ pub struct ListTransactionsOptions {
     /// (DEPRECATED) No longer used
     ///
     /// Default in Bitcoin Core: `false`.
-    pub include_watch_only: Option<bool>,
+    pub include_watchonly: Option<bool>,
 }
 
 /// Optional parameters for the `listunspent` JSON-RPC method (consumed by `Client::list_unspent_with`).
@@ -1469,7 +1470,7 @@ impl Client {
             &[
                 json!(opts.dummy),
                 json!(opts.min_conf),
-                json!(opts.include_watch_only),
+                json!(opts.include_watchonly),
                 json!(opts.avoid_reuse),
             ],
         )
@@ -1595,7 +1596,7 @@ impl Client {
     ) -> Result<GetTransaction> {
         self.call_raw(
             "gettransaction",
-            &[json!(txid), json!(opts.include_watch_only), json!(opts.verbose)],
+            &[json!(txid), json!(opts.include_watchonly), json!(opts.verbose)],
         )
         .await
     }
@@ -1720,7 +1721,7 @@ impl Client {
             &[
                 json!(opts.min_conf),
                 json!(opts.include_empty),
-                json!(opts.include_watch_only),
+                json!(opts.include_watchonly),
                 json!(opts.address_filter),
                 json!(opts.include_immature_coinbase),
             ],
@@ -1747,7 +1748,7 @@ impl Client {
             &[
                 json!(opts.min_conf),
                 json!(opts.include_empty),
-                json!(opts.include_watch_only),
+                json!(opts.include_watchonly),
                 json!(opts.include_immature_coinbase),
             ],
         )
@@ -1777,7 +1778,7 @@ impl Client {
             &[
                 json!(opts.block_hash),
                 json!(opts.target_confirmations),
-                json!(opts.include_watch_only),
+                json!(opts.include_watchonly),
                 json!(opts.include_removed),
                 json!(opts.include_change),
                 json!(opts.label),
@@ -1816,7 +1817,7 @@ impl Client {
                 json!(opts.label),
                 json!(opts.count),
                 json!(opts.skip),
-                json!(opts.include_watch_only),
+                json!(opts.include_watchonly),
             ],
         )
         .await

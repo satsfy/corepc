@@ -59,6 +59,7 @@ pub static WORDS: &[&str] = &[
     "cluster",
     "coin",
     "combine",
+    "compressed",
     "conf",
     "confirmations",
     "connection",
@@ -76,6 +77,7 @@ pub static WORDS: &[&str] = &[
     "derive",
     "desc",
     "descendant",
+    "descendants",
     "descriptor",
     "diagram",
     "difficulty",
@@ -89,6 +91,7 @@ pub static WORDS: &[&str] = &[
     "effective",
     "elapsed",
     "encrypt",
+    "end",
     "entries",
     "entry",
     "enumerate",
@@ -100,6 +103,7 @@ pub static WORDS: &[&str] = &[
     "filter",
     "final",
     "finalize",
+    "fingerprint",
     "first",
     "flag",
     "for",
@@ -108,6 +112,7 @@ pub static WORDS: &[&str] = &[
     "fund",
     "funded",
     "generate",
+    "genesis",
     "get",
     "group",
     "groupings",
@@ -117,6 +122,7 @@ pub static WORDS: &[&str] = &[
     "height",
     "help",
     "hex",
+    "historical",
     "import",
     "included",
     "incremental",
@@ -127,6 +133,7 @@ pub static WORDS: &[&str] = &[
     "internal",
     "invalidate",
     "ipc",
+    "is",
     "join",
     "json",
     "key",
@@ -144,6 +151,7 @@ pub static WORDS: &[&str] = &[
     "logging",
     "man",
     "many",
+    "master",
     "max",
     "median",
     "memory",
@@ -152,6 +160,7 @@ pub static WORDS: &[&str] = &[
     "message",
     "migrate",
     "min",
+    "mine",
     "mining",
     "mock",
     "modified",
@@ -203,6 +212,7 @@ pub static WORDS: &[&str] = &[
     "pubkey",
     "pubnonce",
     "queue",
+    "range",
     "rate",
     "raw",
     "rbf",
@@ -223,7 +233,9 @@ pub static WORDS: &[&str] = &[
     "scanning",
     "scheduler",
     "script",
+    "seed",
     "send",
+    "sent",
     "sequence",
     "set",
     "sign",
@@ -235,6 +247,8 @@ pub static WORDS: &[&str] = &[
     "since",
     "size",
     "smart",
+    "solvable",
+    "spend",
     "spending",
     "stamp",
     "start",
@@ -271,6 +285,7 @@ pub static WORDS: &[&str] = &[
     "uptime",
     "used",
     "utxo",
+    "valid",
     "validate",
     "validation",
     "value",
@@ -283,6 +298,7 @@ pub static WORDS: &[&str] = &[
     "wallet",
     "warnings",
     "watch",
+    "watchonly",
     "weight",
     "with",
     "witness",
@@ -341,12 +357,19 @@ pub fn to_rust_field(name: &str) -> String {
     let cleaned = name.replace('-', "_");
     let de_camel = decamel(&cleaned);
     let words = sorted_words();
-    let split = de_camel
+    let mut split = de_camel
         .split('_')
         .filter(|s| !s.is_empty())
         .flat_map(|seg| greedy_split(&seg.to_ascii_lowercase(), &words))
         .collect::<Vec<_>>()
         .join("_");
+    // Splits the ecosystem writes as one word: `scriptPubKey` de-camels to `script_pub_key`,
+    // but rust-bitcoin (and the curated types) spell it `script_pubkey`.
+    for (from, to) in [("script_pub_key", "script_pubkey")] {
+        if split == from {
+            split = to.to_owned();
+        }
+    }
     rust_keyword_safe(&split)
 }
 

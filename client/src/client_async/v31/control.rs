@@ -11,6 +11,7 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+
 use types::v31::generated::{
     GetMemoryInfo, GetOpenRpcInfo, GetRpcInfo, Help, Logging, Stop, Uptime,
 };
@@ -108,7 +109,9 @@ impl Client {
     /// `help` with required arguments only.
     ///
     /// List all commands, or get help for a specified command.
-    pub async fn help(&self) -> Result<Help> { self.call_raw("help", &[(); 0] as &[()]).await }
+    pub async fn help(&self) -> Result<Help> {
+        self.call_raw("help", &[(); 0] as &[()]).await
+    }
 
     /// `help` with all optional arguments via [`HelpOptions`].
     ///
@@ -148,7 +151,9 @@ impl Client {
     /// `stop` with required arguments only.
     ///
     /// Request a graceful shutdown of Bitcoin Core.
-    pub async fn stop(&self) -> Result<Stop> { self.call_raw("stop", &[(); 0] as &[()]).await }
+    pub async fn stop(&self) -> Result<Stop> {
+        self.call_raw("stop", &[(); 0] as &[()]).await
+    }
 
     /// `stop` with all optional arguments via [`StopOptions`].
     ///

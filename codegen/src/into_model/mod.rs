@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn model_typename_alias_then_verbose_then_identity() {
         // A `TYPE_ALIAS` entry wins outright.
-        assert_eq!(model_typename("GetRawMempool"), "GetRawMempoolResult");
+        assert_eq!(model_typename("GetRawMempoolVerbose0"), "GetRawMempool");
         assert_eq!(model_typename("GetBlockHeaderVerbose0"), "GetBlockHeader");
         // Else the verbose digit -> word rewrite.
         assert_eq!(model_typename("GetBlockVerbose1"), "GetBlockVerboseOne");
