@@ -58,6 +58,14 @@ pub struct LoggingOptions {
     pub exclude: Option<Vec<String>>,
 }
 
+/// Optional parameters for the `stop` JSON-RPC method (consumed by `Client::stop_with`).
+#[derive(Clone, Debug, Default, serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StopOptions {
+    /// how long to wait in ms
+    pub wait: Option<f64>,
+}
+
 impl Client {
     /// `getmemoryinfo` with required arguments only.
     ///
@@ -141,6 +149,13 @@ impl Client {
     ///
     /// Request a graceful shutdown of Bitcoin Core.
     pub async fn stop(&self) -> Result<Stop> { self.call_raw("stop", &[(); 0] as &[()]).await }
+
+    /// `stop` with all optional arguments via [`StopOptions`].
+    ///
+    /// Request a graceful shutdown of Bitcoin Core.
+    pub async fn stop_with(&self, opts: StopOptions) -> Result<Stop> {
+        self.call_raw("stop", &[json!(opts.wait)]).await
+    }
 
     /// `uptime` with required arguments only.
     ///
