@@ -4,12 +4,13 @@
 //! raw response-type source it carries. Schema-shape dispatch, type naming, number classification,
 //! and the small override tables the spec can't express.
 
+use std::borrow::Cow;
 use std::collections::BTreeSet;
 
 use super::emit::{esc_doc, fmt_doc, method_doc, param_description};
 use super::*;
 use crate::names::{method_to_pascal, method_to_snake, to_pascal, to_rust_field};
-use crate::spec::{AdditionalProperties, Method, Param, Schema, SchemaType, Spec};
+use crate::spec::{AdditionalProperties, Items, Method, Param, Schema, SchemaType, Spec};
 
 const DERIVES: &str = "#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]\n\
      #[cfg_attr(feature = \"serde-deny-unknown-fields\", serde(deny_unknown_fields))]";
@@ -415,12 +416,111 @@ pub(crate) fn return_type_ident(method: &Method) -> String {
     safe_type_name(&method_to_pascal(&method.name))
 }
 
+/// A few RPC results come out of Core's dump in shapes the schema can't express as-is (or with
+/// information Core omits entirely). Rather than a separate pre-pass over the JSON, the fix is
+/// applied here, at the one point the result schema is read, by rewriting the parsed [`Schema`]
+/// for the affected method. Everything else borrows its schema untouched.
+fn result_schema(method: &Method) -> Cow<'_, Schema> {
+    let s = &method.result.schema;
+    match method.name.as_str() {
+        // `deriveaddresses`: the dump models the result as a `oneOf` over `string[]` (single
+        // derivation) and `string[][]` (multipath), which the generator can't express. The flat
+        // `string[]` shape is what the client consumes.
+        "deriveaddresses" if s.one_of.is_some() => {
+            let mut fixed = s.clone();
+            fixed.one_of = None;
+            fixed.any_of = None;
+            fixed.kind = Some(SchemaType::One("array".to_owned()));
+            fixed.items = Some(Items::Single(Box::new(Schema {
+                kind: Some(SchemaType::One("string".to_owned())),
+                ..Schema::default()
+            })));
+            fixed.description = Some("the derived addresses".to_owned());
+            Cow::Owned(fixed)
+        }
+        // `getrawaddrman`: the dump models the two address-manager tables as a generic map-of-maps
+        // and omits the key names; Core only ever returns `new` and `tried`, read as named fields.
+        "getrawaddrman" => match (&s.additional_properties, s.has_props()) {
+            (Some(AdditionalProperties::Schema(table)), false) => {
+                let named = |desc: &str| {
+                    let mut v = serde_json::to_value(&**table).unwrap_or(serde_json::Value::Null);
+                    if let Some(obj) = v.as_object_mut() {
+                        obj.insert("description".to_owned(), desc.into());
+                    }
+                    v
+                };
+                let mut props = serde_json::Map::new();
+                props.insert(
+                    "new".to_owned(),
+                    named("addresses in the \"new\" table, keyed by bucket/position"),
+                );
+                props.insert(
+                    "tried".to_owned(),
+                    named("addresses in the \"tried\" table, keyed by bucket/position"),
+                );
+                Cow::Owned(Schema {
+                    kind: Some(SchemaType::One("object".to_owned())),
+                    properties: Some(props),
+                    required: Some(vec!["new".to_owned(), "tried".to_owned()]),
+                    additional_properties: Some(AdditionalProperties::Bool(false)),
+                    description: s.description.clone(),
+                    ..Schema::default()
+                })
+            }
+            _ => Cow::Borrowed(s),
+        },
+        // `estimaterawfee`: the dump details only the `short` horizon and leaves `short.fail`,
+        // `medium` and `long` as empty objects ("same fields as ..." in Core's docs). All horizons
+        // share one shape, so mirror `pass` onto `fail` and the full `short` onto the others.
+        "estimaterawfee" if s.properties.is_some() => {
+            let mut fixed = s.clone();
+            fill_fee_horizons(fixed.properties.as_mut().expect("checked is_some"));
+            Cow::Owned(fixed)
+        }
+        _ => Cow::Borrowed(s),
+    }
+}
+
+/// Fill `estimaterawfee`'s empty horizon sub-schemas from `short` (see [`result_schema`]).
+fn fill_fee_horizons(horizons: &mut serde_json::Map<String, serde_json::Value>) {
+    let horizon_empty = |v: &serde_json::Value| {
+        v.get("properties").and_then(|p| p.as_object()).is_none_or(|p| p.is_empty())
+    };
+    let carry_desc = |mut schema: serde_json::Value, from: &serde_json::Value| {
+        if let (Some(d), Some(obj)) = (from.get("description").cloned(), schema.as_object_mut()) {
+            obj.insert("description".to_owned(), d);
+        }
+        schema
+    };
+    if let Some(short) = horizons.get_mut("short") {
+        if let Some(props) = short.get_mut("properties").and_then(|p| p.as_object_mut()) {
+            if let Some(pass) = props.get("pass").cloned() {
+                if let Some(fail) = props.get_mut("fail") {
+                    if horizon_empty(fail) && pass.get("properties").is_some() {
+                        *fail = carry_desc(pass, fail);
+                    }
+                }
+            }
+        }
+    }
+    let Some(short) = horizons.get("short").cloned() else { return };
+    if short.get("properties").is_some() {
+        for name in ["medium", "long"] {
+            if let Some(horizon) = horizons.get_mut(name) {
+                if horizon_empty(horizon) {
+                    *horizon = carry_desc(short.clone(), horizon);
+                }
+            }
+        }
+    }
+}
+
 /// Generate the top-level return type for a method, or `None` if the method returns null.
 pub(crate) fn generate_return_type(
     method: &Method,
     seen: &mut BTreeSet<String>,
 ) -> Option<GenType> {
-    let s = &method.result.schema;
+    let s = &result_schema(method);
     if s.returns_null() {
         return None;
     }

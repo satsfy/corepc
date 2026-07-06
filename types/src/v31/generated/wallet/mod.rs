@@ -10,6 +10,8 @@
 
 mod into;
 
+use serde::{Deserialize, Serialize};
+
 pub use self::into::{
     AddressInformationError, BumpFeeError, GetAddressInfoEmbeddedError, GetAddressInfoError,
     GetAddressesByLabelError, GetBalanceError, GetBalancesError, GetBalancesMineError,
@@ -25,8 +27,6 @@ pub use self::into::{
     WalletCreateFundedPsbtError, WalletDisplayAddressError, WalletProcessPsbtError,
 };
 
-use serde::{Deserialize, Serialize};
-
 /// Result of the JSON-RPC method `abortrescan`.
 ///
 /// > abortrescan
@@ -39,9 +39,7 @@ pub struct AbortRescan(pub bool);
 
 impl std::ops::Deref for AbortRescan {
     type Target = bool;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Bumps the fee of a transaction T, replacing it with a new transaction B.
@@ -110,9 +108,7 @@ pub struct EncryptWallet(pub String);
 
 impl std::ops::Deref for EncryptWallet {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Return information about the given bitcoin address.
@@ -281,9 +277,7 @@ pub struct GetBalance(pub f64);
 
 impl std::ops::Deref for GetBalance {
     type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Returns an object with all balances in BTC.
@@ -367,9 +361,7 @@ pub struct GetNewAddress(pub String);
 
 impl std::ops::Deref for GetNewAddress {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `getrawchangeaddress`.
@@ -384,9 +376,7 @@ pub struct GetRawChangeAddress(pub String);
 
 impl std::ops::Deref for GetRawChangeAddress {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `getreceivedbyaddress`.
@@ -400,9 +390,7 @@ pub struct GetReceivedByAddress(pub f64);
 
 impl std::ops::Deref for GetReceivedByAddress {
     type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Result of the JSON-RPC method `getreceivedbylabel`.
@@ -416,9 +404,7 @@ pub struct GetReceivedByLabel(pub f64);
 
 impl std::ops::Deref for GetReceivedByLabel {
     type Target = f64;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Get detailed information about in-wallet transaction \<txid\>
@@ -1148,9 +1134,7 @@ pub struct LockUnspent(pub bool);
 
 impl std::ops::Deref for LockUnspent {
     type Target = bool;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Migrate the wallet to a descriptor wallet.
@@ -1260,9 +1244,7 @@ pub struct SendManyVerbose0(pub String);
 
 impl std::ops::Deref for SendManyVerbose0 {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Send multiple times. Amounts are double-precision floating point numbers.
@@ -1304,16 +1286,12 @@ pub struct SendToAddressVerbose0(pub String);
 
 impl std::ops::Deref for SendToAddressVerbose0 {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 impl SendToAddressVerbose0 {
     /// Converts json straight to a `bitcoin::Txid`.
-    pub fn txid(&self) -> Result<bitcoin::Txid, bitcoin::hex::HexToArrayError> {
-        self.0.parse()
-    }
+    pub fn txid(&self) -> Result<bitcoin::Txid, bitcoin::hex::HexToArrayError> { self.0.parse() }
 }
 
 /// Send an amount to a given address.
@@ -1352,9 +1330,7 @@ pub struct SignMessage(pub String);
 
 impl std::ops::Deref for SignMessage {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Sign inputs for raw transaction (serialized, hex-encoded).

@@ -10,7 +10,6 @@ mod codegen;
 mod into_model;
 mod names;
 mod spec;
-mod supplement;
 
 use std::fs;
 use std::path::Path;
@@ -28,9 +27,8 @@ pub fn generate(
 ) -> Result<Summary, String> {
     let raw =
         fs::read_to_string(spec_path).map_err(|e| format!("read {}: {e}", spec_path.display()))?;
-    let mut json: serde_json::Value =
+    let json: serde_json::Value =
         serde_json::from_str(&raw).map_err(|e| format!("parse {}: {e}", spec_path.display()))?;
-    supplement::apply(&mut json);
     let spec: Spec = serde_json::from_value(json)
         .map_err(|e| format!("lower {}: {e}", spec_path.display()))?;
 

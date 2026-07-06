@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -240,9 +239,7 @@ impl std::error::Error for RawFeeDetailError {
 }
 
 impl From<crate::NumericError> for RawFeeDetailError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl EstimateRawFeeShortFail {
@@ -282,16 +279,12 @@ impl EstimateRawFeeShortPass {
 pub enum RawFeeRangeError {}
 
 impl fmt::Display for RawFeeRangeError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for RawFeeRangeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
-    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
 }
 
 impl Generate {
@@ -311,16 +304,12 @@ impl Generate {
 pub enum GenerateError {}
 
 impl fmt::Display for GenerateError {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {}
-    }
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result { match *self {} }
 }
 
 #[cfg(feature = "std")]
 impl std::error::Error for GenerateError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match *self {}
-    }
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> { match *self {} }
 }
 
 impl GenerateBlock {
@@ -524,9 +513,7 @@ impl std::error::Error for FeerateDiagramEntryError {
 }
 
 impl From<crate::NumericError> for FeerateDiagramEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetOrphanTxsVerbose0 {
@@ -662,9 +649,7 @@ impl std::error::Error for GetOrphanTxsVerboseOneEntryError {
 }
 
 impl From<crate::NumericError> for GetOrphanTxsVerboseOneEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetOrphanTxsVerbose2 {
@@ -770,7 +755,5 @@ impl std::error::Error for GetOrphanTxsVerboseTwoEntryError {
 }
 
 impl From<crate::NumericError> for GetOrphanTxsVerboseTwoEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }

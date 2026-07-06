@@ -11,7 +11,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     AbortRescan, BumpFee, CreateWallet, CreateWalletDescriptor, EncryptWallet, GetAddressInfo,
     GetAddressesByLabel, GetBalance, GetBalances, GetHdKeys, GetNewAddress, GetRawChangeAddress,

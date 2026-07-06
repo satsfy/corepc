@@ -2,7 +2,7 @@
 
 //! Typed representation of the OpenRPC document fields used by codegen.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 /// Top-level OpenRPC document.
@@ -44,7 +44,7 @@ pub struct ResultObj {
 }
 
 /// A JSON Schema node. Only the fields needed by codegen are named; unknown keys are dropped.
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
 pub struct Schema {
     #[serde(rename = "type", default)]
     pub kind: Option<SchemaType>,
@@ -77,7 +77,7 @@ pub struct Schema {
 }
 
 /// JSON Schema `type`: either a single string or an array of strings.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum SchemaType {
     One(String),
@@ -95,7 +95,7 @@ impl SchemaType {
 }
 
 /// JSON Schema `additionalProperties`: either a schema object or a bool.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum AdditionalProperties {
     Schema(Box<Schema>),
@@ -103,7 +103,7 @@ pub enum AdditionalProperties {
 }
 
 /// JSON Schema `items`: a single schema or a tuple array.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Items {
     Single(Box<Schema>),

@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -95,9 +94,7 @@ impl std::error::Error for DumpTxOutSetError {
 }
 
 impl From<crate::NumericError> for DumpTxOutSetError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBestBlockHash {
@@ -135,9 +132,7 @@ impl std::error::Error for GetBestBlockHashError {
 
 impl GetBlockCount {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> model::GetBlockCount {
-        model::GetBlockCount(self.0)
-    }
+    pub fn into_model(self) -> model::GetBlockCount { model::GetBlockCount(self.0) }
 }
 
 impl GetBlockFilter {
@@ -342,9 +337,7 @@ impl std::error::Error for GetBlockHeaderVerboseError {
 }
 
 impl From<crate::NumericError> for GetBlockHeaderVerboseError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockStats {
@@ -479,9 +472,7 @@ impl std::error::Error for GetBlockStatsError {
 }
 
 impl From<crate::NumericError> for GetBlockStatsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose0 {
@@ -641,9 +632,7 @@ impl std::error::Error for GetBlockVerboseOneError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseOneError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose1CoinbaseTx {
@@ -689,9 +678,7 @@ impl std::error::Error for CoinbaseTransactionError {
 }
 
 impl From<crate::NumericError> for CoinbaseTransactionError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose2 {
@@ -815,9 +802,7 @@ impl std::error::Error for GetBlockVerboseTwoError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseTwoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose2CoinbaseTx {
@@ -1014,9 +999,7 @@ impl std::error::Error for GetBlockVerboseThreeError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreeError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose3CoinbaseTx {
@@ -1160,9 +1143,7 @@ impl std::error::Error for GetBlockVerboseThreePrevoutError {
 }
 
 impl From<crate::NumericError> for GetBlockVerboseThreePrevoutError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetBlockVerbose3TxItemVinItemPrevoutScriptPubKey {
@@ -1305,9 +1286,7 @@ impl std::error::Error for GetBlockchainInfoError {
 }
 
 impl From<crate::NumericError> for GetBlockchainInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainStates {
@@ -1357,9 +1336,7 @@ impl std::error::Error for GetChainStatesError {
 }
 
 impl From<crate::NumericError> for GetChainStatesError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainStatesChainStatesItem {
@@ -1431,9 +1408,7 @@ impl std::error::Error for ChainStateError {
 }
 
 impl From<crate::NumericError> for ChainStateError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainTips {
@@ -1524,9 +1499,7 @@ impl std::error::Error for ChainTipsError {
 }
 
 impl From<crate::NumericError> for ChainTipsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetChainTxStats {
@@ -1604,9 +1577,7 @@ impl std::error::Error for GetChainTxStatsError {
 }
 
 impl From<crate::NumericError> for GetChainTxStatsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfo {
@@ -1662,9 +1633,7 @@ impl std::error::Error for GetDeploymentInfoError {
 }
 
 impl From<crate::NumericError> for GetDeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeployments {
@@ -1710,9 +1679,7 @@ impl std::error::Error for DeploymentInfoError {
 }
 
 impl From<crate::NumericError> for DeploymentInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeploymentsBip9 {
@@ -1780,9 +1747,7 @@ impl std::error::Error for Bip9InfoError {
 }
 
 impl From<crate::NumericError> for Bip9InfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDeploymentInfoDeploymentsBip9Statistics {
@@ -1825,9 +1790,7 @@ impl std::error::Error for Bip9StatisticsError {
 }
 
 impl From<crate::NumericError> for Bip9StatisticsError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivity {
@@ -1875,12 +1838,10 @@ impl GetDescriptorActivityActivity {
         use ActivityEntryError as E;
 
         Ok(match self {
-            GetDescriptorActivityActivity::Object(x) => {
-                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?)
-            }
-            GetDescriptorActivityActivity::Object2(x) => {
-                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?)
-            }
+            GetDescriptorActivityActivity::Object(x) =>
+                model::ActivityEntry::Spend(x.into_model().map_err(E::Spend)?),
+            GetDescriptorActivityActivity::Object2(x) =>
+                model::ActivityEntry::Receive(x.into_model().map_err(E::Receive)?),
         })
     }
 }
@@ -1988,9 +1949,7 @@ impl std::error::Error for SpendActivityError {
 }
 
 impl From<crate::NumericError> for SpendActivityError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivityActivityVariant0PrevoutSpk {
@@ -2076,9 +2035,7 @@ impl std::error::Error for ReceiveActivityError {
 }
 
 impl From<crate::NumericError> for ReceiveActivityError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetDescriptorActivityActivityVariant1OutputSpk {
@@ -2101,9 +2058,7 @@ impl GetDescriptorActivityActivityVariant1OutputSpk {
 
 impl GetDifficulty {
     /// Converts the raw type into the version-nonspecific model type.
-    pub fn into_model(self) -> model::GetDifficulty {
-        model::GetDifficulty(self.0)
-    }
+    pub fn into_model(self) -> model::GetDifficulty { model::GetDifficulty(self.0) }
 }
 
 impl GetMempoolAncestorsVerbose0 {
@@ -2290,9 +2245,7 @@ impl std::error::Error for MempoolEntryError {
 }
 
 impl From<crate::NumericError> for MempoolEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolAncestorsVerbose1EntryFees {
@@ -2356,9 +2309,7 @@ impl std::error::Error for GetMempoolClusterError {
 }
 
 impl From<crate::NumericError> for GetMempoolClusterError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolClusterChunksItem {
@@ -2411,9 +2362,7 @@ impl std::error::Error for ChunkError {
 }
 
 impl From<crate::NumericError> for ChunkError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolDescendantsVerbose0 {
@@ -2669,9 +2618,7 @@ impl std::error::Error for GetMempoolEntryError {
 }
 
 impl From<crate::NumericError> for GetMempoolEntryError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetMempoolEntryFees {
@@ -2821,9 +2768,7 @@ impl std::error::Error for GetMempoolInfoError {
 }
 
 impl From<crate::NumericError> for GetMempoolInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetRawMempoolVerbose0 {
@@ -3125,9 +3070,7 @@ impl std::error::Error for GetTxOutSetInfoError {
 }
 
 impl From<crate::NumericError> for GetTxOutSetInfoError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTxOutSetInfoBlockInfo {
@@ -3324,9 +3267,7 @@ impl std::error::Error for GetTxOutError {
 }
 
 impl From<crate::NumericError> for GetTxOutError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl GetTxSpendingPrevout {
@@ -3447,9 +3388,7 @@ impl std::error::Error for GetTxSpendingPrevoutItemError {
 }
 
 impl From<crate::NumericError> for GetTxSpendingPrevoutItemError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl LoadTxOutSet {
@@ -3497,9 +3436,7 @@ impl std::error::Error for LoadTxOutSetError {
 }
 
 impl From<crate::NumericError> for LoadTxOutSetError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanBlocksVariant1 {
@@ -3551,9 +3488,7 @@ impl std::error::Error for ScanBlocksStartError {
 }
 
 impl From<crate::NumericError> for ScanBlocksStartError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanTxOutSetVariant0 {
@@ -3617,9 +3552,7 @@ impl std::error::Error for ScanTxOutSetStartError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetStartError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl ScanTxOutSetVariant0UnspentsItem {
@@ -3686,9 +3619,7 @@ impl std::error::Error for ScanTxOutSetUnspentError {
 }
 
 impl From<crate::NumericError> for ScanTxOutSetUnspentError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl VerifyTxOutProof {
@@ -3770,9 +3701,7 @@ impl std::error::Error for WaitForBlockError {
 }
 
 impl From<crate::NumericError> for WaitForBlockError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl WaitForBlockHeight {
@@ -3816,9 +3745,7 @@ impl std::error::Error for WaitForBlockHeightError {
 }
 
 impl From<crate::NumericError> for WaitForBlockHeightError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl WaitForNewBlock {
@@ -3862,7 +3789,5 @@ impl std::error::Error for WaitForNewBlockError {
 }
 
 impl From<crate::NumericError> for WaitForNewBlockError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }

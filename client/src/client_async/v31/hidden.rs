@@ -11,7 +11,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     AddConnection, AddPeerAddress, Echo, EchoIpc, EchoJson, EstimateRawFee, Generate,
     GenerateBlock, GenerateToAddress, GenerateToDescriptor, GetMempoolFeeRateDiagram,
@@ -148,9 +147,7 @@ impl Client {
     /// It will return an internal bug report when arg9='trigger_internal_bug' is passed.
     ///
     /// The difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.
-    pub async fn echo(&self) -> Result<Echo> {
-        self.call_raw("echo", &[(); 0] as &[()]).await
-    }
+    pub async fn echo(&self) -> Result<Echo> { self.call_raw("echo", &[(); 0] as &[()]).await }
 
     /// `echo` with all optional arguments via [`EchoOptions`].
     ///

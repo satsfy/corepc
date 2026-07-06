@@ -10,6 +10,8 @@
 
 mod into;
 
+use serde::{Deserialize, Serialize};
+
 pub use self::into::{
     EstimateRawFeeError, FeerateDiagramEntryError, GenerateBlockError, GenerateError,
     GenerateToAddressError, GenerateToDescriptorError, GetMempoolFeerateDiagramError,
@@ -17,8 +19,6 @@ pub use self::into::{
     GetOrphanTxsVerboseTwoEntryError, GetOrphanTxsVerboseTwoError, RawFeeDetailError,
     RawFeeRangeError,
 };
-
-use serde::{Deserialize, Serialize};
 
 /// Open an outbound connection to a specified node. This RPC is for testing only.
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -62,9 +62,7 @@ pub struct EchoIpc(pub String);
 
 impl std::ops::Deref for EchoIpc {
     type Target = String;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 /// Simply echo back the input arguments. This command is for testing.

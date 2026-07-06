@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -165,9 +164,7 @@ impl std::error::Error for EstimateSmartFeeError {
 }
 
 impl From<crate::NumericError> for EstimateSmartFeeError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SignMessageWithPrivKey {
@@ -321,7 +318,5 @@ impl std::error::Error for ValidateAddressError {
 }
 
 impl From<crate::NumericError> for ValidateAddressError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }

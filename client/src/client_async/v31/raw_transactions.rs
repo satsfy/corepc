@@ -11,7 +11,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     AbortPrivateBroadcast, AnalyzePsbt, CombinePsbt, CombineRawTransaction, ConvertToPsbt,
     CreatePsbt, CreateRawTransaction, DecodePsbt, DecodeRawTransaction, DecodeScript,

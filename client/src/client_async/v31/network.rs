@@ -11,7 +11,6 @@
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-
 use types::v31::generated::{
     GetAddedNodeInfo, GetAddrManInfo, GetConnectionCount, GetNetTotals, GetNetworkInfo,
     GetNodeAddresses, GetPeerInfo, ListBanned, SetNetworkActive,
@@ -217,9 +216,7 @@ impl Client {
     /// Requests that a ping be sent to all other nodes, to measure ping time.
     /// Results are provided in getpeerinfo.
     /// Ping command is handled in queue with all other commands, so it measures processing backlog, not just network ping.
-    pub async fn ping(&self) -> Result<()> {
-        self.call_raw("ping", &[(); 0] as &[()]).await
-    }
+    pub async fn ping(&self) -> Result<()> { self.call_raw("ping", &[(); 0] as &[()]).await }
 
     /// `setban` with required arguments only.
     ///

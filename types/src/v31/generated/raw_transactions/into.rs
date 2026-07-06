@@ -21,12 +21,11 @@ use bitcoin::error::UnprefixedHexError;
 use bitcoin::hashes::{hash160, sha256};
 use bitcoin::hex::FromHex as _;
 use bitcoin::key::{self, PrivateKey, PublicKey};
-use bitcoin::sign_message;
 use bitcoin::{
-    amount, block, hex, network, psbt, witness_program, witness_version, Address, Amount, Block,
-    BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence, SignedAmount,
-    Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram, WitnessVersion, Work,
-    Wtxid,
+    amount, block, hex, network, psbt, sign_message, witness_program, witness_version, Address,
+    Amount, Block, BlockHash, CompactTarget, FeeRate, Network, OutPoint, Psbt, ScriptBuf, Sequence,
+    SignedAmount, Target, Transaction, TxMerkleNode, TxOut, Txid, Weight, WitnessProgram,
+    WitnessVersion, Work, Wtxid,
 };
 
 use super::*;
@@ -146,9 +145,7 @@ impl std::error::Error for AnalyzePsbtError {
 }
 
 impl From<crate::NumericError> for AnalyzePsbtError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl AnalyzePsbtInputsItem {
@@ -840,9 +837,7 @@ impl std::error::Error for GetRawTransactionVerboseError {
 }
 
 impl From<crate::NumericError> for GetRawTransactionVerboseError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl JoinPsbts {
@@ -1007,9 +1002,7 @@ impl std::error::Error for SignFailError {
 }
 
 impl From<crate::NumericError> for SignFailError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SubmitPackage {
@@ -1135,9 +1128,7 @@ impl std::error::Error for SubmitPackageTxResultError {
 }
 
 impl From<crate::NumericError> for SubmitPackageTxResultError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl SubmitPackageTxResultsFees {
@@ -1293,9 +1284,7 @@ impl std::error::Error for MempoolAcceptanceError {
 }
 
 impl From<crate::NumericError> for MempoolAcceptanceError {
-    fn from(e: crate::NumericError) -> Self {
-        Self::Numeric(e)
-    }
+    fn from(e: crate::NumericError) -> Self { Self::Numeric(e) }
 }
 
 impl TestMempoolAcceptItemFees {
