@@ -36,6 +36,33 @@
       "x-bitcoin-help": "abortrescan\n\nStops current wallet rescan triggered by an RPC call, e.g. by an importprivkey call.\nNote: Use \"getwalletinfo\" to query the scanning progress.\n\nResult:\ntrue|false    (boolean) Whether the abort was successful\n\nExamples:\n\nImport a private key\n> bitcoin-cli importprivkey \"mykey\"\n\nAbort the running wallet rescan\n> bitcoin-cli abortrescan \n\nAs a JSON-RPC call\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"abortrescan\", \"params\": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "addconnection",
+      "description": "Open an outbound connection to a specified node. This RPC is for testing only.",
+      "params": [
+        {
+          "name": "address",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The IP address and port to attempt connecting to."
+        },
+        {
+          "name": "connection_type",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Type of connection to open (\"outbound-full-relay\", \"block-relay-only\" or \"addr-fetch\")."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "addconnection \"address\" \"connection_type\"\n\nOpen an outbound connection to a specified node. This RPC is for testing only.\n\nArguments:\n1. address            (string, required) The IP address and port to attempt connecting to.\n2. connection_type    (string, required) Type of connection to open (\"outbound-full-relay\", \"block-relay-only\" or \"addr-fetch\").\n\nResult:\n{                               (json object)\n  \"address\" : \"str\",            (string) Address of newly added connection.\n  \"connection_type\" : \"str\"     (string) Type of connection opened.\n}\n\nExamples:\n> bitcoin-cli addconnection \"192.168.0.6:8333\" \"outbound-full-relay\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"addconnection\", \"params\": [\"192.168.0.6:8333\" \"outbound-full-relay\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "addmultisigaddress",
       "description": "Add an nrequired-to-sign multisignature address to the wallet. Requires a new wallet backup.\nEach key is a Bitcoin address or hex-encoded public key.\nThis functionality is only intended for use with non-watchonly addresses.\nSee `importaddress` for watchonly p2sh address support.\nIf 'label' is specified, assign address to that label.",
       "params": [
@@ -104,6 +131,33 @@
         "schema": {}
       },
       "x-bitcoin-help": "addnode \"node\" \"command\"\n\nAttempts to add or remove a node from the addnode list.\nOr try a connection to a node once.\nNodes added using addnode (or -connect) are protected from DoS disconnection and are not required to be\nfull nodes/support SegWit as other outbound peers are (though such peers will not be synced from).\nAddnode connections are limited to 8 at a time and are counted separately from the -maxconnections limit.\n\nArguments:\n1. node       (string, required) The node (see getpeerinfo for nodes)\n2. command    (string, required) 'add' to add a node to the list, 'remove' to remove a node from the list, 'onetry' to try a connection to the node once\n\nResult:\nnull    (json null)\n\nExamples:\n> bitcoin-cli addnode \"192.168.0.6:8333\" \"onetry\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"addnode\", \"params\": [\"192.168.0.6:8333\", \"onetry\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "addpeeraddress",
+      "description": "Add the address of a potential peer to the address manager. This RPC is for testing only.",
+      "params": [
+        {
+          "name": "address",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The IP address of the peer"
+        },
+        {
+          "name": "port",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "The port of the peer"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "addpeeraddress \"address\" port\n\nAdd the address of a potential peer to the address manager. This RPC is for testing only.\n\nArguments:\n1. address    (string, required) The IP address of the peer\n2. port       (numeric, required) The port of the peer\n\nResult:\n{                            (json object)\n  \"success\" : true|false     (boolean) whether the peer address was successfully added to the address manager\n}\n\nExamples:\n> bitcoin-cli addpeeraddress \"1.2.3.4\" 8333\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"addpeeraddress\", \"params\": [\"1.2.3.4\", 8333]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
       "name": "analyzepsbt",
@@ -606,6 +660,187 @@
       "x-bitcoin-help": "dumpwallet \"filename\"\n\nDumps all wallet keys in a human-readable format to a server-side file. This does not allow overwriting existing files.\nImported scripts are included in the dumpfile, but corresponding BIP173 addresses, etc. may not be added automatically by importwallet.\nNote that if your wallet contains keys which are not derived from your HD seed (e.g. imported keys), these are not covered by\nonly backing up the seed itself, and must be backed up too (e.g. ensure you back up the whole dumpfile).\n\nArguments:\n1. filename    (string, required) The filename with path (absolute path recommended)\n\nResult:\n{                        (json object)\n  \"filename\" : \"str\"     (string) The filename with full absolute path\n}\n\nExamples:\n> bitcoin-cli dumpwallet \"test\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"dumpwallet\", \"params\": [\"test\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "echo",
+      "description": "Simply echo back the input arguments. This command is for testing.\n\nIt will return an internal bug report when arg9='trigger_internal_bug' is passed.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.",
+      "params": [
+        {
+          "name": "arg0",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg1",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg2",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg3",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg4",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg5",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg6",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg7",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg8",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg9",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "echo ( \"arg0\" \"arg1\" \"arg2\" \"arg3\" \"arg4\" \"arg5\" \"arg6\" \"arg7\" \"arg8\" \"arg9\" )\n\nSimply echo back the input arguments. This command is for testing.\n\nIt will return an internal bug report when arg9='trigger_internal_bug' is passed.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.\nArguments:\n1. arg0     (string, optional)\n2. arg1     (string, optional)\n3. arg2     (string, optional)\n4. arg3     (string, optional)\n5. arg4     (string, optional)\n6. arg5     (string, optional)\n7. arg6     (string, optional)\n8. arg7     (string, optional)\n9. arg8     (string, optional)\n10. arg9    (string, optional)\n"
+    },
+    {
+      "name": "echoipc",
+      "description": "Echo back the input argument, passing it through a spawned process in a multiprocess build.\nThis command is for testing.",
+      "params": [
+        {
+          "name": "arg",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "The string to echo"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "echoipc \"arg\"\n\nEcho back the input argument, passing it through a spawned process in a multiprocess build.\nThis command is for testing.\n\nArguments:\n1. arg    (string, required) The string to echo\n\nResult:\n\"str\"    (string) The echoed string.\n\nExamples:\n> bitcoin-cli echo \"Hello world\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"echo\", \"params\": [\"Hello world\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "echojson",
+      "description": "Simply echo back the input arguments. This command is for testing.\n\nIt will return an internal bug report when arg9='trigger_internal_bug' is passed.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.",
+      "params": [
+        {
+          "name": "arg0",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg1",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg2",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg3",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg4",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg5",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg6",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg7",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg8",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "arg9",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "echojson ( \"arg0\" \"arg1\" \"arg2\" \"arg3\" \"arg4\" \"arg5\" \"arg6\" \"arg7\" \"arg8\" \"arg9\" )\n\nSimply echo back the input arguments. This command is for testing.\n\nIt will return an internal bug report when arg9='trigger_internal_bug' is passed.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.\nArguments:\n1. arg0     (string, optional)\n2. arg1     (string, optional)\n3. arg2     (string, optional)\n4. arg3     (string, optional)\n5. arg4     (string, optional)\n6. arg5     (string, optional)\n7. arg6     (string, optional)\n8. arg7     (string, optional)\n9. arg8     (string, optional)\n10. arg9    (string, optional)\n"
+    },
+    {
       "name": "encryptwallet",
       "description": "Encrypts the wallet with 'passphrase'. This is for first time encryption.\nAfter this, any calls that interact with private keys such as sending or signing \nwill require the passphrase to be set prior the making these calls.\nUse the walletpassphrase call for this, and then walletlock call.\nIf the wallet is already encrypted, use the walletpassphrasechange call.",
       "params": [
@@ -722,6 +957,16 @@
         "schema": {}
       },
       "x-bitcoin-help": "fundrawtransaction \"hexstring\" ( options iswitness )\n\nIf the transaction has no inputs, they will be automatically selected to meet its out value.\nIt will add at most one change output to the outputs.\nNo existing outputs will be modified unless \"subtractFeeFromOutputs\" is specified.\nNote that inputs which were signed may need to be resigned after completion since in/outputs have been added.\nThe inputs added will not be signed, use signrawtransactionwithkey\n or signrawtransactionwithwallet for that.\nNote that all existing inputs must have their previous output transaction be in the wallet.\nNote that all inputs selected must be of standard form and P2SH scripts must be\nin the wallet using importaddress or addmultisigaddress (to calculate fees).\nYou can see whether this is the case by checking the \"solvable\" field in the listunspent output.\nOnly pay-to-pubkey, multisig, and P2SH versions thereof are currently supported for watch-only\n\nArguments:\n1. hexstring                          (string, required) The hex string of the raw transaction\n2. options                            (json object, optional) for backward compatibility: passing in a true instead of an object will result in {\"includeWatching\":true}\n     {\n       \"add_inputs\": bool,            (boolean, optional, default=true) For a transaction with existing inputs, automatically include more if they are not enough.\n       \"include_unsafe\": bool,        (boolean, optional, default=false) Include inputs that are not safe to spend (unconfirmed transactions from outside keys and unconfirmed replacement transactions).\n                                      Warning: the resulting transaction may become invalid if one of the unsafe inputs disappears.\n                                      If that happens, you will need to fund the transaction with different inputs and republish it.\n       \"changeAddress\": \"str\",        (string, optional, default=pool address) The bitcoin address to receive the change\n       \"changePosition\": n,           (numeric, optional, default=random) The index of the change output\n       \"change_type\": \"str\",          (string, optional, default=set by -changetype) The output type to use. Only valid if changeAddress is not specified. Options are \"legacy\", \"p2sh-segwit\", and \"bech32\".\n       \"includeWatching\": bool,       (boolean, optional, default=true for watch-only wallets, otherwise false) Also select inputs which are watch only.\n                                      Only solvable inputs can be used. Watch-only destinations are solvable if the public key and/or output script was imported,\n                                      e.g. with 'importpubkey' or 'importmulti' with the 'pubkeys' or 'desc' field.\n       \"lockUnspents\": bool,          (boolean, optional, default=false) Lock selected unspent outputs\n       \"fee_rate\": amount,            (numeric or string, optional, default=not set, fall back to wallet fee estimation) Specify a fee rate in sat/vB.\n       \"feeRate\": amount,             (numeric or string, optional, default=not set, fall back to wallet fee estimation) Specify a fee rate in BTC/kvB.\n       \"subtractFeeFromOutputs\": [    (json array, optional, default=[]) The integers.\n                                      The fee will be equally deducted from the amount of each specified output.\n                                      Those recipients will receive less bitcoins than you enter in their corresponding amount field.\n                                      If no outputs are specified here, the sender pays the fee.\n         vout_index,                  (numeric) The zero-based output index, before a change output is added.\n         ...\n       ],\n       \"replaceable\": bool,           (boolean, optional, default=wallet default) Marks this transaction as BIP125 replaceable.\n                                      Allows this transaction to be replaced by a transaction with higher fees\n       \"conf_target\": n,              (numeric, optional, default=wallet -txconfirmtarget) Confirmation target in blocks\n       \"estimate_mode\": \"str\",        (string, optional, default=\"unset\") The fee estimate mode, must be one of (case insensitive):\n                                      \"unset\"\n                                      \"economical\"\n                                      \"conservative\"\n     }\n3. iswitness                          (boolean, optional, default=depends on heuristic tests) Whether the transaction hex is a serialized witness transaction.\n                                      If iswitness is not present, heuristic tests will be used in decoding.\n                                      If true, only witness deserialization will be tried.\n                                      If false, only non-witness deserialization will be tried.\n                                      This boolean should reflect whether the transaction has inputs\n                                      (e.g. fully valid, or on-chain transactions), if known by the caller.\n\nResult:\n{                     (json object)\n  \"hex\" : \"hex\",      (string) The resulting raw transaction (hex-encoded string)\n  \"fee\" : n,          (numeric) Fee in BTC the resulting transaction pays\n  \"changepos\" : n     (numeric) The position of the added change output, or -1\n}\n\nExamples:\n\nCreate a transaction with no inputs\n> bitcoin-cli createrawtransaction \"[]\" \"{\\\"myaddress\\\":0.01}\"\n\nAdd sufficient unsigned inputs to meet the output value\n> bitcoin-cli fundrawtransaction \"rawtransactionhex\"\n\nSign the transaction\n> bitcoin-cli signrawtransactionwithwallet \"fundedtransactionhex\"\n\nSend the transaction\n> bitcoin-cli sendrawtransaction \"signedtransactionhex\"\n"
+    },
+    {
+      "name": "generate",
+      "description": "has been replaced by the -generate cli option. Refer to -help for more information.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "generate\nhas been replaced by the -generate cli option. Refer to -help for more information."
     },
     {
       "name": "generateblock",
@@ -1945,6 +2190,25 @@
       "x-bitcoin-help": "importwallet \"filename\"\n\nImports keys from a wallet dump file (see dumpwallet). Requires a new wallet backup to include imported keys.\nNote: Use \"getwalletinfo\" to query the scanning progress.\n\nArguments:\n1. filename    (string, required) The wallet file\n\nResult:\nnull    (json null)\n\nExamples:\n\nDump the wallet\n> bitcoin-cli dumpwallet \"test\"\n\nImport the wallet\n> bitcoin-cli importwallet \"test\"\n\nImport using the json rpc call\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"importwallet\", \"params\": [\"test\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "invalidateblock",
+      "description": "Permanently marks a block as invalid, as if it violated a consensus rule.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "the hash of the block to mark as invalid"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "invalidateblock \"blockhash\"\n\nPermanently marks a block as invalid, as if it violated a consensus rule.\n\nArguments:\n1. blockhash    (string, required) the hash of the block to mark as invalid\n\nResult:\nnull    (json null)\n\nExamples:\n> bitcoin-cli invalidateblock \"blockhash\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"invalidateblock\", \"params\": [\"blockhash\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "joinpsbts",
       "description": "Joins multiple distinct PSBTs with different inputs and outputs into one PSBT with inputs and outputs from all of the PSBTs\nNo input in any of the PSBTs can be in more than one of the PSBTs.",
       "params": [
@@ -2358,6 +2622,25 @@
       "x-bitcoin-help": "logging ( [\"include_category\",...] [\"exclude_category\",...] )\nGets and sets the logging configuration.\nWhen called without an argument, returns the list of categories with status that are currently being debug logged or not.\nWhen called with arguments, adds or removes categories from debug logging and return the lists above.\nThe arguments are evaluated in order \"include\", \"exclude\".\nIf an item is both included and excluded, it will thus end up being excluded.\nThe valid logging categories are: net, tor, mempool, http, bench, zmq, walletdb, rpc, estimatefee, addrman, selectcoins, reindex, cmpctblock, rand, prune, proxy, mempoolrej, libevent, coindb, qt, leveldb, validation, i2p, ipc\nIn addition, the following are available as category names with special meanings:\n  - \"all\",  \"1\" : represent all logging categories.\n  - \"none\", \"0\" : even if other logging categories are specified, ignore all of them.\n\nArguments:\n1. include                    (json array, optional) The categories to add to debug logging\n     [\n       \"include_category\",    (string) the valid logging category\n       ...\n     ]\n2. exclude                    (json array, optional) The categories to remove from debug logging\n     [\n       \"exclude_category\",    (string) the valid logging category\n       ...\n     ]\n\nResult:\n{                             (json object) keys are the logging categories, and values indicates its status\n  \"category\" : true|false,    (boolean) if being debug logged or not. false:inactive, true:active\n  ...\n}\n\nExamples:\n> bitcoin-cli logging \"[\\\"all\\\"]\" \"[\\\"http\\\"]\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"logging\", \"params\": [[\"all\"], [\"libevent\"]]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "mockscheduler",
+      "description": "Bump the scheduler into the future (-regtest only)",
+      "params": [
+        {
+          "name": "delta_time",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Number of seconds to forward the scheduler into the future."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "mockscheduler delta_time\n\nBump the scheduler into the future (-regtest only)\n\nArguments:\n1. delta_time    (numeric, required) Number of seconds to forward the scheduler into the future.\n\nResult:\nnull    (json null)\n"
+    },
+    {
       "name": "ping",
       "description": "Requests that a ping be sent to all other nodes, to measure ping time.\nResults provided in getpeerinfo, pingtime and pingwait fields are decimal seconds.\nPing command is handled in queue with all other commands, so it measures processing backlog, not just network ping.",
       "params": [],
@@ -2465,6 +2748,25 @@
         "schema": {}
       },
       "x-bitcoin-help": "psbtbumpfee \"txid\" ( options )\n\nBumps the fee of an opt-in-RBF transaction T, replacing it with a new transaction B.\nReturns a PSBT instead of creating and signing a new transaction.\nAn opt-in RBF transaction with the given txid must be in the wallet.\nThe command will pay the additional fee by reducing change outputs or adding inputs when necessary.\nIt may add a new change output if one does not already exist.\nAll inputs in the original transaction will be included in the replacement transaction.\nThe command will fail if the wallet or mempool contains a transaction that spends one of T's outputs.\nBy default, the new fee will be calculated automatically using the estimatesmartfee RPC.\nThe user can specify a confirmation target for estimatesmartfee.\nAlternatively, the user can specify a fee rate in sat/vB for the new transaction.\nAt a minimum, the new fee rate must be high enough to pay an additional new relay fee (incrementalfee\nreturned by getnetworkinfo) to enter the node's mempool.\n* WARNING: before version 0.21, fee_rate was in BTC/kvB. As of 0.21, fee_rate is in sat/vB. *\n\nArguments:\n1. txid                           (string, required) The txid to be bumped\n2. options                        (json object, optional)\n     {\n       \"conf_target\": n,          (numeric, optional, default=wallet -txconfirmtarget) Confirmation target in blocks\n                                  \n       \"fee_rate\": amount,        (numeric or string, optional, default=not set, fall back to wallet fee estimation) \n                                  Specify a fee rate in sat/vB instead of relying on the built-in fee estimator.\n                                  Must be at least 1.000 sat/vB higher than the current transaction fee rate.\n                                  WARNING: before version 0.21, fee_rate was in BTC/kvB. As of 0.21, fee_rate is in sat/vB.\n                                  \n       \"replaceable\": bool,       (boolean, optional, default=true) Whether the new transaction should still be\n                                  marked bip-125 replaceable. If true, the sequence numbers in the transaction will\n                                  be left unchanged from the original. If false, any input sequence numbers in the\n                                  original transaction that were less than 0xfffffffe will be increased to 0xfffffffe\n                                  so the new transaction will not be explicitly bip-125 replaceable (though it may\n                                  still be replaceable in practice, for example if it has unconfirmed ancestors which\n                                  are replaceable).\n                                  \n       \"estimate_mode\": \"str\",    (string, optional, default=\"unset\") The fee estimate mode, must be one of (case insensitive):\n                                  \"unset\"\n                                  \"economical\"\n                                  \"conservative\"\n     }\n\nResult:\n{                    (json object)\n  \"psbt\" : \"str\",    (string) The base64-encoded unsigned PSBT of the new transaction.\n  \"origfee\" : n,     (numeric) The fee of the replaced transaction.\n  \"fee\" : n,         (numeric) The fee of the new transaction.\n  \"errors\" : [       (json array) Errors encountered during processing (may be empty).\n    \"str\",           (string)\n    ...\n  ]\n}\n\nExamples:\n\nBump the fee, get the new transaction's psbt\n> bitcoin-cli psbtbumpfee <txid>\n"
+    },
+    {
+      "name": "reconsiderblock",
+      "description": "Removes invalidity status of a block, its ancestors and its descendants, reconsider them for activation.\nThis can be used to undo the effects of invalidateblock.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "the hash of the block to reconsider"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "reconsiderblock \"blockhash\"\n\nRemoves invalidity status of a block, its ancestors and its descendants, reconsider them for activation.\nThis can be used to undo the effects of invalidateblock.\n\nArguments:\n1. blockhash    (string, required) the hash of the block to reconsider\n\nResult:\nnull    (json null)\n\nExamples:\n> bitcoin-cli reconsiderblock \"blockhash\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"reconsiderblock\", \"params\": [\"blockhash\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
       "name": "removeprunedfunds",
@@ -2914,6 +3216,25 @@
       "x-bitcoin-help": "setlabel \"address\" \"label\"\n\nSets the label associated with the given address.\n\nArguments:\n1. address    (string, required) The bitcoin address to be associated with a label.\n2. label      (string, required) The label to assign to the address.\n\nResult:\nnull    (json null)\n\nExamples:\n> bitcoin-cli setlabel \"bc1q09vm5lfy0j5reeulh4x5752q25uqqvz34hufdl\" \"tabby\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"setlabel\", \"params\": [\"bc1q09vm5lfy0j5reeulh4x5752q25uqqvz34hufdl\", \"tabby\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "setmocktime",
+      "description": "Set the local time to given timestamp (-regtest only)",
+      "params": [
+        {
+          "name": "timestamp",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "UNIX epoch time"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "setmocktime timestamp\n\nSet the local time to given timestamp (-regtest only)\n\nArguments:\n1. timestamp    (numeric, required) UNIX epoch time\n                Pass 0 to go back to using the system time.\n\nResult:\nnull    (json null)\n"
+    },
+    {
       "name": "setnetworkactive",
       "description": "Disable/enable all p2p network activity.",
       "params": [
@@ -3167,6 +3488,16 @@
       "x-bitcoin-help": "submitheader \"hexdata\"\n\nDecode the given hexdata as a header and submit it as a candidate chain tip if valid.\nThrows when the header is invalid.\n\nArguments:\n1. hexdata    (string, required) the hex-encoded block header data\n\nResult:\nnull    (json null) None\n\nExamples:\n> bitcoin-cli submitheader \"aabbcc\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"submitheader\", \"params\": [\"aabbcc\"]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "syncwithvalidationinterfacequeue",
+      "description": "Waits for the validation interface queue to catch up on everything that was there when we entered this function.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "syncwithvalidationinterfacequeue\n\nWaits for the validation interface queue to catch up on everything that was there when we entered this function.\n\nResult:\nnull    (json null)\n\nExamples:\n> bitcoin-cli syncwithvalidationinterfacequeue \n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"syncwithvalidationinterfacequeue\", \"params\": []}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "testmempoolaccept",
       "description": "Returns result of mempool acceptance tests indicating if raw transaction(s) (serialized, hex-encoded) would be accepted by mempool.\n\nIf multiple transactions are passed in, parents must come before children and package policies apply: the transactions cannot conflict with any mempool transactions or each other.\n\nIf one transaction fails, other transactions may not be fully validated (the 'allowed' key will be blank).\n\nThe maximum number of transactions allowed is 25.\n\nThis checks if transactions violate the consensus or policy rules.\n\nSee sendrawtransaction call.",
       "params": [
@@ -3375,6 +3706,79 @@
         "schema": {}
       },
       "x-bitcoin-help": "verifytxoutproof \"proof\"\n\nVerifies that a proof points to a transaction in a block, returning the transaction it commits to\nand throwing an RPC error if the block is not in our best chain\n\nArguments:\n1. proof    (string, required) The hex-encoded proof generated by gettxoutproof\n\nResult:\n[           (json array)\n  \"hex\",    (string) The txid(s) which the proof commits to, or empty array if the proof can not be validated.\n  ...\n]\n"
+    },
+    {
+      "name": "waitforblock",
+      "description": "Waits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Block hash to wait for."
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitforblock \"blockhash\" ( timeout )\n\nWaits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. blockhash    (string, required) Block hash to wait for.\n2. timeout      (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                    (json object)\n  \"hash\" : \"hex\",    (string) The blockhash\n  \"height\" : n       (numeric) Block height\n}\n\nExamples:\n> bitcoin-cli waitforblock \"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\" 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"waitforblock\", \"params\": [\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "waitforblockheight",
+      "description": "Waits for (at least) block height and returns the height and hash\nof the current tip.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "height",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Block height to wait for."
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitforblockheight height ( timeout )\n\nWaits for (at least) block height and returns the height and hash\nof the current tip.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. height     (numeric, required) Block height to wait for.\n2. timeout    (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                    (json object)\n  \"hash\" : \"hex\",    (string) The blockhash\n  \"height\" : n       (numeric) Block height\n}\n\nExamples:\n> bitcoin-cli waitforblockheight 100 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"waitforblockheight\", \"params\": [100, 1000]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "waitfornewblock",
+      "description": "Waits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitfornewblock ( timeout )\n\nWaits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. timeout    (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                    (json object)\n  \"hash\" : \"hex\",    (string) The blockhash\n  \"height\" : n       (numeric) Block height\n}\n\nExamples:\n> bitcoin-cli waitfornewblock 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\": \"curltest\", \"method\": \"waitfornewblock\", \"params\": [1000]}' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
       "name": "walletcreatefundedpsbt",

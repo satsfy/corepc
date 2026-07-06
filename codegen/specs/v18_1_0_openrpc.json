@@ -566,6 +566,26 @@
       "x-bitcoin-help": "dumpwallet \"filename\"\n\nDumps all wallet keys in a human-readable format to a server-side file. This does not allow overwriting existing files.\nImported scripts are included in the dumpfile, but corresponding BIP173 addresses, etc. may not be added automatically by importwallet.\nNote that if your wallet contains keys which are not derived from your HD seed (e.g. imported keys), these are not covered by\nonly backing up the seed itself, and must be backed up too (e.g. ensure you back up the whole dumpfile).\n\nArguments:\n1. filename    (string, required) The filename with path (either absolute or relative to bitcoind)\n\nResult:\n{                           (json object)\n  \"filename\" : {        (string) The filename with full absolute path\n}\n\nExamples:\n> bitcoin-cli dumpwallet \"test\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"dumpwallet\", \"params\": [\"test\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "echo",
+      "description": "Simply echo back the input arguments. This command is for testing.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "echo|echojson ...\n\nSimply echo back the input arguments. This command is for testing.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference."
+    },
+    {
+      "name": "echojson",
+      "description": "Simply echo back the input arguments. This command is for testing.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "echo|echojson ...\n\nSimply echo back the input arguments. This command is for testing.\n\nThe difference between echo and echojson is that echojson has argument conversion enabled in the client-side table in bitcoin-cli and the GUI. There is no server-side difference."
+    },
+    {
       "name": "encryptwallet",
       "description": "Encrypts the wallet with 'passphrase'. This is for first time encryption.\nAfter this, any calls that interact with private keys such as sending or signing \nwill require the passphrase to be set prior the making these calls.\nUse the walletpassphrase call for this, and then walletlock call.\nIf the wallet is already encrypted, use the walletpassphrasechange call.",
       "params": [
@@ -1728,6 +1748,25 @@
       "x-bitcoin-help": "importwallet \"filename\"\n\nImports keys from a wallet dump file (see dumpwallet). Requires a new wallet backup to include imported keys.\n\nArguments:\n1. filename    (string, required) The wallet file\n\nExamples:\n\nDump the wallet\n> bitcoin-cli dumpwallet \"test\"\n\nImport the wallet\n> bitcoin-cli importwallet \"test\"\n\nImport using the json rpc call\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"importwallet\", \"params\": [\"test\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "invalidateblock",
+      "description": "Permanently marks a block as invalid, as if it violated a consensus rule.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "the hash of the block to mark as invalid"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "invalidateblock \"blockhash\"\n\nPermanently marks a block as invalid, as if it violated a consensus rule.\n\nArguments:\n1. blockhash    (string, required) the hash of the block to mark as invalid\n\nExamples:\n> bitcoin-cli invalidateblock \"blockhash\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"invalidateblock\", \"params\": [\"blockhash\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "joinpsbts",
       "description": "Joins multiple distinct PSBTs with different inputs and outputs into one PSBT with inputs and outputs from all of the PSBTs\nNo input in any of the PSBTs can be in more than one of the PSBTs.",
       "params": [
@@ -2206,6 +2245,25 @@
       "x-bitcoin-help": "pruneblockchain height\n\nArguments:\n1. height    (numeric, required) The block height to prune up to. May be set to a discrete height, or a unix timestamp\n             to prune blocks whose block time is at least 2 hours older than the provided timestamp.\n\nResult:\nn    (numeric) Height of the last block pruned.\n\nExamples:\n> bitcoin-cli pruneblockchain 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"pruneblockchain\", \"params\": [1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "reconsiderblock",
+      "description": "Removes invalidity status of a block, its ancestors and its descendants, reconsider them for activation.\nThis can be used to undo the effects of invalidateblock.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "the hash of the block to reconsider"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "reconsiderblock \"blockhash\"\n\nRemoves invalidity status of a block, its ancestors and its descendants, reconsider them for activation.\nThis can be used to undo the effects of invalidateblock.\n\nArguments:\n1. blockhash    (string, required) the hash of the block to reconsider\n\nExamples:\n> bitcoin-cli reconsiderblock \"blockhash\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"reconsiderblock\", \"params\": [\"blockhash\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "removeprunedfunds",
       "description": "Deletes the specified transaction from the wallet. Meant for use with pruned wallets and as a companion to importprunedfunds. This will affect wallet balances.",
       "params": [
@@ -2563,6 +2621,25 @@
       "x-bitcoin-help": "setlabel \"address\" \"label\"\n\nSets the label associated with the given address.\n\nArguments:\n1. address    (string, required) The bitcoin address to be associated with a label.\n2. label      (string, required) The label to assign to the address.\n\nExamples:\n> bitcoin-cli setlabel \"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX\" \"tabby\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"setlabel\", \"params\": [\"1D1ZrZNe3JUo7ZycKEYQQiQAWd9y54F4XX\", \"tabby\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "setmocktime",
+      "description": "Set the local time to given timestamp (-regtest only)",
+      "params": [
+        {
+          "name": "timestamp",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Unix seconds-since-epoch timestamp"
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "setmocktime timestamp\n\nSet the local time to given timestamp (-regtest only)\n\nArguments:\n1. timestamp    (numeric, required) Unix seconds-since-epoch timestamp\n                Pass 0 to go back to using the system time.\n"
+    },
+    {
       "name": "setnetworkactive",
       "description": "Disable/enable all p2p network activity.",
       "params": [
@@ -2789,6 +2866,16 @@
       "x-bitcoin-help": "submitheader \"hexdata\"\n\nDecode the given hexdata as a header and submit it as a candidate chain tip if valid.\nThrows when the header is invalid.\n\nArguments:\n1. hexdata    (string, required) the hex-encoded block header data\n\nResult:\nNone\nExamples:\n> bitcoin-cli submitheader \"aabbcc\"\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"submitheader\", \"params\": [\"aabbcc\"] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
+      "name": "syncwithvalidationinterfacequeue",
+      "description": "Waits for the validation interface queue to catch up on everything that was there when we entered this function.",
+      "params": [],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "syncwithvalidationinterfacequeue\n\nWaits for the validation interface queue to catch up on everything that was there when we entered this function.\n\nExamples:\n> bitcoin-cli syncwithvalidationinterfacequeue \n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"syncwithvalidationinterfacequeue\", \"params\": [] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
       "name": "testmempoolaccept",
       "description": "Returns result of mempool acceptance tests indicating if raw transaction (serialized, hex-encoded) would be accepted by mempool.\n\nThis checks if the transaction violates the consensus or policy rules.\n\nSee sendrawtransaction call.",
       "params": [
@@ -2962,6 +3049,79 @@
         "schema": {}
       },
       "x-bitcoin-help": "verifytxoutproof \"proof\"\n\nVerifies that a proof points to a transaction in a block, returning the transaction it commits to\nand throwing an RPC error if the block is not in our best chain\n\nArguments:\n1. proof    (string, required) The hex-encoded proof generated by gettxoutproof\n\nResult:\n[\"txid\"]      (array, strings) The txid(s) which the proof commits to, or empty array if the proof can not be validated.\n"
+    },
+    {
+      "name": "waitforblock",
+      "description": "Waits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "blockhash",
+          "required": true,
+          "schema": {
+            "type": "string"
+          },
+          "description": "Block hash to wait for."
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitforblock \"blockhash\" ( timeout )\n\nWaits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. blockhash    (string, required) Block hash to wait for.\n2. timeout      (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                           (json object)\n  \"hash\" : {       (string) The blockhash\n  \"height\" : {     (int) Block height\n}\n\nExamples:\n> bitcoin-cli waitforblock \"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"waitforblock\", \"params\": [\"0000000000079f8ef3d2c688c244eb7a4570b24c9ed7b4a8c619eb02596f8862\", 1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "waitforblockheight",
+      "description": "Waits for (at least) block height and returns the height and hash\nof the current tip.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "height",
+          "required": true,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Block height to wait for."
+        },
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitforblockheight height ( timeout )\n\nWaits for (at least) block height and returns the height and hash\nof the current tip.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. height     (numeric, required) Block height to wait for.\n2. timeout    (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                           (json object)\n  \"hash\" : {       (string) The blockhash\n  \"height\" : {     (int) Block height\n}\n\nExamples:\n> bitcoin-cli waitforblockheight \"100\", 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"waitforblockheight\", \"params\": [\"100\", 1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
+    },
+    {
+      "name": "waitfornewblock",
+      "description": "Waits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.",
+      "params": [
+        {
+          "name": "timeout",
+          "required": false,
+          "schema": {
+            "type": "number"
+          },
+          "description": "Time in milliseconds to wait for a response. 0 indicates no timeout."
+        }
+      ],
+      "result": {
+        "name": "result",
+        "schema": {}
+      },
+      "x-bitcoin-help": "waitfornewblock ( timeout )\n\nWaits for a specific new block and returns useful info about it.\n\nReturns the current block on timeout or exit.\n\nArguments:\n1. timeout    (numeric, optional, default=0) Time in milliseconds to wait for a response. 0 indicates no timeout.\n\nResult:\n{                           (json object)\n  \"hash\" : {       (string) The blockhash\n  \"height\" : {     (int) Block height\n}\n\nExamples:\n> bitcoin-cli waitfornewblock 1000\n> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", \"method\": \"waitfornewblock\", \"params\": [1000] }' -H 'content-type: text/plain;' http://127.0.0.1:8332/\n"
     },
     {
       "name": "walletcreatefundedpsbt",
