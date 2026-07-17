@@ -6,11 +6,30 @@
 
 #![allow(unused_imports)] // Not all users need the json types.
 
-#[cfg(feature = "31_0")]
-pub use corepc_client::{client_sync::v31::*, types::v31 as vtype};
+// Under `client-async`, `Client` is the blocking facade over the async production client. The facade
+// is version-generic: it exposes the active version's method surface (same names, args, curated
+// return types), so the integration tests run unchanged but exercise the async transport. Without
+// `client-async`, `Client` is the sync client for the same version. The `blocking::*` glob also
+// re-exports the facade's `vtype` shim module; the sync build points `vtype` at the generated
+// `vtype_sync` shim (curated types + generated-error-name aliases) so the same test annotations
+// compile against both clients.
+#[cfg(all(feature = "31_0", not(feature = "client-async")))]
+pub use corepc_client::{client_sync::v31::*, types::v31::generated::vtype_sync as vtype};
+#[cfg(all(feature = "31_0", feature = "client-async"))]
+pub use corepc_client::client_async::blocking::*;
 
-#[cfg(all(feature = "30_2", not(feature = "31_0")))]
+// Also expose the raw async client (not the blocking facade) so tests can be written natively
+// async against it: build a `client_async::Client` pointed at the node and `.await` its generated
+// method wrappers directly. This is the no-facade, no-bridge path - the async client is exercised
+// through its own generated arg-encoding and return types, fully isolated from the sync client.
+#[cfg(feature = "client-async")]
+pub use corepc_client::client_async;
+
+#[cfg(all(feature = "30_2", not(feature = "31_0"), not(feature = "client-async")))]
 pub use corepc_client::{client_sync::v30::*, types::v30 as vtype};
+
+#[cfg(all(feature = "30_2", not(feature = "31_0"), feature = "client-async"))]
+pub use corepc_client::client_async::blocking::*;
 
 #[cfg(all(feature = "29_0", not(feature = "30_2")))]
 pub use corepc_client::{client_sync::v29::*, types::v29 as vtype};
@@ -55,3 +74,17 @@ pub use corepc_client::{client_sync::v17::*, types::v17 as vtype};
 /// the build process to trigger the `compile_error!` in `./versions.rs`.
 #[cfg(not(feature = "0_17_2"))] // Remember: later version features enable earlier ones.
 pub use corepc_client::{client_sync::v28::*, types::v28 as vtype};
+
+// Guards the `31_0 + client-async` => async-facade wiring above (the combination `--all-features`
+// resolves to: every version on, so `31_0` wins, and `client-async` selects the blocking facade).
+// The body never runs; the assignment only has to type-check, which it does iff `Client` is the
+// async blocking facade. Inert in every build without both features.
+#[cfg(all(test, feature = "31_0", feature = "client-async"))]
+#[test]
+fn async_features_surface_the_blocking_facade() {
+    #[allow(unreachable_code, unused_variables)]
+    fn _assert() {
+        let facade: corepc_client::client_async::blocking::Client = unimplemented!();
+        let surfaced: crate::Client = facade;
+    }
+}

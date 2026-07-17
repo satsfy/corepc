@@ -4,7 +4,7 @@
 //!
 //! Types for methods that are excluded from the API docs by default.
 
-mod into;
+// mod into;
 
 use serde::{Deserialize, Serialize};
 

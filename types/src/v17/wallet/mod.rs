@@ -5,7 +5,7 @@
 //! Types for methods found under the `== Wallet ==` section of the API docs.
 
 mod error;
-mod into;
+// mod into;
 
 use alloc::collections::BTreeMap;
 
@@ -103,7 +103,7 @@ pub struct CreateWallet {
 
 impl CreateWallet {
     /// Returns the created wallet name.
-    pub fn name(self) -> String { self.into_model().name }
+    pub fn name(self) -> String { self.name }
 }
 
 /// Result of the JSON-RPC method `dumpprivkey`.
@@ -121,7 +121,7 @@ pub struct DumpPrivKey(pub String); // The private key.
 
 impl DumpPrivKey {
     /// Returns the dumped key.
-    pub fn key(self) -> Result<PrivateKey, key::FromWifError> { Ok(self.into_model()?.0) }
+    pub fn key(self) -> Result<PrivateKey, key::FromWifError> { PrivateKey::from_wif(&self.0) }
 }
 
 /// Result of the JSON-RPC method `dumpwallet`.
@@ -355,10 +355,7 @@ pub struct GetBalance(pub f64);
 
 impl GetBalance {
     /// Converts json straight to a `bitcoin::Amount`.
-    pub fn balance(self) -> Result<Amount, ParseAmountError> {
-        let model = self.into_model()?;
-        Ok(model.0)
-    }
+    pub fn balance(self) -> Result<Amount, ParseAmountError> { Amount::from_btc(self.0) }
 }
 
 /// Result of the JSON-RPC method `getnewaddress`.
@@ -866,7 +863,7 @@ pub struct LoadWallet {
 
 impl LoadWallet {
     /// Returns the loaded wallet name.
-    pub fn name(self) -> String { self.into_model().name }
+    pub fn name(self) -> String { self.name }
 }
 
 /// Result of JSON-RPC method `lockunspent`.
@@ -932,7 +929,7 @@ pub struct SendToAddress(pub String);
 
 impl SendToAddress {
     /// Converts json straight to a `bitcoin::Txid`.
-    pub fn txid(self) -> Result<Txid, hex::HexToArrayError> { Ok(self.into_model()?.txid) }
+    pub fn txid(self) -> Result<Txid, hex::HexToArrayError> { self.0.parse() }
 }
 
 /// Result of JSON-RPC method `settxfee`.

@@ -20,6 +20,7 @@ use super::SignRawTransaction;
 
 /// The purpose of an address. Part of `getaddressesbylabel`.
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum AddressPurpose {
     /// A send-to address.
     Send,
@@ -29,6 +30,7 @@ pub enum AddressPurpose {
 
 /// The category of a transaction. Part of `gettransaction`, `listsinceblock` and `listtransactions`.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum TransactionCategory {
     /// Transactions sent.
     Send,
@@ -45,6 +47,7 @@ pub enum TransactionCategory {
 /// Whether this transaction can be RBF'ed. Part of `gettransaction`, `listsinceblock` and
 /// `listtransactions`.
 #[derive(Copy, Clone, PartialEq, Eq, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Bip125Replaceable {
     /// Yes, can be replaced due to BIP-125 (RBF).
     Yes,
@@ -170,22 +173,31 @@ pub struct GetAddressInfo {
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum ScriptType {
     /// Non-standard output script type.
+    #[serde(rename = "nonstandard")]
     NonStandard,
     /// PubKey output script.
+    #[serde(rename = "pubkey")]
     PubKey,
     /// PubKey hash output script.
+    #[serde(rename = "pubkeyhash")]
     PubKeyHash,
     /// Script hash output script.
+    #[serde(rename = "scripthash")]
     ScriptHash,
     /// Multisig output script.
+    #[serde(rename = "multisig")]
     Multisig,
     /// Null data for output script.
+    #[serde(rename = "nulldata")]
     NullData,
     /// Witness version 0 key hash output script.
+    #[serde(rename = "witness_v0_keyhash")]
     WitnessV0KeyHash,
     /// Witness version 0 script hash output script.
+    #[serde(rename = "witness_v0_scripthash")]
     WitnessV0ScriptHash,
     /// Witness unknown for output script.
+    #[serde(rename = "witness_unknown")]
     WitnessUnknown,
 }
 
@@ -392,7 +404,9 @@ pub struct GetTransactionDetail {
     /// DEPRECATED. The account name involved in the transaction, can be "" for the default account.
     pub account: Option<String>, // Docs are wrong, this is not documented as optional.
     /// The bitcoin address involved in the transaction.
-    pub address: Address<NetworkUnchecked>,
+    ///
+    /// Absent when the output has no standard address (e.g. a bare/raw script).
+    pub address: Option<Address<NetworkUnchecked>>,
     /// The category, either 'send' or 'receive'.
     pub category: TransactionCategory,
     ///  The amount.
@@ -676,7 +690,9 @@ pub struct ListUnspentItem {
     /// The vout value.
     pub vout: u32,
     /// The bitcoin address of the transaction.
-    pub address: Address<NetworkUnchecked>,
+    ///
+    /// Absent when the output has no standard address (e.g. a bare/raw script).
+    pub address: Option<Address<NetworkUnchecked>>,
     /// The associated label, or "" for the default label.
     pub label: String,
     /// The script key.

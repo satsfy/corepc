@@ -4,8 +4,6 @@
 //!
 //! Types for methods found under the `== Wallet ==` section of the API docs.
 
-mod error;
-mod into;
 
 use serde::{Deserialize, Serialize};
 

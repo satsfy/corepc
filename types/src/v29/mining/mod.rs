@@ -5,7 +5,7 @@
 //! Types for methods found under the `== Mining ==` section of the API docs.
 
 mod error;
-mod into;
+// mod into;
 
 use serde::{Deserialize, Serialize};
 

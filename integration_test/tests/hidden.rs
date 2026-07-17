@@ -284,7 +284,7 @@ fn hidden__get_raw_addrman() {
     let entry = json
         .new
         .values()
-        .find(|e| e.address == peer_address && e.port == peer_port)
+        .find(|e| e.address == peer_address && e.port as i64 == peer_port as i64)
         .expect("added peer should appear in the 'new' table");
 
     assert_eq!(entry.network, "ipv4");

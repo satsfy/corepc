@@ -240,7 +240,7 @@ fn wallet__get_addresses_by_label__modelled() {
 
     let json: GetAddressesByLabel =
         node.client.get_addresses_by_label(label).expect("getaddressesbylabel");
-    let model: Result<mtype::GetAddressesByLabel, address::ParseError> = json.into_model();
+    let model: Result<mtype::GetAddressesByLabel, GetAddressesByLabelError> = json.into_model();
     let map = model.unwrap();
 
     // sanity checks.
@@ -286,13 +286,13 @@ fn wallet__get_balance__modelled() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
 
     let json: GetBalance = node.client.get_balance().expect("getbalance");
-    let model: Result<mtype::GetBalance, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::GetBalance, GetBalanceError> = json.into_model();
     model.unwrap();
 
     // Check non-zero balance just for giggles.
     node.fund_wallet();
     let json: GetBalance = node.client.get_balance().expect("getbalance");
-    let model: Result<mtype::GetBalance, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::GetBalance, GetBalanceError> = json.into_model();
     model.unwrap();
 }
 
@@ -338,7 +338,7 @@ fn wallet__get_raw_change_address__modelled() {
     let node = BitcoinD::with_wallet(Wallet::Default, &[]);
     let json: GetRawChangeAddress =
         node.client.get_raw_change_address().expect("getrawchangeaddress");
-    let model: Result<mtype::GetRawChangeAddress, address::ParseError> = json.into_model();
+    let model: Result<mtype::GetRawChangeAddress, GetRawChangeAddressError> = json.into_model();
     model.unwrap();
 }
 
@@ -356,7 +356,7 @@ fn wallet__get_received_by_address__modelled() {
 
     let json: GetReceivedByAddress =
         node.client.get_received_by_address(&address).expect("getreceivedbyaddress");
-    let model: Result<mtype::GetReceivedByAddress, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::GetReceivedByAddress, GetReceivedByAddressError> = json.into_model();
     let received_by_address = model.unwrap();
 
     assert_eq!(received_by_address.0, amount);
@@ -377,7 +377,7 @@ fn wallet__get_received_by_label__modelled() {
 
     let json: GetReceivedByLabel =
         node.client.get_received_by_label(label).expect("getreceivedbylabel");
-    let model: Result<mtype::GetReceivedByLabel, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::GetReceivedByLabel, GetReceivedByLabelError> = json.into_model();
     let received = model.unwrap();
     assert_eq!(received.0, amount);
 }
@@ -646,7 +646,7 @@ fn wallet__list_transactions__modelled() {
     node.mine_a_block();
 
     let json: ListTransactions = node.client.list_transactions().expect("listtransactions");
-    let model: Result<mtype::ListTransactions, TransactionItemError> = json.into_model();
+    let model: Result<mtype::ListTransactions, ListTransactionsError> = json.into_model();
     let list_transactions = model.unwrap();
 
     let first_tx: mtype::TransactionItem = list_transactions.0[0].clone();
@@ -791,7 +791,7 @@ fn wallet__list_lock_unspent__modelled() {
     node.client.lock_unspent(&[(txid, vout)]).expect("lockunspent");
 
     let json: ListLockUnspent = node.client.list_lock_unspent().expect("listlockunspent");
-    let model: Result<mtype::ListLockUnspent, ListLockUnspentItemError> = json.into_model();
+    let model: Result<mtype::ListLockUnspent, ListLockUnspentError> = json.into_model();
     let lock_unspent = model.unwrap();
 
     assert!(lock_unspent.0.iter().any(|o| o.txid == txid && o.vout == vout));
@@ -809,7 +809,7 @@ fn wallet__list_unspent__modelled() {
     node.fund_wallet();
 
     let json: ListUnspent = node.client.list_unspent().expect("listunspent");
-    let model: Result<mtype::ListUnspent, ListUnspentItemError> = json.into_model();
+    let model: Result<mtype::ListUnspent, ListUnspentError> = json.into_model();
     model.unwrap();
 }
 
@@ -928,7 +928,7 @@ fn wallet__rescan_blockchain__modelled() {
     let _ = node.client.generate_to_address(3, &mining_addr).expect("generatetoaddress");
 
     let json: RescanBlockchain = node.client.rescan_blockchain().expect("rescanblockchain");
-    let model: Result<mtype::RescanBlockchain, NumericError> = json.into_model();
+    let model: Result<mtype::RescanBlockchain, RescanBlockchainError> = json.into_model();
     let rescan = model.unwrap();
 
     assert!(rescan.stop_height >= rescan.start_height);
@@ -959,14 +959,14 @@ fn wallet__send_many__modelled() {
     amounts.insert(addr2, Amount::from_sat(100_000));
 
     let json: SendMany = node.client.send_many(amounts.clone()).expect("sendmany");
-    let model: Result<mtype::SendMany, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::SendMany, SendManyError> = json.into_model();
     model.unwrap();
 
     #[cfg(not(feature = "v20_and_below"))]
     {
         let json_verbose: SendManyVerbose =
             node.client.send_many_verbose(amounts).expect("sendmany verbose");
-        let model_verbose: Result<mtype::SendManyVerbose, hex::HexToArrayError> =
+        let model_verbose: Result<mtype::SendManyVerbose, SendManyVerboseError> =
             json_verbose.into_model();
         model_verbose.unwrap();
     }
@@ -1009,7 +1009,7 @@ fn wallet__send_to_address__modelled() {
 
     let json: SendToAddress =
         node.client.send_to_address(&address, Amount::from_sat(10_000)).expect("sendtddress");
-    let model: Result<mtype::SendToAddress, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::SendToAddress, SendToAddressError> = json.into_model();
     model.unwrap();
 }
 
@@ -1066,7 +1066,7 @@ fn wallet__sign_message__modelled() {
 
     // Sign the message with the address key
     let json: SignMessage = node.client.sign_message(&address, message).expect("signmessage");
-    let model: Result<mtype::SignMessage, sign_message::MessageSignatureError> = json.into_model();
+    let model: Result<mtype::SignMessage, SignMessageError> = json.into_model();
     model.unwrap();
 }
 
@@ -1092,7 +1092,7 @@ fn wallet__simulate_raw_transaction__modelled() {
     let json: SimulateRawTransaction =
         node.client.simulate_raw_transaction(&rawtxs).expect("simulaterawtransaction");
 
-    let model: Result<mtype::SimulateRawTransaction, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::SimulateRawTransaction, SimulateRawTransactionError> = json.into_model();
     let raw_transaction = model.unwrap();
 
     // Should show a negative balance change since we're sending money

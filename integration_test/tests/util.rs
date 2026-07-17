@@ -39,11 +39,13 @@ fn util__derive_addresses__modelled() {
         "pkh(02ff12471208c14bd580709cb2358d98975247d8765f92bc25eab3b2763ed605f8)#sf4k0g3u";
 
     let json: DeriveAddresses = node.client.derive_addresses(descriptor).expect("deriveaddresses");
-    let model: Result<mtype::DeriveAddresses, address::ParseError> = json.into_model();
+    let model: Result<mtype::DeriveAddresses, DeriveAddressesError> = json.into_model();
     model.unwrap();
 
-    // For v29 and above test a multipath descriptor.
-    #[cfg(not(feature = "v28_and_below"))]
+    // For v29 and above test a multipath descriptor. The multipath result shape (array of
+    // arrays) is not representable in the OpenRPC spec, so there is no generated type for it;
+    // sync-only until the spec can express it.
+    #[cfg(all(not(feature = "v28_and_below"), not(feature = "test-async")))]
     {
         // Create a multipath descriptor taken from running `listdescriptors` on the node. With 2 derivation paths.
         let multipath_descriptor = "wpkh([26b4ed16/84h/1h/0h]tpubDDe7JUw2CGU1rYZxupmNrhDXuE1fv25gs4je3BBuWCFwTW9QHGgyh5cjAEugd14ysJXTVshPvnUVABfD66HZKCS9gp5AYFd5K2WN2oVFp8t/<0;1>/*)#grvmsm8m";
@@ -69,7 +71,7 @@ fn util__estimate_smart_fee__modelled() {
     node.fund_wallet();
 
     let json: EstimateSmartFee = node.client.estimate_smart_fee(6).expect("estimatesmartfee");
-    let model: Result<mtype::EstimateSmartFee, amount::ParseAmountError> = json.into_model();
+    let model: Result<mtype::EstimateSmartFee, EstimateSmartFeeError> = json.into_model();
     model.unwrap();
 }
 
@@ -83,7 +85,7 @@ fn util__estimate_smart_fee_with_mode__modelled() {
     for mode in MODES {
         let json: EstimateSmartFee =
             node.client.estimate_smart_fee_with_mode(6, mode).expect("estimatesmartfee");
-        let model: Result<mtype::EstimateSmartFee, amount::ParseAmountError> = json.into_model();
+        let model: Result<mtype::EstimateSmartFee, EstimateSmartFeeError> = json.into_model();
         model.unwrap();
     }
 }
@@ -107,7 +109,7 @@ fn util__get_index_info() {
 
     let txindex_info = index_info.0.get("txindex").unwrap();
     assert!(
-        txindex_info.best_block_height < u32::MAX,
+        i64::from(txindex_info.best_block_height) < i64::from(u32::MAX),
         "best_block_height should be a valid block height"
     );
 }
@@ -129,7 +131,7 @@ fn util__sign_message_with_priv_key__modelled() {
     // Sign the message with the private key
     let json: SignMessageWithPrivKey =
         node.client.sign_message_with_privkey(&privkey, message).expect("signmessagewithprivkey");
-    let model: Result<mtype::SignMessageWithPrivKey, sign_message::MessageSignatureError> =
+    let model: Result<mtype::SignMessageWithPrivKey, SignMessageWithPrivKeyError> =
         json.into_model();
     let sig = model.unwrap();
 

@@ -4,7 +4,7 @@
 //!
 //! Types for methods found under the `== Blockchain ==` section of the API docs.
 
-mod into;
+// mod into;
 
 use alloc::collections::BTreeMap;
 

@@ -103,7 +103,7 @@ fn network__get_node_addresses() {
         let json: GetNodeAddresses = node.client.get_node_addresses().expect("getnodeaddresses");
 
         assert_eq!(json.0[0].address, peer_address);
-        assert_eq!(json.0[0].port, peer_port);
+        assert_eq!(json.0[0].port as i64, peer_port as i64);
     }
 }
 
@@ -129,7 +129,7 @@ fn get_peer_info_three_node_network() {
 
     let json: GetPeerInfo = node1.client.get_peer_info().expect("getpeerinfo");
     // This verifies that we re-exported the correct `PeerInfo` type at the module level.
-    let _: PeerInfo = json.0[0];
+    let _: &PeerInfo = &json.0[0];
 
     #[cfg(not(feature = "v30_and_below"))]
     let _ = (json.0[0].inv_to_send, json.0[0].last_inv_sequence);

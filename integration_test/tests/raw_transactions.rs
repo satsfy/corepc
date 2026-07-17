@@ -67,7 +67,7 @@ fn raw_transactions__combine_psbt__modelled() {
     outputs.push(Output::new(change_address, change_amount));
 
     let json: CreatePsbt = node.client.create_psbt(&inputs, &outputs).expect("createpsbt");
-    let psbt: Result<mtype::CreatePsbt, psbt::PsbtParseError> = json.clone().into_model();
+    let psbt: Result<mtype::CreatePsbt, CreatePsbtError> = json.clone().into_model();
     let psbt = psbt.unwrap();
     let psbt = psbt.0;
 
@@ -75,7 +75,7 @@ fn raw_transactions__combine_psbt__modelled() {
     let psbts = vec![psbt.clone(), psbt.clone()];
 
     let json: CombinePsbt = node.client.combine_psbt(&psbts).expect("combinepsbt");
-    let model: Result<mtype::CombinePsbt, psbt::PsbtParseError> = json.into_model();
+    let model: Result<mtype::CombinePsbt, CombinePsbtError> = json.into_model();
     let combined = model.unwrap();
     // Just for giggles.
     assert_eq!(combined.0, psbt)
@@ -95,7 +95,7 @@ fn raw_transactions__combine_raw_transaction__modelled() {
 
     let json: CombineRawTransaction =
         node.client.combine_raw_transaction(&txs).expect("combinerawtransaction");
-    let model: Result<mtype::CombineRawTransaction, encode::FromHexError> = json.into_model();
+    let model: Result<mtype::CombineRawTransaction, CombineRawTransactionError> = json.into_model();
 
     let combined = model.unwrap();
     // Just for giggles.
@@ -110,7 +110,7 @@ fn raw_transactions__convert_to_psbt__modelled() {
     let tx = create_a_raw_transaction(&node);
 
     let json: ConvertToPsbt = node.client.convert_to_psbt(&tx).expect("converttopsbt");
-    let model: Result<mtype::ConvertToPsbt, psbt::PsbtParseError> = json.into_model();
+    let model: Result<mtype::ConvertToPsbt, ConvertToPsbtError> = json.into_model();
     model.unwrap();
 }
 
@@ -192,7 +192,7 @@ fn raw_transactions__decode_raw_transaction__modelled() {
         node.client.get_raw_transaction(txid).expect("getrawtransaction").transaction().unwrap();
     let json: DecodeRawTransaction =
         node.client.decode_raw_transaction(&tx).expect("decoderawtransaction");
-    let model: Result<mtype::DecodeRawTransaction, RawTransactionError> = json.into_model();
+    let model: Result<mtype::DecodeRawTransaction, DecodeRawTransactionError> = json.into_model();
     model.unwrap();
 }
 
@@ -285,7 +285,7 @@ fn raw_transactions__get_raw_transaction__modelled() {
     let (_, tx) = node.create_mined_transaction();
     let json: GetRawTransaction =
         node.client.get_raw_transaction(tx.compute_txid()).expect("getrawtransaction");
-    let model: Result<mtype::GetRawTransaction, encode::FromHexError> = json.into_model();
+    let model: Result<mtype::GetRawTransaction, GetRawTransactionError> = json.into_model();
     model.unwrap();
 
     // Get raw transaction using a mined transaction and verbose = true.
@@ -319,7 +319,7 @@ fn raw_transactions__join_psbts__modelled() {
 
     let json: JoinPsbts =
         node.client.join_psbts(&[psbt1.clone(), psbt2.clone()]).expect("joinpsbts");
-    let model: Result<mtype::JoinPsbts, psbt::PsbtParseError> = json.into_model();
+    let model: Result<mtype::JoinPsbts, JoinPsbtsError> = json.into_model();
     let join_psbts = model.unwrap();
 
     assert_eq!(join_psbts.0.inputs.len(), psbt1.inputs.len() + psbt2.inputs.len());
@@ -430,7 +430,7 @@ fn raw_transactions__utxo_update_psbt__modelled() {
 
     let psbt = create_a_psbt(&node);
     let json: UtxoUpdatePsbt = node.client.utxo_update_psbt(&psbt).expect("utxoupdatepsbt");
-    let model: Result<mtype::UtxoUpdatePsbt, psbt::PsbtParseError> = json.into_model();
+    let model: Result<mtype::UtxoUpdatePsbt, UtxoUpdatePsbtError> = json.into_model();
     let update_psbts = model.unwrap();
 
     assert!(update_psbts.0.inputs.len() >= psbt.inputs.len());
@@ -470,7 +470,7 @@ fn create_sign_send(node: &BitcoinD) {
 
     let json: CreateRawTransaction =
         node.client.create_raw_transaction(&inputs, &outputs).expect("createrawtransaction");
-    let model: Result<mtype::CreateRawTransaction, encode::FromHexError> =
+    let model: Result<mtype::CreateRawTransaction, CreateRawTransactionError> =
         json.clone().into_model();
     model.unwrap();
     let tx = json.transaction().unwrap();
@@ -480,14 +480,14 @@ fn create_sign_send(node: &BitcoinD) {
     let json: SignRawTransactionWithWallet =
         node.client.sign_raw_transaction_with_wallet(&tx).expect("signrawtransactionwithwallet");
 
-    let model: Result<mtype::SignRawTransactionWithWallet, SignRawTransactionError> =
+    let model: Result<mtype::SignRawTransactionWithWallet, _> =
         json.into_model();
     let sign_raw_transaction = model.unwrap();
 
     // The proves we did everything correctly.
     let json: SendRawTransaction =
         node.client.send_raw_transaction(&sign_raw_transaction.tx).expect("sendrawtransaction");
-    let model: Result<mtype::SendRawTransaction, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::SendRawTransaction, SendRawTransactionError> = json.into_model();
     model.unwrap();
 }
 
@@ -572,7 +572,7 @@ fn create_fund_sign_send(node: &BitcoinD) {
 
     let json: CreateRawTransaction =
         node.client.create_raw_transaction(&inputs, &outputs).expect("createrawtransaction");
-    let model: Result<mtype::CreateRawTransaction, encode::FromHexError> =
+    let model: Result<mtype::CreateRawTransaction, CreateRawTransactionError> =
         json.clone().into_model();
     model.unwrap();
     let tx = json.transaction().unwrap();
@@ -590,7 +590,7 @@ fn create_fund_sign_send(node: &BitcoinD) {
         .sign_raw_transaction_with_wallet(&funded)
         .expect("signrawtransactionwithwallet");
     // This proves we did everything correctly.
-    let model: Result<mtype::SignRawTransactionWithWallet, SignRawTransactionError> =
+    let model: Result<mtype::SignRawTransactionWithWallet, _> =
         json.into_model();
     let sign_raw_transaction = model.unwrap();
     let _ =
@@ -626,7 +626,7 @@ fn create_a_raw_transaction(node: &BitcoinD) -> Transaction {
 
     let json: CreateRawTransaction =
         node.client.create_raw_transaction(&inputs, &outputs).expect("createrawtransaction");
-    let model: Result<mtype::CreateRawTransaction, encode::FromHexError> =
+    let model: Result<mtype::CreateRawTransaction, CreateRawTransactionError> =
         json.clone().into_model();
     model.unwrap();
     json.transaction().unwrap()
@@ -695,7 +695,7 @@ fn create_a_psbt(node: &BitcoinD) -> bitcoin::Psbt {
     outputs.push(Output::new(change_address, change_amount));
 
     let json: CreatePsbt = node.client.create_psbt(&inputs, &outputs).expect("createpsbt");
-    let model: Result<mtype::CreatePsbt, psbt::PsbtParseError> = json.clone().into_model();
+    let model: Result<mtype::CreatePsbt, CreatePsbtError> = json.clone().into_model();
     let psbt = model.unwrap();
     psbt.0
 }
@@ -711,7 +711,7 @@ fn raw_transactions__get_private_broadcast_info__modelled() {
     // Without Tor or an active private broadcast the queue is empty.
     assert!(json.transactions.is_empty());
 
-    let model: Result<mtype::GetPrivateBroadcastInfo, encode::FromHexError> = json.into_model();
+    let model: Result<mtype::GetPrivateBroadcastInfo, GetPrivateBroadcastInfoError> = json.into_model();
     assert!(model.unwrap().transactions.is_empty());
 }
 

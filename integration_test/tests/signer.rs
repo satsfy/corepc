@@ -80,7 +80,7 @@ esac
         node.client.wallet_display_address(address).expect("walletdisplayaddress");
 
     let address: Address<NetworkUnchecked> = address.parse().unwrap();
-    let model: Result<mtype::WalletDisplayAddress, ParseError> = json.into_model();
+    let model: Result<mtype::WalletDisplayAddress, WalletDisplayAddressError> = json.into_model();
     let model = model.unwrap();
     assert_eq!(model.address, address);
 }

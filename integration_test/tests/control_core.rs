@@ -37,5 +37,5 @@ fn get_index_info_has_txindex() {
     let json: GetIndexInfo = node.client.get_index_info().unwrap();
 
     let txindex = json.0.get("txindex").unwrap();
-    assert!(txindex.best_block_height <= height as u32);
+    assert!(i64::from(txindex.best_block_height) <= height as i64);
 }

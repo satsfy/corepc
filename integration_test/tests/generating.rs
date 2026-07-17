@@ -71,7 +71,7 @@ fn generating__generate_to_address__modelled() {
     let json: GenerateToAddress =
         node.client.generate_to_address(NBLOCKS, &address).expect("generatetoaddress");
 
-    let model: Result<mtype::GenerateToAddress, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::GenerateToAddress, GenerateToAddressError> = json.into_model();
     model.unwrap();
 }
 
@@ -86,7 +86,7 @@ fn generating__generate_to_descriptor__modelled() {
 
     let json: GenerateToDescriptor =
         node.client.generate_to_descriptor(NBLOCKS, &descriptor).expect("generatetodescriptor");
-    let model: Result<mtype::GenerateToDescriptor, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::GenerateToDescriptor, GenerateToDescriptorError> = json.into_model();
     model.unwrap();
 }
 
@@ -113,7 +113,7 @@ fn generating__invalidate_block() {
     let _: () = node.client.invalidate_block(new_best_block).expect("invalidateblock");
 
     let json: GetBestBlockHash = node.client.get_best_block_hash().expect("getbestblockhash");
-    let model: Result<mtype::GetBestBlockHash, hex::HexToArrayError> = json.into_model();
+    let model: Result<mtype::GetBestBlockHash, GetBestBlockHashError> = json.into_model();
     let best_block = model.unwrap();
 
     assert_eq!(old_best_block, best_block.0);

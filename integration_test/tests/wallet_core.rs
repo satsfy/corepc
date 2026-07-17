@@ -5,6 +5,10 @@
 //! wallet_bumpfee.py, wallet_listdescriptors.py, wallet_listsinceblock.py,
 //! wallet_groups.py, and wallet_listreceivedby.py
 
+// These tests read the GENERATED raw response shapes (map-shaped groupings, i64 fields, union
+// variants), which only exist on the async surface; the curated raw types differ.
+#![cfg(feature = "test-async")]
+
 use bitcoin::Amount;
 use bitcoind::vtype::*;
 use bitcoind::AddressType;
@@ -204,7 +208,8 @@ fn list_descriptors_ranged_has_range_and_next_index() {
 
     let ranged = json.descriptors.iter().find(|d| d.range.is_some()).unwrap();
     assert!(ranged.next_index.is_some());
-    let [start, end] = ranged.range.unwrap();
+    let range = ranged.range.clone().unwrap();
+    let (start, end) = (range[0].as_i64().unwrap(), range[1].as_i64().unwrap());
     assert!(end >= start);
 }
 
@@ -246,7 +251,7 @@ fn get_transaction_send_detail_has_negative_fee() {
 
     let json: GetTransaction = node.client.get_transaction(txid).unwrap();
 
-    let send = json.details.iter().find(|d| d.category == TransactionCategory::Send).unwrap();
+    let send = json.details.iter().find(|d| d.category == "send").unwrap();
     assert!(send.fee.is_some());
     assert!(send.fee.unwrap() < 0.0);
 }
@@ -263,7 +268,7 @@ fn get_transaction_received_detail_has_parent_descs() {
 
     let json: GetTransaction = node.client.get_transaction(txid).unwrap();
 
-    let receive = json.details.iter().find(|d| d.category == TransactionCategory::Receive).unwrap();
+    let receive = json.details.iter().find(|d| d.category == "receive").unwrap();
     assert!(receive.parent_descriptors.is_some());
 }
 
@@ -296,17 +301,11 @@ fn list_address_groupings_labeled_uses_three_variant() {
         .0
         .iter()
         .flat_map(|group| group.iter())
-        .find(|item| match item {
-            ListAddressGroupingsItem::Two(a, _) => a == &addr_s,
-            ListAddressGroupingsItem::Three(a, _, _) => a == &addr_s,
-        })
+        .find(|item| item.first().and_then(|v| v.as_str()) == Some(addr_s.as_str()))
         .unwrap();
-    match entry {
-        ListAddressGroupingsItem::Three(_, _, l) => assert_eq!(l, label),
-        ListAddressGroupingsItem::Two(_, _) => {
-            panic!("labeled address must deserialize as Three variant, got Two")
-        }
-    }
+    // A labeled address deserializes as a three-element `[address, amount, label]` group.
+    assert_eq!(entry.len(), 3, "labeled address must have a third (label) element");
+    assert_eq!(entry.get(2).and_then(|v| v.as_str()), Some(label));
 }
 
 #[test]
@@ -339,6 +338,6 @@ fn list_transactions_yields_both_send_and_receive() {
 
     let json: ListTransactions = node.client.list_transactions().unwrap();
 
-    assert!(json.0.iter().any(|t| t.category == TransactionCategory::Receive));
-    assert!(json.0.iter().any(|t| t.category == TransactionCategory::Send));
+    assert!(json.0.iter().any(|t| t.category == "receive"));
+    assert!(json.0.iter().any(|t| t.category == "send"));
 }
