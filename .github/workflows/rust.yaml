@@ -21,10 +21,11 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Run ${{ matrix.toolchain }} tests"
         run: |
-          cargo rbmt --lock-file ${{ matrix.dep }} test --toolchain ${{ matrix.toolchain }} \
+          cargo rbmt test --lockfile ${{ matrix.dep }} --toolchain ${{ matrix.toolchain }} \
             -p bitreq \
             -p corepc-client \
             -p jsonrpc-fuzz \
@@ -45,10 +46,11 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Run lints"
         run: |
-          cargo rbmt --lock-file ${{ matrix.dep }} lint \
+          cargo rbmt lint --lockfile ${{ matrix.dep }} \
             -p bitreq \
             -p corepc-client \
             -p jsonrpc-fuzz \
@@ -71,9 +73,10 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Run doc tests"
-        run: cargo rbmt --lock-file ${{ matrix.dep }} docs
+        run: cargo rbmt docs --lockfile ${{ matrix.dep }} --no-docsrs
 
   Docsrs:
     name: Docs - nightly toolchain
@@ -89,9 +92,10 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Run docsrs tests"
-        run: cargo rbmt --lock-file ${{ matrix.dep }} docsrs
+        run: cargo rbmt docs --lockfile ${{ matrix.dep }}
 
   Format:                       #  1 job, run cargo fmt directly.
     name: Format - nightly toolchain
@@ -101,7 +105,8 @@ jobs:
     steps:
       - name: "Checkout repo"
         uses: actions/checkout@v4
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Check formatting"
         run: |
           cargo rbmt fmt --check
@@ -151,7 +156,8 @@ jobs:
       - name: "Checkout repo"
         uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-      - uses: rust-bitcoin/rust-bitcoin-maintainer-tools/.github/actions/setup-rbmt@6560b728ae6a81af9d92713b630ba26772fbd970 # v0.1.0
+      - name: "Install cargo-rbmt"
+        run: cargo install --locked cargo-rbmt@$(grep '^rbmt.version' Cargo.toml | cut -d'"' -f2)
       - name: "Cache downloaded bitcoind"
         uses: actions/cache@v4
         with:
