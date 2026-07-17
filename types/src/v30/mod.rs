@@ -243,6 +243,7 @@
 //! </details>
 
 mod blockchain;
+// pub mod generated;
 mod hidden;
 mod mining;
 mod raw_transactions;
@@ -347,7 +348,7 @@ pub use crate::{
         LoadWallet, PeerInfo, ScanBlocksStart, UnloadWallet, WalletProcessPsbt,
         WalletProcessPsbtError,
     },
-    v27::{GetPrioritisedTransactions, PrioritisedTransaction},
+    v27::{GetPrioritisedTransactions, GetPrioritisedTransactionsError, PrioritisedTransaction},
     v28::{
         CreateWalletDescriptor, GetAddressInfo, GetAddressInfoEmbedded, GetHdKeys, GetHdKeysError,
         GetNetworkInfo, GetRawAddrMan, GetTransaction, HdKey, HdKeyDescriptor, ListSinceBlock,

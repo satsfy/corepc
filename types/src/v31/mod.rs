@@ -246,6 +246,7 @@
 
 mod blockchain;
 mod control;
+pub mod generated;
 mod network;
 mod raw_transactions;
 mod wallet;
@@ -343,7 +344,7 @@ pub use crate::{
         GetTxOutSetInfoUnspendables, LoadTxOutSet, LoadTxOutSetError, LoadWallet, ScanBlocksStart,
         UnloadWallet, WalletProcessPsbt, WalletProcessPsbtError,
     },
-    v27::{GetPrioritisedTransactions, PrioritisedTransaction},
+    v27::{GetPrioritisedTransactions, GetPrioritisedTransactionsError, PrioritisedTransaction},
     v28::{
         CreateWalletDescriptor, GetAddressInfo, GetAddressInfoEmbedded, GetHdKeys, GetHdKeysError,
         GetNetworkInfo, GetRawAddrMan, GetTransaction, HdKey, HdKeyDescriptor, ListSinceBlock,
