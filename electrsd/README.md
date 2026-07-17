@@ -15,7 +15,7 @@ assert_eq!(header.height, 0);
 
 ## Automatic binaries download
 
-In your project Cargo.toml, activate the following features
+In your project Cargo.toml, acasdsadsadtivate the following features
 
 ```yml
 electrsd = { version= "0.23", features = ["bitcoind_30_2", "bitcoin_download", "electrs_0_9_1"] }
