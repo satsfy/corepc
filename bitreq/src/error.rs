@@ -147,6 +147,8 @@ impl error::Error for Error {
             InvalidUtf8InBody(err) => Some(err),
             #[cfg(feature = "rustls")]
             RustlsCreateConnection(err) => Some(err),
+            #[cfg(feature = "native-tls")]
+            NativeTlsCreateConnection(err) => Some(err),
             _ => None,
         }
     }

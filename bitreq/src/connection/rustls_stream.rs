@@ -3,6 +3,7 @@
 
 #[cfg(feature = "rustls")]
 use alloc::sync::Arc;
+#[cfg(feature = "rustls")]
 use std::io;
 use std::net::TcpStream;
 use std::sync::OnceLock;
@@ -94,12 +95,12 @@ pub(super) async fn wrap_async_stream(
 pub type SecuredStream = TlsStream<TcpStream>;
 
 #[cfg(all(feature = "native-tls", not(feature = "rustls")))]
-static CONNECTOR: OnceLock<Result<TlsConnector, Error>> = OnceLock::new();
+static CONNECTOR: OnceLock<TlsConnector> = OnceLock::new();
 
 #[cfg(all(feature = "native-tls", not(feature = "rustls")))]
 fn native_tls_err<S>(e: HandshakeError<S>) -> Error {
     match e {
-        HandshakeError::Failure(e) => Error::NativeTlsError(e),
+        HandshakeError::Failure(e) => Error::NativeTlsCreateConnection(e),
         HandshakeError::WouldBlock(_) => {
             debug_assert!(false, "We shouldn't hit a blocking error");
             Error::Other("Got a WouldBlock error from native-tls")
@@ -107,9 +108,16 @@ fn native_tls_err<S>(e: HandshakeError<S>) -> Error {
     }
 }
 
+// Caches the connector on success only, so a failed build is retried on the
+// next request. TODO: Use `get_or_try_init` once it is stable.
+// https://github.com/rust-lang/rust/issues/109737
 #[cfg(all(feature = "native-tls", not(feature = "rustls")))]
-fn build_tls_connector() -> Result<TlsConnector, Error> {
-    TlsConnector::builder().build().map_err(Error::NativeTlsError)
+fn tls_connector() -> Result<&'static TlsConnector, Error> {
+    if let Some(connector) = CONNECTOR.get() {
+        return Ok(connector);
+    }
+    let connector = TlsConnector::builder().build().map_err(Error::NativeTlsCreateConnection)?;
+    Ok(CONNECTOR.get_or_init(|| connector))
 }
 
 #[cfg(all(feature = "native-tls", not(feature = "rustls")))]
@@ -117,9 +125,7 @@ pub(super) fn wrap_stream(tcp: TcpStream, host: &str) -> Result<SecuredStream, E
     #[cfg(feature = "log")]
     log::trace!("Setting up TLS parameters for {host}.");
 
-    // TODO: Once we can `get_or_try_init`, so that instead
-    // https://github.com/rust-lang/rust/issues/109737
-    let connector = CONNECTOR.get_or_init(build_tls_connector)?;
+    let connector = tls_connector()?;
 
     #[cfg(feature = "log")]
     log::trace!("Establishing TLS session to {host}.");
@@ -138,14 +144,14 @@ pub(super) async fn wrap_async_stream(
     #[cfg(feature = "log")]
     log::trace!("Setting up TLS parameters for {host}.");
 
-    // TODO: Once we can `get_or_try_init`, so that instead
-    // https://github.com/rust-lang/rust/issues/109737
-    let connector = AsyncTlsConnector::from(CONNECTOR.get_or_init(build_tls_connector)?.clone());
+    let connector = AsyncTlsConnector::from(tls_connector()?.clone());
 
     #[cfg(feature = "log")]
     log::trace!("Establishing TLS session to {host}.");
 
-    let tls = connector.connect(host, tcp).await.map_err(native_tls_err)?;
+    // tokio-native-tls drives the handshake itself, so it reports
+    // `native_tls::Error` rather than `HandshakeError`.
+    let tls = connector.connect(host, tcp).await.map_err(Error::NativeTlsCreateConnection)?;
 
     Ok(AsyncHttpStream::Secured(Box::new(tls)))
 }
