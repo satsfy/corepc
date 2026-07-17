@@ -185,6 +185,8 @@ dependencies = [
  "base64 0.22.1",
  "log",
  "native-tls",
+ "openssl",
+ "openssl-sys",
  "proptest",
  "rustls",
  "rustls-native-certs",

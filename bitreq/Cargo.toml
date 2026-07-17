@@ -41,6 +41,9 @@ tiny_http = "0.12"
 tokio = { version = "1.0", default-features = false, features = ["macros", "rt-multi-thread", "time"] }
 proptest = { version = "1", default-features = false, features = ["std"] }
 url = { version = "2.4" }
+# Without these pins the resolver picks an openssl stack too old to build because openssl-sys 0.9.39 predates OpenSSL 3.x.
+openssl-sys = { version = "0.9.111" }
+openssl = { version = "0.10.75" }
 
 [package.metadata.docs.rs]
 all-features = true
