@@ -9,7 +9,9 @@ use std::time::Duration;
 use self::setup::*;
 
 #[tokio::test]
-#[cfg(feature = "rustls")]
+// Gate on the backends that carry trust roots. Bare `rustls` compiles the
+// HTTPS machinery but has no roots, so it cannot verify any certificate.
+#[cfg(any(feature = "https-rustls", feature = "https-rustls-probe", feature = "https-native-tls"))]
 async fn test_https() {
     // TODO: Implement this locally.
     assert_eq!(get_status_code(bitreq::get("https://example.com")).await, 200);
